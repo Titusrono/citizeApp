@@ -41,6 +41,9 @@ export class AuthService {
       if (valid) {
         const role = this.getUserRole();
         this.currentUserRole$.next(role);
+        if (role) {
+          localStorage.setItem('userRole', role);
+        }
 
         const token = this.getToken();
         const decoded = token ? this.decodeToken(token) : null;
@@ -88,8 +91,8 @@ export class AuthService {
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem('userRole');
     }
-    localStorage.clear()
 
     this.currentUserRole$.next(null);
     this.authState$.next(false);
@@ -114,7 +117,11 @@ export class AuthService {
     }
 
     const decoded = this.decodeToken(token);
-    this.currentUserRole$.next(decoded?.role ?? null);
+    const role = decoded?.role ?? null;
+    this.currentUserRole$.next(role);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('userRole', role || '');
+    }
     this.authState$.next(true);
 
     if (decoded?.exp) {

@@ -31,6 +31,7 @@ import { RoleGuard } from "./core/auth/role.guard";
 import { AuthGuard } from "./core/auth/auth.guard";
 import { AuthService } from "./core/auth/auth.service";
 import { AdminpetitionComponent } from "./admin/dashboard/adminpetition/adminpetition.component";
+import { UnauthorizedComponent } from "./shared/unauthorized/unauthorized.component";
 
 export const routes: Routes = [
   // Public routes
@@ -52,12 +53,14 @@ export const routes: Routes = [
   { path: 'update-password', title: 'Update Password', component: UpdatePasswordComponent },
   { path: 'google-callback', title: 'Google Login', component: GoogleCallbackComponent },
   {path:'profile', title:'Profile', component:ProfileComponent},
+  { path: 'unauthorized', title: 'Unauthorized', component: UnauthorizedComponent },
 
   // Authenticated dashboard
   {
     path: 'dashboard',
     title: 'User Dashboard',
     canActivate: [RoleGuard,AuthGuard],
+    data: { roles: ['admin', 'super_admin'] },
     component: DashboardComponent,
     children: [
       { path: 'moderator', component: ModeratorComponent },
@@ -74,6 +77,7 @@ export const routes: Routes = [
         path: 'portal',
         component: PortalComponent,
         canActivate: [RoleGuard,AuthGuard],
+        data: { roles: ['citizen', 'ward_manager', 'constituency_manager', 'admin', 'super_admin'] },
         children: [
           { path: '', redirectTo: 'realtimereport', pathMatch: 'full' },
           { path: 'realtimereport', component: RealtimereportComponent },

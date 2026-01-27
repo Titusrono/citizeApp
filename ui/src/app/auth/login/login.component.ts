@@ -44,12 +44,10 @@ export class LoginComponent {
         }, 3000); // auto dismiss success after 3s
 
         const role = this.authService.getRole();
-        if (role === 'admin') {
-          this.router.navigate(['/dashboard/moderator']);
-        } else if (role === 'user') {
-          this.router.navigate(['/portal/realtimereport']);
+        if (role === 'admin' || role === 'super_admin') {
+          this.router.navigate(['/dashboard/report-admin']);
         } else {
-          this.router.navigate(['/']);
+          this.router.navigate(['/portal/realtimereport']);
         }
       },
       error: (err) => {

@@ -42,7 +42,7 @@ export class AuthService {
     }
 
     // Generate JWT
-    const payload = { email: user.email, sub: user.id.toString() };
+    const payload = { email: user.email, sub: user.id.toString(), role: user.role };
     const token = jwt.sign(payload, 'secret', { expiresIn: '1h' });
 
     return { access_token: token };
