@@ -1,0 +1,70 @@
+<div class="flex flex-col min-h-screen bg-gray-100 pt-0 px-1 md:px-14">
+  <!-- 🔗 Top Admin Navigation -->
+  <header class="bg-white shadow sticky top-16 z-40">
+    <nav class="flex flex-col sm:flex-row justify-end sm:space-x-4 bg-gray-50 border-b border-gray-200 pr-4">
+      <a
+        routerLink="report-admin"
+        routerLinkActive="text-rose-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-rose-700"
+        class="px-4 py-3 text-gray-700 hover:text-rose-700 hover:underline transition whitespace-nowrap"
+      >
+        Reports
+      </a>
+
+      <a
+        routerLink="adminpetition"
+        routerLinkActive="text-pink-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-pink-700"
+        class="px-4 py-3 text-gray-700 hover:text-pink-700 hover:underline transition whitespace-nowrap"
+      >
+        Petitions
+      </a>
+
+      <a
+        routerLink="vote-create"
+        routerLinkActive="text-indigo-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-indigo-700"
+        class="px-4 py-3 text-gray-700 hover:text-indigo-700 hover:underline transition whitespace-nowrap"
+      >
+        Vote Create
+      </a>
+
+      <a
+        routerLink="virtual-create"
+        routerLinkActive="text-blue-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-blue-700"
+        class="px-4 py-3 text-gray-700 hover:text-blue-700 hover:underline transition whitespace-nowrap"
+      >
+        Virtual Meet
+      </a>
+
+      <!-- ✅ Only visible to superadmin -->
+      <a
+        *ngIf="userRole === 'superadmin'"
+        routerLink="usersreg"
+        routerLinkActive="text-gray-800 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-gray-800"
+        class="px-4 py-3 text-gray-700 hover:text-gray-800 hover:underline transition whitespace-nowrap"
+      >
+        Users
+      </a>
+
+      <!-- ✅ Only visible to superadmin -->
+      <a
+        *ngIf="userRole === 'superadmin'"
+        routerLink="blog_admin"
+        routerLinkActive="text-green-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-green-700"
+        class="px-4 py-3 text-gray-700 hover:text-green-700 hover:underline transition whitespace-nowrap"
+      >
+        Blogs
+      </a>
+    </nav>
+  </header>
+
+  <!-- ℹ️ Info Banner -->
+  <div class="bg-purple-50 p-4 text-purple-800 border-b border-purple-200 min-h-[40px] sticky top-[72px] z-30">
+    <p class="text-sm">
+      Manage platform settings and tools for moderators, voting, reports, and admin panels.
+    </p>
+  </div>
+
+  <!-- 🔁 Dynamic Content Area -->
+  <main class="p-6 flex-1 overflow-y-auto">
+    <router-outlet></router-outlet>
+  </main>
+</div>

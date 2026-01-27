@@ -1,0 +1,159 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-100 px-2 p-18">
+  <div class="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
+    <h2 class="text-xl font-semibold mb-4 text-center">Register</h2>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+
+      <!-- Username -->
+      <div class="mb-3">
+        <label for="username" class="block text-sm font-medium mb-1">Username</label>
+        <input
+          type="text"
+          id="username"
+          formControlName="username"
+          class="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Enter your username"
+        />
+        <div *ngIf="registerForm.get('username')?.invalid && (registerForm.get('username')?.touched || registerForm.get('username')?.dirty)" class="text-red-600 text-xs mt-1">
+          <div *ngIf="registerForm.get('username')?.errors?.['required']">Username is required.</div>
+          <div *ngIf="registerForm.get('username')?.errors?.['minlength']">Username must be at least 3 characters.</div>
+          <div *ngIf="registerForm.get('username')?.errors?.['pattern']">Username can only contain letters and spaces.</div>
+        </div>
+      </div>
+
+      <!-- Phone Number -->
+      <div class="mb-3">
+        <label for="phone_no" class="block text-sm font-medium mb-1">Phone Number</label>
+        <input
+          type="text"
+          id="phone_no"
+          formControlName="phone_no"
+          class="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="+254712345678"
+        />
+        <div *ngIf="registerForm.get('phone_no')?.invalid && (registerForm.get('phone_no')?.touched || registerForm.get('phone_no')?.dirty)" class="text-red-600 text-xs mt-1">
+          <div *ngIf="registerForm.get('phone_no')?.errors?.['required']">Phone number is required.</div>
+          <div *ngIf="registerForm.get('phone_no')?.errors?.['pattern']">Enter a valid phone number.</div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="mb-3">
+        <label for="email" class="block text-sm font-medium mb-1">Email</label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          class="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="example@email.com"
+        />
+        <div *ngIf="registerForm.get('email')?.invalid && (registerForm.get('email')?.touched || registerForm.get('email')?.dirty)" class="text-red-600 text-xs mt-1">
+          <div *ngIf="registerForm.get('email')?.errors?.['required']">Email is required.</div>
+          <div *ngIf="registerForm.get('email')?.errors?.['email']">Enter a valid email.</div>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="mb-3 relative">
+        <label for="password" class="block text-sm font-medium mb-1">Password</label>
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          id="password"
+          formControlName="password"
+          class="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Enter your password"
+        />
+        <button
+          type="button"
+          (click)="showPassword = !showPassword"
+          class="absolute top-7 right-2 text-xs text-indigo-600"
+        >
+          {{ showPassword ? 'Hide' : 'Show' }}
+        </button>
+        <div *ngIf="registerForm.get('password')?.invalid && (registerForm.get('password')?.touched || registerForm.get('password')?.dirty)" class="text-red-600 text-xs mt-1">
+          <div *ngIf="registerForm.get('password')?.errors?.['required']">Password is required.</div>
+          <div *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters.</div>
+          <div *ngIf="registerForm.get('password')?.errors?.['pattern']">Password must contain letters and numbers.</div>
+        </div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="mb-3 relative">
+        <label for="confirmPassword" class="block text-sm font-medium mb-1">Confirm Password</label>
+        <input
+          [type]="showConfirmPassword ? 'text' : 'password'"
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          class="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="Re-enter your password"
+        />
+        <button
+          type="button"
+          (click)="showConfirmPassword = !showConfirmPassword"
+          class="absolute top-7 right-2 text-xs text-indigo-600"
+        >
+          {{ showConfirmPassword ? 'Hide' : 'Show' }}
+        </button>
+        <div *ngIf="registerForm.get('confirmPassword')?.invalid && (registerForm.get('confirmPassword')?.touched || registerForm.get('confirmPassword')?.dirty)" class="text-red-600 text-xs mt-1">
+          <div *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">Confirm Password is required.</div>
+        </div>
+        <!-- Password mismatch error -->
+        <div *ngIf="registerForm.errors?.['passwordMismatch'] && (registerForm.get('confirmPassword')?.touched || registerForm.get('confirmPassword')?.dirty)" class="text-red-600 text-xs mt-1">
+          Passwords do not match.
+        </div>
+      </div>
+
+      <!-- Sub-county Selection -->
+      <div class="mb-3">
+        <label for="subCounty" class="block text-sm font-medium mb-1">Sub-county</label>
+        <select
+          id="subCounty"
+          formControlName="subCounty"
+          (change)="updateWards()"
+          class="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="" disabled>Select Sub-county</option>
+          <option *ngFor="let sub of subCounties" [value]="sub.name">{{ sub.name }}</option>
+        </select>
+        <div *ngIf="registerForm.get('subCounty')?.invalid && (registerForm.get('subCounty')?.touched || registerForm.get('subCounty')?.dirty)" class="text-red-600 text-xs mt-1">
+          <div *ngIf="registerForm.get('subCounty')?.errors?.['required']">Sub-county is required.</div>
+        </div>
+      </div>
+
+      <!-- Ward Selection -->
+      <div class="mb-3" *ngIf="wards.length > 0">
+        <label for="ward" class="block text-sm font-medium mb-1">Ward</label>
+        <select
+          id="ward"
+          formControlName="ward"
+          class="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="" disabled>Select Ward</option>
+          <option *ngFor="let ward of wards" [value]="ward">{{ ward }}</option>
+        </select>
+        <div *ngIf="registerForm.get('ward')?.invalid && (registerForm.get('ward')?.touched || registerForm.get('ward')?.dirty)" class="text-red-600 text-xs mt-1">
+          <div *ngIf="registerForm.get('ward')?.errors?.['required']">Ward is required.</div>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="mb-3 text-red-600 text-sm text-center font-semibold">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        [disabled]="registerForm.invalid"
+        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 text-sm rounded transition"
+      >
+        Register
+      </button>
+
+      <p class="mt-4 text-center text-xs text-gray-600">
+        Already have an account?
+        <a routerLink="/login" class="text-indigo-600 hover:underline">Login</a>
+      </p>
+    </form>
+  </div>
+</div>

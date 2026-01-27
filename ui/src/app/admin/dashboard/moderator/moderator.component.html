@@ -1,0 +1,52 @@
+<div class="max-w-6xl mx-auto px-6 py-12">
+  <h1 class="text-3xl font-extrabold text-gray-800 mb-10 text-center">
+    Welcome to the Admin Dashboard
+  </h1>
+
+  <p class="max-w-3xl mx-auto text-center text-gray-600 mb-16">
+    Explore the powerful tools and insights that help you manage your platform efficiently. Scroll down to discover features designed to streamline your workflow and boost productivity.
+  </p>
+
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="fade-in-card bg-white rounded-lg shadow-lg p-6 border border-gray-200">
+      <h2 class="text-xl font-semibold mb-3 text-blue-700">User Management</h2>
+      <p class="text-gray-600">
+        Add, update, or remove users effortlessly. Manage roles and permissions to keep your system secure.
+      </p>
+    </div>
+
+    <div class="fade-in-card bg-white rounded-lg shadow-lg p-6 border border-gray-200">
+      <h2 class="text-xl font-semibold mb-3 text-green-700">Content Control</h2>
+      <p class="text-gray-600">
+        Create, edit, and publish content directly from the dashboard. Preview changes in real-time before going live.
+      </p>
+    </div>
+
+    <div class="fade-in-card bg-white rounded-lg shadow-lg p-6 border border-gray-200">
+      <h2 class="text-xl font-semibold mb-3 text-purple-700">Analytics & Reports</h2>
+      <p class="text-gray-600">
+        Track performance metrics and generate detailed reports to make data-driven decisions.
+      </p>
+    </div>
+  </div>
+
+  <section class="fade-in-card mt-16 bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg p-8 shadow-md border border-blue-300">
+    <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Stay Updated</h2>
+    <p class="text-gray-700 max-w-4xl mx-auto text-center">
+      Receive notifications about new features, system updates, and important alerts right here on your dashboard. Keeping you informed is our priority.
+    </p>
+  </section>
+  <script>
+    // Place this in your component.ts or in a script tag
+window.addEventListener('scroll', () => {
+  const elements = document.querySelectorAll('.fade-in-card');
+  const scrollY = window.scrollY + window.innerHeight;
+
+  elements.forEach(el => {
+    if (el.getBoundingClientRect().top + window.scrollY < scrollY - 100) {
+      el.classList.add('visible');
+    }
+  });
+});
+  </script>
+</div>

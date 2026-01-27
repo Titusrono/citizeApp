@@ -1,0 +1,45 @@
+{
+  "name": "citizen-connect-monorepo",
+  "version": "1.0.0",
+  "description": "CitizenConnect - Monorepo containing frontend (ui) and backend (api)",
+  "private": true,
+  "workspaces": [
+    "ui",
+    "api"
+  ],
+  "scripts": {
+    "dev": "npx concurrently --names \"API,UI\" --prefix-colors \"blue,green\" \"cd api && npm run dev\" \"cd ui && npm run dev\"",
+    "dev:api": "npm run dev --prefix api",
+    "dev:ui": "npm run dev --prefix ui",
+    "start": "npm run dev",
+    "start:api": "npm run start --prefix api",
+    "start:ui": "npm run start --prefix ui",
+    "build": "npm run build --workspaces",
+    "build:api": "npm run build -w api",
+    "build:ui": "npm run build -w ui",
+    "test": "npm run test --workspaces",
+    "test:api": "npm run test -w api",
+    "test:ui": "npm run test -w ui",
+    "clean": "npm run clean --workspaces --if-present && rimraf node_modules",
+    "install:all": "npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "rimraf": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/citizeApp.git"
+  },
+  "keywords": [
+    "monorepo",
+    "angular",
+    "citizen-connect"
+  ],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,159 @@
+<div class="w-full px-4 md:px-10 lg:px-16 py-6">
+  <h2 class="text-2xl sm:text-3xl font-bold text-blue-700 mb-5">Manage Submitted Petitions</h2>
+
+  <!-- ✅ Authority Stats Section -->
+  <div class="mb-6">
+    <h3 class="text-sm font-semibold text-gray-700 mb-2">Petition Distribution by Authority</h3>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-sm text-gray-800">
+      <div
+        *ngFor="let stat of authorityStats"
+        class="bg-white border rounded-md p-3 shadow text-center"
+      >
+        <p class="text-blue-700 font-semibold">{{ stat.authority }}</p>
+        <p class="text-gray-600">{{ stat.count }} petitions</p>
+        <p class="text-green-600 font-bold">{{ stat.percentage }}%</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="mb-5">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Filter by Target Authority:</label>
+    <div class="flex flex-wrap gap-2">
+      <button 
+        (click)="selectedAuthority = ''; applyFilter()"
+        [ngClass]="{
+          'bg-blue-600 text-white': selectedAuthority === '',
+          'bg-gray-200 text-gray-800': selectedAuthority !== ''
+        }"
+        class="px-4 py-1.5 rounded text-sm transition hover:bg-blue-500 hover:text-white">
+        All Authorities
+      </button>
+      <button 
+        *ngFor="let authority of authorities" 
+        (click)="selectedAuthority = authority; applyFilter()"
+        [ngClass]="{
+          'bg-blue-600 text-white': selectedAuthority === authority,
+          'bg-gray-200 text-gray-800': selectedAuthority !== authority
+        }"
+        class="px-4 py-1.5 rounded text-sm transition hover:bg-blue-500 hover:text-white">
+        {{ authority }}
+      </button>
+    </div>
+  </div>
+
+  <!-- No Results Message -->
+  <div *ngIf="filteredPetitions.length === 0" class="text-gray-600 text-sm mb-6">
+    No petitions found for the selected authority.
+  </div>
+
+  <!-- Petition Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <div *ngFor="let petition of filteredPetitions" 
+         class="bg-white shadow-sm border border-gray-200 p-5 rounded-lg hover:shadow-md hover:border-blue-300 transition duration-300 text-sm space-y-3">
+
+      <!-- Petition Title -->
+      <div>
+        <label class="block text-gray-500 text-xs mb-1">Title</label>
+        <h3 class="text-base font-semibold text-gray-800">{{ petition.title }}</h3>
+      </div>
+
+      <!-- Petition Description -->
+      <div>
+        <label class="block text-gray-500 text-xs mb-1">Description</label>
+        <p class="text-gray-700 leading-relaxed">{{ petition.description }}</p>
+      </div>
+
+      <!-- Target Authority -->
+      <div>
+        <label class="block text-gray-500 text-xs mb-1">Target Authority</label>
+        <p class="text-blue-700">{{ petition.targetAuthority }}</p>
+      </div>
+
+      <!-- User Details -->
+      <div *ngIf="petition.createdBy" class="pt-2 border-t">
+        <p class="text-xs font-semibold text-gray-600 mb-1">Submitted By</p>
+        <p class="text-gray-700">User name: {{ petition.createdBy.username }}</p>
+        <p class="text-gray-700">Email: {{ petition.createdBy.email }}</p>
+        <p class="text-gray-700">Phone No. {{ petition.createdBy.phone_no }}</p>
+        <p class="text-gray-700">Sub county: {{ petition.createdBy.subCounty }} | ward: {{ petition.createdBy.ward }}</p>
+      </div>
+
+      <!-- Supporting Docs -->
+      <div *ngIf="petition.supportingDocs">
+        <label class="block text-gray-500 text-xs mb-1">Supporting Document</label>
+        <a 
+          [href]="'/uploads/' + petition.supportingDocs" 
+          target="_blank" 
+          class="text-blue-600 hover:text-blue-800 underline text-sm">
+          📎 View Supporting Doc
+        </a>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-3 pt-3 border-t">
+        <button 
+          (click)="editPetition(petition)" 
+          class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded text-sm transition">
+           Edit
+        </button>
+        <button 
+          (click)="deletePetition(petition._id)" 
+          class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded text-sm transition">
+           Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div *ngIf="selectedPetition" class="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+    <div class="bg-white p-5 rounded-lg w-full max-w-xl shadow-lg text-sm">
+      <h2 class="text-lg font-bold mb-4 text-blue-700">Edit Petition</h2>
+
+      <form (ngSubmit)="submitEdit()">
+        <!-- Title -->
+        <label for="title" class="block text-xs font-medium text-gray-700 mb-1">Petition Title</label>
+        <input 
+          id="title"
+          class="w-full border border-gray-300 p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400" 
+          [(ngModel)]="selectedPetition.title" 
+          name="title" 
+          required />
+
+        <!-- Description -->
+        <label for="description" class="block text-xs font-medium text-gray-700 mb-1">Description</label>
+        <textarea 
+          id="description"
+          class="w-full border border-gray-300 p-2 rounded mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400" 
+          [(ngModel)]="selectedPetition.description" 
+          name="description" 
+          rows="3"
+          required></textarea>
+
+        <!-- Target Authority -->
+        <label for="targetAuthority" class="block text-xs font-medium text-gray-700 mb-1">Target Authority</label>
+        <input 
+          id="targetAuthority"
+          class="w-full border border-gray-300 p-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400" 
+          [(ngModel)]="selectedPetition.targetAuthority" 
+          name="targetAuthority" />
+
+        <!-- Modal Buttons -->
+        <div class="flex justify-end gap-2 mt-2">
+          <button 
+            type="button" 
+            (click)="cancelEdit()" 
+            class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-1.5 rounded text-sm transition">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-sm transition">
+            Update
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,147 @@
+<section class="bg-white shadow-md rounded-lg p-6 mb-6 w-full px-4 md:px-10 lg:px-16">
+  <h2 class="text-2xl font-bold text-blue-700 mb-6">Admin Report Management</h2>
+
+  <!-- 📊 Category Stats -->
+  <div class="mb-6">
+  <h3 class="font-semibold text-gray-700 mb-2 text-sm"> Report Distribution by Category</h3>
+  <div class="flex gap-3 overflow-x-auto text-xs text-gray-800 pb-1">
+    <div
+      *ngFor="let stat of categoryStats"
+      class="min-w-[160px] bg-white border rounded-md p-2 shadow-sm flex-shrink-0">
+      <p class="font-semibold text-blue-700 text-sm">{{ stat.category }}</p>
+      <p class="text-gray-600">{{ stat.count }} reports</p>
+      <p class="text-green-600 font-medium">{{ stat.percentage }}%</p>
+    </div>
+  </div>
+</div>
+
+
+  <!-- 🔍 Category Filter Bar -->
+  <div class="flex flex-wrap justify-center gap-2 mb-4 overflow-x-auto text-sm">
+    <button
+      class="px-3 py-1.5 rounded-full border font-medium transition hover:bg-blue-100 hover:text-blue-700"
+      [ngClass]="{
+        'bg-blue-600 text-white': selectedCategory === '',
+        'text-gray-700': selectedCategory !== ''
+      }"
+      (click)="filterByCategory('')"
+    >
+      All
+    </button>
+
+    <button
+      *ngFor="let category of availableCategories"
+      class="px-3 py-1.5 rounded-full border font-medium transition hover:bg-blue-100 hover:text-blue-700"
+      [ngClass]="{
+        'bg-blue-600 text-white': selectedCategory === category,
+        'text-gray-700': selectedCategory !== category
+      }"
+      (click)="filterByCategory(category)"
+    >
+      {{ category }}
+    </button>
+  </div>
+
+  <!-- 🗂️ Reports Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+    <ng-container *ngFor="let report of paginatedReports; let i = index; trackBy: trackById">
+      <div class="border rounded-lg shadow hover:shadow-lg transition duration-300 bg-gray-50">
+        <!-- 🖼️ Image Preview -->
+        <div class="w-full h-48 overflow-hidden rounded-t-lg" *ngIf="report.images?.length">
+          <img
+            [src]="report.images[0]"
+            alt="Report Preview"
+            class="w-full h-full object-cover object-center hover:scale-105 transition-transform duration-300" />
+        </div>
+
+        <!-- 📝 Report Details -->
+        <div class="p-3 space-y-1.5">
+          <h4 class="text-base font-semibold text-gray-800">{{ report.description }}</h4>
+          <p class="text-gray-600"><strong class="text-gray-800">Location:</strong> {{ report.location }}</p>
+          <p class="text-gray-600"><strong class="text-gray-800">Category:</strong> {{ report.category }}</p>
+
+          <!-- 🛠️ Admin Actions -->
+          <div class="flex justify-end mt-3 space-x-2">
+            <button
+              (click)="editReport(report)"
+              class="bg-yellow-500 text-white px-3 py-1.5 rounded hover:bg-yellow-600 transition text-xs">
+              Edit
+            </button>
+            <button
+              (click)="deleteReport(report._id)"
+              class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition text-xs">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- 📄 Pagination Controls -->
+  <div class="flex justify-center items-center mt-6 gap-3 text-sm">
+    <button
+      class="px-3 py-1.5 bg-gray-200 rounded hover:bg-gray-300"
+      [disabled]="currentPage === 1"
+      (click)="previousPage()">
+      Previous
+    </button>
+
+    <span class="text-gray-700 font-medium">
+      Page {{ currentPage }} of {{ totalPages }}
+    </span>
+
+    <button
+      class="px-3 py-1.5 bg-gray-200 rounded hover:bg-gray-300"
+      [disabled]="currentPage === totalPages"
+      (click)="nextPage()">
+      Next
+    </button>
+  </div>
+
+  <!-- ✏️ Edit Modal -->
+  <div
+    *ngIf="editingReport"
+    class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+  >
+    <div class="bg-white p-5 rounded-lg shadow-lg w-full max-w-md relative text-sm">
+      <h3 class="text-xl font-bold text-blue-700 mb-4">Edit Report</h3>
+
+      <label class="block mb-1 text-gray-700 font-semibold">Description:</label>
+      <input [(ngModel)]="editingReport.description" class="w-full p-2 border rounded mb-3" />
+
+      <label class="block mb-1 text-gray-700 font-semibold">Location:</label>
+      <input [(ngModel)]="editingReport.location" class="w-full p-2 border rounded mb-3" />
+
+      <label class="block mb-1 text-gray-700 font-semibold">Category:</label>
+      <input [(ngModel)]="editingReport.category" class="w-full p-2 border rounded mb-3" />
+
+      <!-- 🖼️ Editable Image Field -->
+      <label class="block mb-1 text-gray-700 font-semibold">Image URLs (comma-separated):</label>
+      <textarea
+        [(ngModel)]="imageUrlString"
+        class="w-full p-2 border rounded mb-3"
+        rows="3"
+        placeholder="Enter image URLs separated by commas..."></textarea>
+
+      <!-- 📷 Preview Multiple Images -->
+      <div *ngIf="imageUrlString" class="grid grid-cols-2 gap-2 mb-4">
+        <img
+          *ngFor="let img of getImageUrls(imageUrlString)"
+          [src]="img"
+          alt="Preview"
+          class="w-full h-20 object-cover rounded border" />
+      </div>
+
+      <div class="flex justify-end space-x-2 mt-3">
+        <button (click)="cancelEdit()" class="bg-gray-400 text-white px-3 py-1.5 rounded hover:bg-gray-500">Cancel</button>
+        <button (click)="saveEdit()" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ❌ Empty State -->
+  <div *ngIf="reports.length === 0" class="text-gray-500 text-center mt-10 text-sm">
+    No reports available.
+  </div>
+</section>

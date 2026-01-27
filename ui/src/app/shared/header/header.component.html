@@ -1,0 +1,115 @@
+<nav class="bg-blue-500 text-white w-full z-50 shadow-lg sticky top-0">
+  <div class="container mx-auto flex items-center justify-between p-4">
+    <!-- Logo -->
+    <div class="text-2xl font-bold">Citizen Connect</div>
+
+    <!-- Mobile menu button -->
+    <button class="md:hidden focus:outline-none" (click)="toggleMobileMenu()">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+
+    <!-- Center nav links (Desktop) -->
+    <div class="hidden md:flex flex-1 justify-center space-x-6">
+      <a routerLink="/" routerLinkActive="text-yellow-300 underline font-bold" [routerLinkActiveOptions]="{ exact: true }"
+         class="hover:text-yellow-300 transition duration-300">Home</a>
+      <a routerLink="/about" routerLinkActive="text-yellow-300 underline font-bold"
+         class="hover:text-yellow-300 transition duration-300">About</a>
+      <a routerLink="/service" routerLinkActive="text-yellow-300 underline font-bold"
+         class="hover:text-yellow-300 transition duration-300">Services</a>
+      <a routerLink="/contact" routerLinkActive="text-yellow-300 underline font-bold"
+         class="hover:text-yellow-300 transition duration-300">Contact</a>
+      <a routerLink="/blog" routerLinkActive="text-yellow-300 underline font-bold"
+         class="hover:text-yellow-300 transition duration-300">Blogs</a>
+
+      <!-- 👇 Updated condition to include superadmin -->
+      <a *ngIf="isLoggedIn && (userRole === 'user' || userRole === 'admin' || userRole === 'superadmin')" 
+         routerLink="/portal" 
+         routerLinkActive="text-yellow-300 underline font-bold"
+         class="hover:text-yellow-300 transition duration-300">User</a>
+
+      <a *ngIf="isLoggedIn && (userRole === 'admin' || userRole === 'superadmin')" 
+         routerLink="/dashboard/moderator" 
+         routerLinkActive="text-yellow-300 underline font-bold"
+         class="hover:text-yellow-300 transition duration-300">Admin</a>
+    </div>
+
+    <!-- Right corner auth buttons (Desktop) -->
+    <div class="hidden md:flex items-center space-x-2">
+      <a *ngIf="!isLoggedIn" routerLink="/login"
+         class="flex items-center bg-blue-500 text-white font-semibold px-3 py-2 rounded hover:bg-yellow-300 transition duration-300">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12H3m0 0l4-4m-4 4l4 4m6 4h6a2 2 0 002-2V6a2 2 0 00-2-2h-6" />
+        </svg>
+        Login
+      </a>
+
+      <button *ngIf="isLoggedIn" (click)="logout()"
+              class="flex items-center bg-blue-500 text-red-700 font-semibold px-3 py-2 rounded hover:bg-yellow-300 transition duration-300">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 16l-4-4m0 0l4-4m-4 4h12M13 4h6a2 2 0 012 2v12a2 2 0 01-2 2h-6" />
+        </svg>
+        Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Fullscreen Mobile Menu -->
+  <div *ngIf="mobileMenuVisible"
+       class="fixed inset-0 bg-blue-500 text-white z-50 flex flex-col p-6 space-y-6 transition duration-300 md:hidden">
+    <!-- Close Button -->
+    <div class="flex justify-end">
+      <button (click)="closeMobileMenu()" class="text-white text-4xl font-bold focus:outline-none">&times;</button>
+    </div>
+
+    <!-- Mobile Links -->
+    <nav class="flex flex-col space-y-4 mt-6 text-center text-xl font-medium">
+      <a routerLink="/" routerLinkActive="text-yellow-300 underline font-bold" [routerLinkActiveOptions]="{ exact: true }"
+         class="hover:text-yellow-300 transition duration-300" (click)="closeMobileMenu()">Home</a>
+      <a routerLink="/about" routerLinkActive="text-yellow-300 underline font-bold"
+         class="hover:text-yellow-300 transition duration-300" (click)="closeMobileMenu()">About</a>
+      <a routerLink="/service" routerLinkActive="text-yellow-300 underline font-bold"
+         class="hover:text-yellow-300 transition duration-300" (click)="closeMobileMenu()">Services</a>
+      <a routerLink="/contact" routerLinkActive="text-yellow-300 underline font-bold"
+         class="hover:text-yellow-300 transition duration-300" (click)="closeMobileMenu()">Contact</a>
+      <a routerLink="/blog" routerLinkActive="text-yellow-300 underline font-bold"
+         class="hover:text-yellow-300 transition duration-300" (click)="closeMobileMenu()">Blogs</a>
+
+      <!-- 👇 Updated condition to include superadmin -->
+      <a *ngIf="isLoggedIn && (userRole === 'user' || userRole === 'admin' || userRole === 'superadmin')" 
+         routerLink="/portal" class="hover:text-yellow-300 transition duration-300" 
+         (click)="closeMobileMenu()">User</a>
+
+      <a *ngIf="isLoggedIn && (userRole === 'admin' || userRole === 'superadmin')" 
+         routerLink="/dashboard/moderator"
+         class="hover:text-yellow-300 transition duration-300" (click)="closeMobileMenu()">Admin</a>
+    </nav>
+
+    <!-- Mobile Auth Buttons -->
+    <div class="mt-8 flex flex-col items-center space-y-4">
+      <a *ngIf="!isLoggedIn" routerLink="/login"
+         class="flex items-center bg-white text-blue-600 font-semibold px-5 py-2 rounded hover:bg-yellow-300 transition duration-300"
+         (click)="closeMobileMenu()">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12H3m0 0l4-4m-4 4l4 4m6 4h6a2 2 0 002-2V6a2 2 0 00-2-2h-6" />
+        </svg>
+        Login
+      </a>
+
+      <button *ngIf="isLoggedIn"
+              (click)="logout(); closeMobileMenu()"
+              class="flex items-center bg-white text-red-600 font-semibold px-5 py-2 rounded hover:bg-yellow-300 transition duration-300">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 16l-4-4m0 0l4-4m-4 4h12M13 4h6a2 2 0 012 2v12a2 2 0 01-2 2h-6" />
+        </svg>
+        Logout
+      </button>
+    </div>
+  </div>
+</nav>

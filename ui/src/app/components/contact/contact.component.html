@@ -1,0 +1,146 @@
+<div class="w-full bg-white text-gray-700 font-sans pt-28 pb-16">
+  <!-- Section: Get in Touch -->
+  <section class="max-w-6xl mx-auto px-6 md:px-12 lg:px-20">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-blue-700"> Reach Out to Citizen Connect</h2>
+      <p class="text-base mt-3 text-gray-600">
+        Have suggestions, need support or want to report an issue in Nandi County?
+        Use the form below to engage with your local leadership and development initiatives.
+      </p>
+    </div>
+
+    <!-- Grid Layout: Contact Details & Why Reach Out -->
+    <div class="grid md:grid-cols-2 gap-8">
+      <!-- Contact Information -->
+      <div class="bg-white border rounded-lg p-6 shadow-sm">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800"> Contact Details</h3>
+        <ul class="space-y-4 text-sm">
+          <li class="flex items-start gap-3">
+            <div class="bg-blue-600 text-white p-2 rounded-full">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                   viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M16 12H8m0 0l4-4m-4 4l4 4"></path>
+              </svg>
+            </div>
+            <span>
+              Email:
+              <a href="mailto:citizenconnect@nandi.go.ke" class="text-blue-600 hover:underline">citizenconnect&$64;nandi.go.ke</a>
+            </span>
+          </li>
+          <li class="flex items-start gap-3">
+            <div class="bg-blue-600 text-white p-2 rounded-full">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                   viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M3 10h11M9 21H6a2 2 0 01-2-2v-5a2 2 0 012-2h3"></path>
+              </svg>
+            </div>
+            <span>
+              Phone:
+              <a href="tel:+254706749066" class="text-blue-600 hover:underline">+254 706 749 066</a>
+            </span>
+          </li>
+          <li class="flex items-start gap-3">
+            <div class="bg-blue-600 text-white p-2 rounded-full">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
+                   viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M17.657 16.657L13.414 12m0 0l4.243-4.243M13.414 12H21"></path>
+              </svg>
+            </div>
+            <span>County Headquarters: Kapsabet, Nandi County</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Why Reach Out -->
+      <div class="bg-white text-black rounded-lg p-6 shadow-sm">
+        <h3 class="text-xl font-semibold mb-3"> Why Engage?</h3>
+        <p class="mb-3">
+          Citizen Connect empowers residents of Nandi County to raise concerns, share feedback and participate in governance.
+        </p>
+        <p>
+          Your voice matters whether you're reporting a local issue, suggesting a development idea or following up on a project.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Form Section -->
+  <div class="max-w-2xl mx-auto mt-16 bg-white border border-gray-200 rounded-lg shadow-md p-8">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-blue-700"> Submit Your Message</h1>
+      <p class="text-gray-600 mt-2">Fill out the form below to connect with your county administration.</p>
+    </div>
+
+    <form action="https://api.web3forms.com/submit" method="POST" id="form" class="space-y-5 text-sm">
+      <input type="hidden" name="access_key" value="d29c8c26-41c4-4e33-ba9f-c6b577b06f80" />
+      <input type="hidden" name="subject" value="New Citizen Connect Submission" />
+      <input type="checkbox" name="botcheck" style="display: none;" />
+
+      <!-- Full Name -->
+      <div>
+        <label for="name" class="block font-medium mb-1 text-gray-700">Name</label>
+        <input type="text" name="name" id="name" placeholder="Your Name" required
+               class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label for="email" class="block font-medium mb-1 text-gray-700">Email Address</label>
+        <input type="email" name="email" id="email" placeholder="Your email" required
+               class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      </div>
+
+      <!-- Phone -->
+      <div>
+        <label for="phone" class="block font-medium mb-1 text-gray-700">Phone Number</label>
+        <input type="text" name="phone" id="phone" placeholder="Number" required
+               class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" />
+      </div>
+
+      <!-- Message -->
+      <div>
+        <label for="message" class="block font-medium mb-1 text-gray-700">Your Message</label>
+        <textarea rows="4" name="message" id="message" placeholder="Message" required
+                  class="w-full border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"></textarea>
+      </div>
+
+      <!-- Submit Button -->
+      <div>
+        <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition">
+          Submit to Citizen Connect
+        </button>
+      </div>
+
+      <!-- Result Message -->
+      <p class="text-center text-sm mt-2 text-gray-600" id="result"></p>
+    </form>
+  </div>
+</div>
+
+<!-- 💻 Submission JS -->
+<script>
+  document.getElementById("form").addEventListener("submit", async function (event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const result = document.getElementById("result");
+
+    const response = await fetch(form.action, {
+      method: form.method,
+      body: formData
+    });
+
+    if (response.ok) {
+      result.innerText = "✅ Message submitted successfully!";
+      result.style.color = "green";
+      form.reset();
+    } else {
+      result.innerText = " Submission failed. Please try again.";
+      result.style.color = "red";
+    }
+  });
+</script>

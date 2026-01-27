@@ -1,0 +1,117 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-600 mb-6 text-center">
+    Citizen Petitioning: Empowering Your Voice for Change
+  </h1>
+
+  <!-- Petition Process Section -->
+  <section class="bg-blue-50 border border-blue-100 p-4 sm:p-6 md:p-8 rounded-lg mb-8">
+    <h2 class="text-xl sm:text-2xl font-semibold text-blue-700 mb-4">How the Petition Process Works</h2>
+
+    <p class="text-gray-700 mb-6 text-sm sm:text-base leading-relaxed">
+      The Citizen Petition platform enables individuals to initiate impactful proposals by identifying key issues, outlining justifiable concerns, and submitting them for official vetting. Public support is valuable but not mandatory — what matters most is presenting a reasonable case backed by facts and relevance. Verified petitions can then proceed to approval and potentially public voting.
+    </p>
+
+    <!-- Steps Grid -->
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="bg-white border border-blue-100 rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition hover:bg-blue-100 cursor-pointer">
+        <h3 class="text-lg font-semibold text-blue-700 mb-2">1️⃣ Identify a Legitimate Issue</h3>
+        <p class="text-gray-700 text-sm sm:text-base">Spot concerns or opportunities for improvement within your community. Clearly define your objective.</p>
+      </div>
+
+      <div class="bg-white border border-blue-100 rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition hover:bg-blue-100 cursor-pointer">
+        <h3 class="text-lg font-semibold text-blue-700 mb-2">2️⃣ Provide Supporting Information</h3>
+        <p class="text-gray-700 text-sm sm:text-base">Share facts, examples, and context to justify your concern. Strong logic strengthens credibility.</p>
+      </div>
+
+      <div class="bg-white border border-blue-100 rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition hover:bg-blue-100 cursor-pointer">
+        <h3 class="text-lg font-semibold text-blue-700 mb-2">3️⃣ Submit for Official Vetting</h3>
+        <p class="text-gray-700 text-sm sm:text-base">Your petition is reviewed by relevant authorities for clarity, merit, and potential impact.</p>
+      </div>
+
+      <div class="bg-white border border-blue-100 rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition hover:bg-blue-100 cursor-pointer">
+        <h3 class="text-lg font-semibold text-blue-700 mb-2">4️⃣ Approval and Validation</h3>
+        <p class="text-gray-700 text-sm sm:text-base">Approved petitions are readied for action — including implementation or voting.</p>
+      </div>
+
+      <div class="bg-white border border-blue-100 rounded-lg p-4 sm:p-6 shadow-sm hover:shadow-md transition hover:bg-blue-100 cursor-pointer sm:col-span-2">
+        <h3 class="text-lg font-semibold text-blue-700 mb-2">5️⃣ Track and Engage</h3>
+        <p class="text-gray-700 text-sm sm:text-base">Monitor progress, receive updates, and participate in public engagements or feedback loops.</p>
+      </div>
+    </div>
+
+    <p class="text-gray-700 mt-6 text-sm sm:text-base">
+      If you have a valid concern or vision for change, submit your petition below. A clear and well-reasoned case is enough to start the journey toward action.
+    </p>
+  </section>
+
+  <!-- Success Message -->
+  <div *ngIf="showSuccessMessage" class="bg-green-100 text-green-800 p-4 rounded mb-4 shadow transition-all duration-300 text-sm sm:text-base">
+    <strong>Success:</strong> Petition Successfully Submitted!
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="showErrorMessage" class="bg-red-100 text-red-800 p-4 rounded mb-4 shadow transition-all duration-300 text-sm sm:text-base">
+    <strong>Error:</strong> Submission Failed! Please try again.
+  </div>
+
+  <!-- Petition Form -->
+  <section class="bg-white shadow-md rounded-lg p-4 sm:p-6 mb-6">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Create a New Petition</h2>
+
+    <form [formGroup]="petitionForm" (ngSubmit)="onSubmit()">
+      <!-- Title -->
+      <div class="mb-4">
+        <label for="petitionTitle" class="block text-gray-700 text-sm font-medium mb-1">Title</label>
+        <input 
+          type="text" 
+          id="petitionTitle" 
+          formControlName="title" 
+          placeholder="Enter petition title" 
+          class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm" />
+      </div>
+
+      <!-- Description -->
+      <div class="mb-4">
+        <label for="petitionDescription" class="block text-gray-700 text-sm font-medium mb-1">Description</label>
+        <textarea 
+          id="petitionDescription" 
+          formControlName="description" 
+          rows="4" 
+          placeholder="Describe the petition" 
+          class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
+        </textarea>
+      </div>
+
+      <!-- Target Authority -->
+      <div class="mb-4">
+        <label for="targetAuthority" class="block text-gray-700 text-sm font-medium mb-1">Target Authority</label>
+        <select 
+          id="targetAuthority" 
+          formControlName="targetAuthority" 
+          class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm">
+          <option value="" disabled selected>Select Target Authority</option>
+          <option *ngFor="let authority of authorities" [value]="authority">{{ authority }}</option>
+        </select>
+      </div>
+
+      <!-- Supporting Docs -->
+      <div class="mb-4">
+        <label for="supportingDocs" class="block text-gray-700 text-sm font-medium mb-1">Supporting Documents</label>
+        <input 
+          type="file" 
+          id="supportingDocs" 
+          (change)="onFileChange($event)" 
+          class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm" />
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-end">
+        <button 
+          type="submit" 
+          class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition text-sm sm:text-base">
+          Submit
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

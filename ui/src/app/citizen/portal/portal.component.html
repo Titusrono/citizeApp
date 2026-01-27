@@ -1,0 +1,56 @@
+<div class="flex flex-col min-h-screen bg-gray-100 pt-0 px-4 md:px-7">
+  <header class="bg-white shadow sticky top-16 z-40">
+    <nav class="flex flex-col sm:flex-row justify-end sm:space-x-4 bg-gray-50 border-b border-gray-200 pr-4">
+      <a
+        routerLink="realtimereport"
+        routerLinkActive="text-green-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-green-700"
+        class="px-4 py-3 text-gray-700 hover:text-green-700 hover:underline transition whitespace-nowrap"
+      >
+        Report Issue
+      </a>
+      <a
+        routerLink="petition"
+        routerLinkActive="text-green-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-green-700"
+        class="px-4 py-3 text-gray-700 hover:text-green-700 hover:underline transition whitespace-nowrap"
+      >
+        Petitions
+      </a>
+      <a
+        routerLink="proposal"
+        routerLinkActive="text-green-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-green-700"
+        class="px-4 py-3 text-gray-700 hover:text-green-700 hover:underline transition whitespace-nowrap"
+      >
+        Vote on Projects
+      </a>
+      <a
+        routerLink="streaminglive"
+        routerLinkActive="text-green-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-green-700"
+        class="px-4 py-3 text-gray-700 hover:text-green-700 hover:underline transition whitespace-nowrap"
+      >
+        Virtual Hall
+      </a>
+    </nav>
+  </header>
+
+  <!-- 💬 Intro Section -->
+  <section class="bg-white border-b border-gray-200 px-4 py-6 sm:px-6 sm:py-8">
+    <div class="max-w-5xl mx-auto text-center">
+      <h2 class="text-xl sm:text-2xl font-bold text-green-700 mb-2">Your Voice. Your Platform.</h2>
+      <p class="text-gray-600 text-sm sm:text-base leading-relaxed">
+        Citizen Connect empowers residents to actively participate in governance by reporting local issues, submitting petitions, voting on community projects and attending virtual town halls  all in one place.
+      </p>
+    </div>
+  </section>
+
+  <!-- 🏠 Optional Welcome Section -->
+  <main class="flex-1 overflow-y-auto p-6">
+    <div *ngIf="isBaseDashboardRoute" class="text-center mt-20 space-y-4">
+      <h1 class="text-3xl sm:text-4xl font-bold text-green-700">Welcome to Citizen Connect</h1>
+      <p class="text-gray-600 text-base sm:text-lg">Engage, report, and help shape your community’s future.</p>
+      <p class="text-gray-500">Use the navigation above to get started with live reports, petitions, or votes.</p>
+    </div>
+
+    <!-- 📄 Routed Content -->
+    <router-outlet></router-outlet>
+  </main>
+</div>

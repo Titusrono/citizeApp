@@ -1,0 +1,73 @@
+<div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+  <h2 class="text-2xl sm:text-3xl font-bold mb-6 text-blue-700 text-center"> Active Proposals</h2>
+
+  <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+    <div 
+      *ngFor="let p of proposals" 
+      class="bg-white p-5 rounded-lg border border-gray-200 shadow hover:shadow-md transition space-y-4 text-sm"
+    >
+      <!-- Title & Description -->
+      <div class="space-y-1">
+        <h3 class="text-base font-bold text-gray-800">{{ p.title }}</h3>
+        <p class="text-gray-600">{{ p.description }}</p>
+      </div>
+
+      <!-- Metadata -->
+      <div class="text-xs text-gray-500 space-y-1">
+        <div><strong>Eligibility:</strong> {{ p.eligibility }}</div>
+        <div><strong>Ends:</strong> {{ p.endDate | date }}</div>
+      </div>
+
+      <!-- Always show vote summary -->
+      <div class="pt-2 border-t text-sm text-gray-700">
+        <label class="text-xs text-gray-500 block mb-1">Total Votes</label>
+        <div>✅ Yes: {{ p.yesVotes || 0 }} |  No: {{ p.noVotes || 0 }}</div>
+      </div>
+
+      <!-- Voting Form -->
+      <div *ngIf="!voteStatus[p._id]" class="pt-2 border-t space-y-3">
+        <p class="text-sm text-gray-700 font-medium">Cast Your Vote:</p>
+
+        <div class="flex gap-3">
+          <button 
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-md text-sm font-semibold"
+            [disabled]="voteStatus[p._id]"
+            (click)="selectedVote[p._id] = 'yes'">
+            ✅ Yes
+          </button>
+          <button 
+            class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-md text-sm font-semibold"
+            [disabled]="voteStatus[p._id]"
+            (click)="selectedVote[p._id] = 'no'">
+             No
+          </button>
+        </div>
+
+        <!-- Reason Input -->
+        <div>
+          <label class="text-xs text-gray-600 block mb-1">Reason (optional)</label>
+          <input 
+            type="text"
+            class="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
+            [(ngModel)]="reasons[p._id]"
+            [name]="'reason_' + p._id" />
+        </div>
+
+        <!-- Submit -->
+        <div class="text-right">
+          <button 
+            (click)="submitVote(p._id)"
+            [disabled]="!selectedVote[p._id]"
+            class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-1.5 rounded-md text-sm font-semibold disabled:opacity-50">
+            Submit
+          </button>
+        </div>
+      </div>
+
+      <!-- Already Voted -->
+      <div *ngIf="voteStatus[p._id]" class="text-green-600 text-sm font-medium">
+        ✅ Thank you! You’ve already voted.
+      </div>
+    </div>
+  </div>
+</div>

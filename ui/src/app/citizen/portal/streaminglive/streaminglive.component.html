@@ -1,0 +1,136 @@
+<div class="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-10">
+  <h1 class="text-3xl font-bold mb-2 text-center text-gray-800">Virtual Meetings</h1>
+
+  <!-- Introductory Message -->
+  <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">
+    Welcome to the County Virtual Meetings Portal. Here, you can browse and join live town hall sessions,
+    stay informed about upcoming meetings, and catch up on past discussions with available recordings.
+    This space is dedicated to promoting transparency, civic engagement, and easy access to county deliberations.
+  </p>
+
+  <!-- Filter Buttons -->
+  <div class="flex justify-center mb-6 flex-wrap gap-2">
+    <button class="px-4 py-1 rounded border text-sm transition"
+      [class.bg-blue-600]="filterType === 'all'"
+      [class.text-white]="filterType === 'all'"
+      (click)="applyFilter('all'); currentPage = 1">
+      All
+    </button>
+    <button class="px-4 py-1 rounded border text-sm transition"
+      [class.bg-green-600]="filterType === 'live'"
+      [class.text-white]="filterType === 'live'"
+      (click)="applyFilter('live'); currentPage = 1">
+      Live Now
+    </button>
+    <button class="px-4 py-1 rounded border text-sm transition"
+      [class.bg-yellow-600]="filterType === 'upcoming'"
+      [class.text-white]="filterType === 'upcoming'"
+      (click)="applyFilter('upcoming'); currentPage = 1">
+      Upcoming
+    </button>
+    <button class="px-4 py-1 rounded border text-sm transition"
+      [class.bg-gray-600]="filterType === 'past'"
+      [class.text-white]="filterType === 'past'"
+      (click)="applyFilter('past'); currentPage = 1">
+      Past
+    </button>
+  </div>
+
+  <!-- Loading and Error States -->
+  <div *ngIf="loading" class="text-center text-gray-500">Loading meetings...</div>
+  <div *ngIf="error" class="text-center text-red-600">{{ error }}</div>
+
+  <!-- Meetings Display -->
+  <div *ngIf="!loading && !error && filteredMeetings.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div
+      *ngFor="let meet of paginatedMeetings()"
+      class="p-5 bg-gray-50 border rounded-xl shadow-sm hover:shadow-xl transition duration-300 ease-in-out"
+    >
+      <!-- Status Badge -->
+      <span
+        class="inline-block px-2 py-1 text-xs font-semibold rounded-full mb-2"
+        [ngClass]="{
+          'bg-green-100 text-green-800': getStatus(meet) === 'Live',
+          'bg-yellow-100 text-yellow-800': getStatus(meet) === 'Upcoming',
+          'bg-gray-200 text-gray-800': getStatus(meet) === 'Past'
+        }"
+      >
+        {{ getStatus(meet) }}
+      </span>
+
+      <!-- Title -->
+      <h2 class="text-xl font-bold text-blue-700 mb-2">{{ meet.title }}</h2>
+
+      <!-- Agenda -->
+      <p class="text-sm text-gray-600 font-semibold mb-1">Agenda:</p>
+      <p class="text-gray-700 mb-3 whitespace-pre-line">{{ meet.agenda }}</p>
+
+      <!-- Date & Time -->
+      <p class="text-sm text-gray-600 font-semibold mb-1">Date & Time:</p>
+      <p class="text-sm text-gray-500 mb-3">
+        Date: {{ meet.date | date: 'fullDate' }}  Time:  {{ meet.date | date: 'shortTime' }}
+      </p>
+
+      <!-- Countdown -->
+      <p *ngIf="getStatus(meet) === 'Upcoming'" class="text-sm text-yellow-600 font-medium mb-3">
+         {{ getCountdown(meet) }}
+      </p>
+
+      <!-- Links -->
+      <div class="flex flex-col space-y-2 mt-3">
+        <!-- Join Meeting -->
+        <div *ngIf="!meet.isPast">
+          <span class="text-sm font-semibold text-gray-600">Meeting Link:</span>
+          <a
+            [href]="meet.meetLink"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-blue-600 hover:text-blue-800 font-medium hover:underline"
+          >
+           Join Meeting
+          </a>
+        </div>
+
+        <!-- View Recording -->
+        <div *ngIf="meet.isPast && meet.recordingLink">
+          <span class="text-sm font-semibold text-gray-600">Recording:</span>
+          <a
+            [href]="meet.recordingLink"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-purple-600 hover:text-purple-800 font-medium hover:underline"
+          >
+           View Recording
+          </a>
+        </div>
+
+        <!-- Live badge -->
+        <span *ngIf="meet.isLive" class="text-green-600 font-semibold"> Live Now</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination Controls -->
+  <div class="flex justify-between items-center mt-8" *ngIf="filteredMeetings.length > itemsPerPage">
+    <button
+      (click)="previousPage()"
+      [disabled]="currentPage === 1"
+      class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50">
+      ← Previous
+    </button>
+    <span class="text-sm text-gray-600">
+      Page {{ currentPage }} of {{ totalPages() }}
+    </span>
+    <button
+      (click)="nextPage()"
+      [disabled]="currentPage === totalPages()"
+      class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50">
+      Next →
+    </button>
+  </div>
+
+  <!-- No Meetings Message -->
+  <div *ngIf="!loading && filteredMeetings.length === 0" class="text-center text-gray-500 mt-4">
+    No {{ filterType }} meetings.
+  </div>
+</div>
