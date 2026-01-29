@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Petition } from './entities/petition.entity';
 import { CreatePetitionDto } from './dto/create-petition.dto';
 import { UpdatePetitionDto } from './dto/update-petition.dto';
+import { User } from '../users/entities/user.entity';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class PetitionsService {
-  create(createPetitionDto: CreatePetitionDto) {
-    return 'This action adds a new petition';
+  constructor(
+    @InjectRepository(Petition)
+    private petitionsRepository: Repository<Petition>,
+  ) {}
+
+  async create(createPetitionDto: CreatePetitionDto, user: User) {
+    const petition = this.petitionsRepository.create({
+      ...createPetitionDto,
+      user,
+    });
+    return this.petitionsRepository.save(petition);
   }
 
-  findAll() {
-    return `This action returns all petitions`;
+  async findAll() {
+    return this.petitionsRepository.find({ relations: ['user'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} petition`;
+  async findOne(id: string) {
+    return this.petitionsRepository.findOne({ where: { id: new ObjectId(id) }, relations: ['user'] });
   }
 
-  update(id: number, updatePetitionDto: UpdatePetitionDto) {
-    return `This action updates a #${id} petition`;
+  async update(id: string, updatePetitionDto: UpdatePetitionDto) {
+    await this.petitionsRepository.update(id, updatePetitionDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} petition`;
+  async remove(id: string) {
+    return this.petitionsRepository.delete(id);
   }
 }

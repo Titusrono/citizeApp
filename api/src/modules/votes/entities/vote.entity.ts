@@ -1,11 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, ObjectIdColumn, ManyToOne } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Policy } from '../../policies/entities/policy.entity';
+import { ObjectId } from 'mongodb';
 
 @Entity('votes')
 export class Vote {
-  @PrimaryGeneratedColumn()
-  vote_id: number;
+  @ObjectIdColumn()
+  id: ObjectId;
 
   @ManyToOne(() => Policy, (policy: Policy) => policy.votes, { onDelete: 'CASCADE' })
   policy: Policy;

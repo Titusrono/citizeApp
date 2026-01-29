@@ -1,26 +1,37 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Townhall } from './entities/townhall.entity';
 import { CreateTownhallDto } from './dto/create-townhall.dto';
 import { UpdateTownhallDto } from './dto/update-townhall.dto';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class TownhallsService {
-  create(createTownhallDto: CreateTownhallDto) {
-    return 'This action adds a new townhall';
+  constructor(
+    @InjectRepository(Townhall)
+    private townhallsRepository: Repository<Townhall>,
+  ) {}
+
+  async create(createTownhallDto: CreateTownhallDto) {
+    const townhall = this.townhallsRepository.create(createTownhallDto);
+    return this.townhallsRepository.save(townhall);
   }
 
-  findAll() {
-    return `This action returns all townhalls`;
+  async findAll() {
+    return this.townhallsRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} townhall`;
+  async findOne(id: string) {
+    return this.townhallsRepository.findOne({ where: { id: new ObjectId(id) } });
   }
 
-  update(id: number, updateTownhallDto: UpdateTownhallDto) {
-    return `This action updates a #${id} townhall`;
+  async update(id: string, updateTownhallDto: UpdateTownhallDto) {
+    await this.townhallsRepository.update(id, updateTownhallDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} townhall`;
+  async remove(id: string) {
+    return this.townhallsRepository.delete(id);
   }
 }

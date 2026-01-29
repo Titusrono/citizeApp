@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Vote } from './entities/vote.entity';
 import { CreateVoteDto } from './dto/create-vote.dto';
 import { UpdateVoteDto } from './dto/update-vote.dto';
+import { User } from '../users/entities/user.entity';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class VotesService {
-  create(createVoteDto: CreateVoteDto) {
-    return 'This action adds a new vote';
+  constructor(
+    @InjectRepository(Vote)
+    private votesRepository: Repository<Vote>,
+  ) {}
+
+  async create(createVoteDto: CreateVoteDto, user: User) {
+    const vote = this.votesRepository.create({
+      ...createVoteDto,
+      user,
+    });
+    return this.votesRepository.save(vote);
   }
 
-  findAll() {
-    return `This action returns all votes`;
+  async findAll() {
+    return this.votesRepository.find({ relations: ['user'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} vote`;
+  async findOne(id: string) {
+    return this.votesRepository.findOne({ where: { id: new ObjectId(id) }, relations: ['user'] });
   }
 
-  update(id: number, updateVoteDto: UpdateVoteDto) {
-    return `This action updates a #${id} vote`;
+  async update(id: string, updateVoteDto: UpdateVoteDto) {
+    await this.votesRepository.update(id, updateVoteDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} vote`;
+  async remove(id: string) {
+    return this.votesRepository.delete(id);
   }
 }

@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Signature } from './entities/signature.entity';
 import { CreateSignatureDto } from './dto/create-signature.dto';
 import { UpdateSignatureDto } from './dto/update-signature.dto';
+import { User } from '../users/entities/user.entity';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class SignaturesService {
-  create(createSignatureDto: CreateSignatureDto) {
-    return 'This action adds a new signature';
+  constructor(
+    @InjectRepository(Signature)
+    private signaturesRepository: Repository<Signature>,
+  ) {}
+
+  async create(createSignatureDto: CreateSignatureDto, user: User) {
+    const signature = this.signaturesRepository.create({
+      ...createSignatureDto,
+      user,
+    });
+    return this.signaturesRepository.save(signature);
   }
 
-  findAll() {
-    return `This action returns all signatures`;
+  async findAll() {
+    return this.signaturesRepository.find({ relations: ['user', 'petition'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} signature`;
+  async findOne(id: string) {
+    return this.signaturesRepository.findOne({ where: { id: new ObjectId(id) }, relations: ['user', 'petition'] });
   }
 
-  update(id: number, updateSignatureDto: UpdateSignatureDto) {
-    return `This action updates a #${id} signature`;
+  async update(id: string, updateSignatureDto: UpdateSignatureDto) {
+    await this.signaturesRepository.update(id, updateSignatureDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} signature`;
+  async remove(id: string) {
+    return this.signaturesRepository.delete(id);
   }
 }

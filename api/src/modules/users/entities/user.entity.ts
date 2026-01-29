@@ -1,5 +1,6 @@
 import { Entity, ObjectIdColumn, Column, OneToMany } from 'typeorm';
 import { Issue } from '../../issues/entities/issue.entity';
+import { Petition } from '../../petitions/entities/petition.entity';
 import { Signature } from '../../signatures/entities/signature.entity';
 import { Vote } from '../../votes/entities/vote.entity';
 import { ObjectId } from 'mongodb';
@@ -47,6 +48,9 @@ export class User {
 
   @OneToMany(() => Issue, (issue: Issue) => issue.user, { cascade: true })
   issues: Issue[];
+
+  @OneToMany(() => Petition, (petition: Petition) => petition.user, { cascade: true })
+  petitions: Petition[];
 
   @OneToMany(() => Signature, (signature: Signature) => signature.user, { cascade: true })
   signatures: Signature[];

@@ -1,9 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, ObjectIdColumn, Column, OneToMany } from 'typeorm';
 import { Vote } from '../../votes/entities/vote.entity';
+import { ObjectId } from 'mongodb';
+
 @Entity('policies')
 export class Policy {
-  @PrimaryGeneratedColumn()
-  policy_id: number;
+  @ObjectIdColumn()
+  id: ObjectId;
 
   @Column({ length: 255 })
   title: string;

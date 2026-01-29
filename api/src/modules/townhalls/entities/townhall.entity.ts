@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, ObjectIdColumn, Column } from 'typeorm';
+import { ObjectId } from 'mongodb';
 
 @Entity('townhalls')
 export class Townhall {
-  @PrimaryGeneratedColumn()
-  event_id: number;
+  @ObjectIdColumn()
+  id: ObjectId;
 
   @Column({ length: 255 })
   title: string;

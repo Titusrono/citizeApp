@@ -1,26 +1,41 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Issue } from './entities/issue.entity';
 import { CreateIssueDto } from './dto/create-issue.dto';
 import { UpdateIssueDto } from './dto/update-issue.dto';
+import { User } from '../users/entities/user.entity';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class IssuesService {
-  create(createIssueDto: CreateIssueDto) {
-    return 'This action adds a new issue';
+  constructor(
+    @InjectRepository(Issue)
+    private issuesRepository: Repository<Issue>,
+  ) {}
+
+  async create(createIssueDto: CreateIssueDto, user: User) {
+    const issue = this.issuesRepository.create({
+      ...createIssueDto,
+      user,
+    });
+    return this.issuesRepository.save(issue);
   }
 
-  findAll() {
-    return `This action returns all issues`;
+  async findAll() {
+    return this.issuesRepository.find({ relations: ['user'] });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} issue`;
+  async findOne(id: string) {
+    return this.issuesRepository.findOne({ where: { id: new ObjectId(id) }, relations: ['user'] });
   }
 
-  update(id: number, updateIssueDto: UpdateIssueDto) {
-    return `This action updates a #${id} issue`;
+  async update(id: string, updateIssueDto: UpdateIssueDto) {
+    await this.issuesRepository.update(id, updateIssueDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} issue`;
+  async remove(id: string) {
+    return this.issuesRepository.delete(id);
   }
 }

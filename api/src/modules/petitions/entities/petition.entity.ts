@@ -1,9 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, ObjectIdColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 import { Signature } from '../../signatures/entities/signature.entity';
+import { ObjectId } from 'mongodb';
+
 @Entity('petitions')
 export class Petition {
-  @PrimaryGeneratedColumn()
-  petition_id: number;
+  @ObjectIdColumn()
+  id: ObjectId;
+
+  @ManyToOne(() => User, (user) => user.petitions, { onDelete: 'CASCADE' })
+  user: User;
 
   @Column({ length: 255 })
   title: string;
