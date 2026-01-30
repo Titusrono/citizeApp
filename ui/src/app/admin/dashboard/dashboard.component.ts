@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { DashboardSwitcherComponent } from '../../shared/dashboard-switcher/dashboard-switcher.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,8 +9,7 @@ import { DashboardSwitcherComponent } from '../../shared/dashboard-switcher/dash
   imports: [
     CommonModule,
     RouterLink,
-    RouterOutlet,
-    DashboardSwitcherComponent
+    RouterOutlet
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -137,9 +135,5 @@ export class DashboardComponent implements OnInit {
 
   getVisibleNavigationItems() {
     return this.navigationItems.filter(item => this.canAccessRoute(item.allowedRoles));
-  }
-
-  switchToCitizenPortal(): void {
-    this.router.navigate(['/portal']);
   }
 }

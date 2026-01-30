@@ -12,25 +12,22 @@
     [class.translate-x-0]="isSidebarOpen"
     [class.-translate-x-full]="!isSidebarOpen">
     
-    <!-- Dashboard Switcher for Super Admin -->
-    <div *ngIf="isSuperAdmin()" class="border-b border-gray-200">
-      <app-dashboard-switcher currentDashboard="Admin Dashboard"></app-dashboard-switcher>
-    </div>
-
     <!-- Sidebar Header -->
     <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-700">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-bold text-white">Admin Dashboard</h2>
+      <div class="flex items-center space-x-3">
+        <!-- Hamburger Menu -->
         <button 
-          *ngIf="isMobile" 
-          (click)="closeSidebar()" 
+          (click)="toggleSidebar()" 
           class="text-white hover:text-gray-200 transition-colors">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
           </svg>
         </button>
+        <div class="flex-1">
+          <h2 class="text-xl font-bold text-white">Admin Dashboard</h2>
+          <p class="text-blue-100 text-sm mt-1">Manage and moderate platform</p>
+        </div>
       </div>
-      <p class="text-blue-100 text-sm mt-1">Manage and moderate platform</p>
     </div>
 
     <!-- Navigation Menu -->
@@ -101,26 +98,8 @@
     <!-- Top Header with Menu Toggle -->
     <header class="bg-white shadow-sm border-b border-gray-200 px-4 py-3 md:px-6">
       <div class="flex items-center justify-between">
-        <!-- Mobile menu button -->
-        <button 
-          (click)="toggleSidebar()" 
-          class="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200 md:hidden">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-        
-        <!-- Desktop sidebar toggle -->
-        <button 
-          (click)="toggleSidebar()" 
-          class="hidden md:flex p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-          </svg>
-        </button>
-
         <!-- Breadcrumb/Title -->
-        <div class="flex-1 mx-4">
+        <div class="flex-1">
           <h1 class="text-lg font-semibold text-gray-900">Admin Panel</h1>
         </div>
 

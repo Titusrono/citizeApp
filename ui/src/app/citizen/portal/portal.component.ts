@@ -2,11 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-import { DashboardSwitcherComponent } from '../../shared/dashboard-switcher/dashboard-switcher.component';
 
 @Component({
   selector: 'app-portal',
-  imports: [RouterLink, CommonModule, RouterOutlet, DashboardSwitcherComponent],
+  imports: [RouterLink, CommonModule, RouterOutlet],
   standalone: true,
   templateUrl: './portal.component.html',
   styleUrls: ['./portal.component.scss'],  // fixed typo from styleUrl to styleUrls
@@ -90,5 +89,11 @@ export class PortalComponent implements OnInit {
 
   isActiveRoute(path: string): boolean {
     return this.router.url.includes(path);
+  }
+
+  getVisibleNavigationItems() {
+    // Citizens see only citizen navigation items, regardless of role
+    // Super admins accessing citizen portal also see only citizen items
+    return this.navigationItems;
   }
 }
