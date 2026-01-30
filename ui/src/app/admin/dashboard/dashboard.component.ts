@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
-//import { AuthService } from 'src/app/services/auth.service'; // Adjust path if needed
+import { DashboardSwitcherComponent } from '../../shared/dashboard-switcher/dashboard-switcher.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,7 +10,8 @@ import { AuthService } from '../../core/auth/auth.service';
   imports: [
     CommonModule,
     RouterLink,
-    RouterOutlet
+    RouterOutlet,
+    DashboardSwitcherComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -49,5 +50,13 @@ export class DashboardComponent implements OnInit {
 
   isRootDashboard(): boolean {
     return this.isHomeRoute();
+  }
+
+  isSuperAdmin(): boolean {
+    return this.userRole === 'super_admin';
+  }
+
+  switchToCitizenPortal(): void {
+    this.router.navigate(['/portal']);
   }
 }

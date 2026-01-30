@@ -58,7 +58,7 @@ export const routes: Routes = [
   // Authenticated dashboard
   {
     path: 'dashboard',
-    title: 'User Dashboard',
+    title: 'Admin Dashboard',
     canActivate: [RoleGuard,AuthGuard],
     data: { roles: ['admin', 'super_admin'] },
     component: DashboardComponent,

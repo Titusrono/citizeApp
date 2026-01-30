@@ -15,32 +15,45 @@ export interface Blog {
   providedIn: 'root',
 })
 export class BlogsService {
-  private apiUrl = 'http://localhost:3000/blogs'; // Update to match your backend host if needed
+  private apiUrl = '/assets/blogs.json'; // Using local JSON file until backend blogs module is created
 
   constructor(private http: HttpClient) {}
 
-  /** ✅ Get all blogs */
+  /** ✅ Get all blogs from local JSON file */
   getBlogs(): Observable<Blog[]> {
     return this.http.get<Blog[]>(this.apiUrl);
   }
 
-  /** ✅ Get a single blog by ID */
+  /** ✅ Get a single blog by ID from the blogs array */
   getBlogById(id: string): Observable<Blog> {
-    return this.http.get<Blog>(`${this.apiUrl}/${id}`);
+    return new Observable(observer => {
+      this.getBlogs().subscribe(blogs => {
+        const blog = blogs.find(b => b._id === id);
+        if (blog) {
+          observer.next(blog);
+        } else {
+          observer.error({ message: 'Blog not found' });
+        }
+        observer.complete();
+      });
+    });
   }
 
-  /** ✅ Create a new blog post */
+  // Note: The following methods are disabled since we're using a local JSON file
+  // To enable these, create a backend blogs module with CRUD operations
+  
+  /** ⚠️ Create blog - requires backend API */
   createBlog(blogData: Partial<Blog>): Observable<Blog> {
-    return this.http.post<Blog>(this.apiUrl, blogData);
+    throw new Error('Create blog requires backend API - local JSON is read-only');
   }
 
-  /** ✅ Update blog using PATCH */
+  /** ⚠️ Update blog - requires backend API */
   updateBlog(id: string, blogData: Partial<Blog>): Observable<Blog> {
-    return this.http.patch<Blog>(`${this.apiUrl}/${id}`, blogData);
+    throw new Error('Update blog requires backend API - local JSON is read-only');
   }
 
-  /** ✅ Delete blog */
+  /** ⚠️ Delete blog - requires backend API */
   deleteBlog(id: string): Observable<{ message: string }> {
-    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
+    throw new Error('Delete blog requires backend API - local JSON is read-only');
   }
 }

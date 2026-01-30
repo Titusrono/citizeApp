@@ -24,16 +24,36 @@
       <a routerLink="/blog" routerLinkActive="text-yellow-300 underline font-bold"
          class="hover:text-yellow-300 transition duration-300">Blogs</a>
 
-      <!-- 👇 Updated condition to include superadmin -->
-      <a *ngIf="isLoggedIn && (userRole === 'user' || userRole === 'admin' || userRole === 'superadmin')" 
+      <!-- Dashboard navigation for super_admin -->
+      <div *ngIf="isLoggedIn && userRole === 'super_admin'" class="relative">
+        <button (click)="toggleDropdown()" class="flex items-center hover:text-yellow-300 transition duration-300">
+          Dashboards
+          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div *ngIf="dropdownVisible" class="absolute top-full left-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg z-50">
+          <a routerLink="/portal" 
+             routerLinkActive="bg-blue-100 text-blue-800"
+             class="block px-4 py-2 hover:bg-blue-50 transition duration-300"
+             (click)="closeDropdown()">Citizen Portal</a>
+          <a routerLink="/dashboard/moderator" 
+             routerLinkActive="bg-blue-100 text-blue-800"
+             class="block px-4 py-2 hover:bg-blue-50 transition duration-300"
+             (click)="closeDropdown()">Admin Dashboard</a>
+        </div>
+      </div>
+      
+      <!-- Regular navigation for other roles -->
+      <a *ngIf="isLoggedIn && (userRole === 'citizen' || userRole === 'ward_manager' || userRole === 'constituency_manager')" 
          routerLink="/portal" 
          routerLinkActive="text-yellow-300 underline font-bold"
-         class="hover:text-yellow-300 transition duration-300">User</a>
+         class="hover:text-yellow-300 transition duration-300">Citizen Portal</a>
 
-      <a *ngIf="isLoggedIn && (userRole === 'admin' || userRole === 'superadmin')" 
+      <a *ngIf="isLoggedIn && userRole === 'admin'" 
          routerLink="/dashboard/moderator" 
          routerLinkActive="text-yellow-300 underline font-bold"
-         class="hover:text-yellow-300 transition duration-300">Admin</a>
+         class="hover:text-yellow-300 transition duration-300">Admin Dashboard</a>
     </div>
 
     <!-- Right corner auth buttons (Desktop) -->
@@ -79,14 +99,27 @@
       <a routerLink="/blog" routerLinkActive="text-yellow-300 underline font-bold"
          class="hover:text-yellow-300 transition duration-300" (click)="closeMobileMenu()">Blogs</a>
 
-      <!-- 👇 Updated condition to include superadmin -->
-      <a *ngIf="isLoggedIn && (userRole === 'user' || userRole === 'admin' || userRole === 'superadmin')" 
+      <!-- Dashboard navigation for super_admin -->
+      <div *ngIf="isLoggedIn && userRole === 'super_admin'">
+        <button (click)="toggleMobileAdminMenu()" class="w-full text-left hover:text-yellow-300 transition duration-300 text-xl font-medium">
+          Dashboards
+        </button>
+        <div *ngIf="mobileAdminMenuVisible" class="ml-4 mt-2 space-y-2">
+          <a routerLink="/portal" class="block hover:text-yellow-300 transition duration-300" 
+             (click)="closeMobileMenu()">Citizen Portal</a>
+          <a routerLink="/dashboard/moderator" class="block hover:text-yellow-300 transition duration-300" 
+             (click)="closeMobileMenu()">Admin Dashboard</a>
+        </div>
+      </div>
+      
+      <!-- Regular navigation for other roles -->
+      <a *ngIf="isLoggedIn && (userRole === 'citizen' || userRole === 'ward_manager' || userRole === 'constituency_manager')" 
          routerLink="/portal" class="hover:text-yellow-300 transition duration-300" 
-         (click)="closeMobileMenu()">User</a>
+         (click)="closeMobileMenu()">Citizen Portal</a>
 
-      <a *ngIf="isLoggedIn && (userRole === 'admin' || userRole === 'superadmin')" 
+      <a *ngIf="isLoggedIn && userRole === 'admin'" 
          routerLink="/dashboard/moderator"
-         class="hover:text-yellow-300 transition duration-300" (click)="closeMobileMenu()">Admin</a>
+         class="hover:text-yellow-300 transition duration-300" (click)="closeMobileMenu()">Admin Dashboard</a>
     </nav>
 
     <!-- Mobile Auth Buttons -->

@@ -19,7 +19,7 @@ export interface VirtualMeet {
   providedIn: 'root'
 })
 export class VirtualService {
-  private readonly API_URL = 'http://localhost:3000/virtualmeet'; // adjust as needed
+  private readonly API_URL = 'http://localhost:3000/townhalls'; // Updated to match backend
 
   constructor(private http: HttpClient) {}
 

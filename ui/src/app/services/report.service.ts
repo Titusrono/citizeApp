@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ReportService {
-  private apiUrl = 'http://localhost:3000/report'; // ✅ Your NestJS backend endpoint
+  private apiUrl = 'http://localhost:3000/issues'; // ✅ Updated to match backend endpoint
 
   constructor(private http: HttpClient) {}
 

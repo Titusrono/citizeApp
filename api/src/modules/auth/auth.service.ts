@@ -42,8 +42,11 @@ export class AuthService {
     }
 
     // Generate JWT
-    const payload = { email: user.email, sub: user.id.toString(), role: user.role };
+    const userId = user.id.toString();
+    console.log('Auth Service - Generating token for user ID:', userId);
+    const payload = { email: user.email, sub: userId, role: user.role };
     const token = jwt.sign(payload, 'secret', { expiresIn: '1h' });
+    console.log('Auth Service - Generated payload:', payload);
 
     return { access_token: token };
   }

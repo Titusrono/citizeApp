@@ -22,7 +22,7 @@ export interface CastVoteDto {
 })
 export class VoteCreateService {
   // ✅ Correct base URL that matches your NestJS controller path
-  private apiUrl = 'http://localhost:3000/votecreate';
+  private apiUrl = 'http://localhost:3000/votes';
 
   constructor(private http: HttpClient) {}
 
