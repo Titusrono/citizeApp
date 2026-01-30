@@ -1,42 +1,115 @@
-<div class="flex flex-col min-h-screen bg-gray-100 pt-0 px-4 md:px-7">
-  <!-- 🔗 Dashboard Switcher for Super Admin -->
-  <app-dashboard-switcher 
-    *ngIf="isSuperAdmin()" 
-    currentDashboard="Citizen Portal">
-  </app-dashboard-switcher>
-  
-  <header class="bg-white shadow sticky top-16 z-40">
-    <nav class="flex flex-col sm:flex-row justify-end sm:space-x-4 bg-gray-50 border-b border-gray-200 pr-4">
-      <a
-        routerLink="realtimereport"
-        routerLinkActive="text-green-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-green-700"
-        class="px-4 py-3 text-gray-700 hover:text-green-700 hover:underline transition whitespace-nowrap"
-      >
-        Report Issue
-      </a>
-      <a
-        routerLink="petition"
-        routerLinkActive="text-green-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-green-700"
-        class="px-4 py-3 text-gray-700 hover:text-green-700 hover:underline transition whitespace-nowrap"
-      >
-        Petitions
-      </a>
-      <a
-        routerLink="proposal"
-        routerLinkActive="text-green-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-green-700"
-        class="px-4 py-3 text-gray-700 hover:text-green-700 hover:underline transition whitespace-nowrap"
-      >
-        Vote on Projects
-      </a>
-      <a
-        routerLink="streaminglive"
-        routerLinkActive="text-green-700 font-semibold border-b-2 sm:border-b-0 sm:border-b-2 border-green-700"
-        class="px-4 py-3 text-gray-700 hover:text-green-700 hover:underline transition whitespace-nowrap"
-      >
-        Virtual Hall
+<div class="flex min-h-screen bg-gray-50">
+  <!-- Mobile sidebar overlay -->
+  <div 
+    *ngIf="isMobile && sidebarOpen" 
+    class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" 
+    (click)="closeSidebar()">
+  </div>
+
+  <!-- Sidebar -->
+  <aside 
+    class="fixed md:relative inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out"
+    [class.translate-x-0]="sidebarOpen"
+    [class.-translate-x-full]="!sidebarOpen">
+    
+    <!-- Dashboard Switcher for Super Admin -->
+    <div *ngIf="isSuperAdmin()" class="border-b border-gray-200">
+      <app-dashboard-switcher currentDashboard="Citizen Portal"></app-dashboard-switcher>
+    </div>
+
+    <!-- Sidebar Header -->
+    <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-500 to-blue-600">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white">Citizen Portal</h2>
+        <button 
+          *ngIf="isMobile" 
+          (click)="closeSidebar()" 
+          class="text-white hover:text-gray-200 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <p class="text-green-100 text-sm mt-1">Your voice. Your platform.</p>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="p-4 space-y-2">
+      <a 
+        *ngFor="let item of navigationItems"
+        [routerLink]="item.path"
+        (click)="closeSidebar()"
+        class="flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all duration-200 hover:bg-gray-100 group"
+        [class.bg-blue-50]="isActiveRoute(item.path)"
+        [class.border-r-4]="isActiveRoute(item.path)"
+        [class.border-blue-500]="isActiveRoute(item.path)"
+        [class.text-blue-700]="isActiveRoute(item.path)"
+        [class.font-semibold]="isActiveRoute(item.path)">
+        
+        <svg 
+          class="w-5 h-5 mr-3 transition-colors duration-200"
+          [ngClass]="isActiveRoute(item.path) ? 'text-blue-600' : item.color"
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon"></path>
+        </svg>
+        
+        <span class="text-sm font-medium">{{ item.label }}</span>
+        
+        <!-- Active indicator -->
+        <div 
+          *ngIf="isActiveRoute(item.path)" 
+          class="ml-auto w-2 h-2 bg-blue-500 rounded-full">
+        </div>
       </a>
     </nav>
-  </header>
+
+    <!-- Footer info -->
+    <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
+      <div class="text-xs text-gray-500 text-center">
+        <p class="font-medium">Citizen Connect</p>
+        <p>Empowering Communities</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col min-h-screen">
+    <!-- Top Header with Menu Toggle -->
+    <header class="bg-white shadow-sm border-b border-gray-200 px-4 py-3 md:px-6">
+      <div class="flex items-center justify-between">
+        <!-- Mobile menu button -->
+        <button 
+          (click)="toggleSidebar()" 
+          class="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200 md:hidden">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+        
+        <!-- Desktop sidebar toggle -->
+        <button 
+          (click)="toggleSidebar()" 
+          class="hidden md:flex p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+
+        <!-- Breadcrumb/Title -->
+        <div class="flex-1 mx-4">
+          <h1 class="text-lg font-semibold text-gray-900">Dashboard</h1>
+        </div>
+
+        <!-- User actions -->
+        <div class="flex items-center space-x-2">
+          <div class="text-sm text-gray-600">
+            Welcome, <span class="font-medium text-gray-900">{{ userRole === 'super_admin' ? 'Super Admin' : 'Citizen' }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
 
   <!-- 💬 Intro Section -->
   <section class="bg-white border-b border-gray-200 px-4 py-6 sm:px-6 sm:py-8">
@@ -50,7 +123,7 @@
 
   <!-- 🏠 Optional Welcome Section -->
   <main class="flex-1 overflow-y-auto p-6">
-    <div *ngIf="isBaseDashboardRoute" class="text-center mt-20 space-y-4">
+    <div class="text-center mt-20 space-y-4">
       <h1 class="text-3xl sm:text-4xl font-bold text-green-700">Welcome to Citizen Connect</h1>
       <p class="text-gray-600 text-base sm:text-lg">Engage, report, and help shape your community’s future.</p>
       <p class="text-gray-500">Use the navigation above to get started with live reports, petitions, or votes.</p>
