@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-realtimereport',
@@ -24,7 +25,7 @@ export class RealtimereportComponent implements OnInit {
     imageUrls: '' // comma-separated string input (converted to string[])
   };
 
-  private readonly apiBaseUrl = 'http://localhost:3000';
+  private readonly apiBaseUrl = environment.apiUrl;
 
   ngOnInit() {
     this.fetchIssues();

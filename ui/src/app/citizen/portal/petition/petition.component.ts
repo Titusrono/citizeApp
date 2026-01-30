@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-petition',
@@ -63,7 +64,7 @@ export class PetitionComponent {
         Authorization: `Bearer ${token}`
       });
 
-      this.http.post('http://localhost:3000/petitions', formData, { headers }).subscribe(
+      this.http.post(`${environment.apiUrl}/petitions`, formData, { headers }).subscribe(
         (res) => {
           this.successMessage = 'Petition Successfully Submitted!';
           this.showSuccessMessage = true;

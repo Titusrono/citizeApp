@@ -124,6 +124,68 @@ npm install axios --workspace=api
 6. Build to ensure no errors: `npm run build`
 7. Submit a pull request
 
-## 📄 License
+## � Deployment to Vercel
+
+This project is configured for deployment on Vercel. The frontend and backend are deployed as separate projects.
+
+### Prerequisites
+- Vercel account (https://vercel.com)
+- Vercel CLI installed: `npm install -g vercel`
+
+### Deploy Backend (API)
+
+1. Navigate to the API directory:
+   ```bash
+   cd api
+   ```
+
+2. Deploy to Vercel:
+   ```bash
+   vercel
+   ```
+
+3. Set environment variables in Vercel dashboard:
+   - `MONGODB_URI`: Your MongoDB connection string
+   - `JWT_SECRET`: Your JWT secret key
+   - `FRONTEND_URL`: Your frontend URL (for CORS)
+
+4. After deployment, note your API URL (e.g., `https://your-api.vercel.app`)
+
+### Deploy Frontend (UI)
+
+1. Update the production API URL in `ui/src/environments/environment.prod.ts`:
+   ```typescript
+   export const environment = {
+     production: true,
+     apiUrl: 'https://your-api.vercel.app' // Your deployed API URL
+   };
+   ```
+
+2. Navigate to the UI directory:
+   ```bash
+   cd ui
+   ```
+
+3. Deploy to Vercel:
+   ```bash
+   vercel
+   ```
+
+### Environment Variables
+
+#### API (.env)
+| Variable | Description |
+|----------|-------------|
+| `MONGODB_URI` | MongoDB connection string |
+| `JWT_SECRET` | Secret key for JWT tokens |
+| `FRONTEND_URL` | Frontend URL for CORS |
+| `PORT` | Server port (optional, default: 3000) |
+
+#### UI (environment.prod.ts)
+| Variable | Description |
+|----------|-------------|
+| `apiUrl` | Backend API base URL |
+
+## �📄 License
 
 ISC

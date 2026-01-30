@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 // DTO for creating or updating a proposal
 export interface CreateVoteCreateDto {
@@ -21,8 +22,7 @@ export interface CastVoteDto {
   providedIn: 'root',
 })
 export class VoteCreateService {
-  // ✅ Correct base URL that matches your NestJS controller path
-  private apiUrl = 'http://localhost:3000/votes';
+  private apiUrl = `${environment.apiUrl}/votes`;
 
   constructor(private http: HttpClient) {}
 

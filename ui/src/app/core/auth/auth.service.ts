@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 interface LoginResponse {
   access_token: string;
@@ -20,7 +21,7 @@ interface JwtPayload {
 })
 export class AuthService {
   private readonly TOKEN_KEY = 'access_token';
-  private readonly apiUrl = 'http://localhost:3000/auth'; // Backend base URL
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
   private readonly googleAuthUrl = `${this.apiUrl}/google`;
 
   private currentUserRole$ = new BehaviorSubject<string | null>(null);
