@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Blog {
   _id: string;
@@ -15,45 +16,32 @@ export interface Blog {
   providedIn: 'root',
 })
 export class BlogsService {
-  private apiUrl = '/assets/blogs.json'; // Using local JSON file until backend blogs module is created
+  private apiUrl = `${environment.apiUrl}/blogs`;
 
   constructor(private http: HttpClient) {}
 
-  /** ✅ Get all blogs from local JSON file */
+  /** Get all blogs */
   getBlogs(): Observable<Blog[]> {
     return this.http.get<Blog[]>(this.apiUrl);
   }
 
-  /** ✅ Get a single blog by ID from the blogs array */
+  /** Get a single blog by ID */
   getBlogById(id: string): Observable<Blog> {
-    return new Observable(observer => {
-      this.getBlogs().subscribe(blogs => {
-        const blog = blogs.find(b => b._id === id);
-        if (blog) {
-          observer.next(blog);
-        } else {
-          observer.error({ message: 'Blog not found' });
-        }
-        observer.complete();
-      });
-    });
+    return this.http.get<Blog>(`${this.apiUrl}/${id}`);
   }
 
-  // Note: The following methods are disabled since we're using a local JSON file
-  // To enable these, create a backend blogs module with CRUD operations
-  
-  /** ⚠️ Create blog - requires backend API */
+  /** Create a new blog */
   createBlog(blogData: Partial<Blog>): Observable<Blog> {
-    throw new Error('Create blog requires backend API - local JSON is read-only');
+    return this.http.post<Blog>(this.apiUrl, blogData);
   }
 
-  /** ⚠️ Update blog - requires backend API */
+  /** Update an existing blog */
   updateBlog(id: string, blogData: Partial<Blog>): Observable<Blog> {
-    throw new Error('Update blog requires backend API - local JSON is read-only');
+    return this.http.patch<Blog>(`${this.apiUrl}/${id}`, blogData);
   }
 
-  /** ⚠️ Delete blog - requires backend API */
+  /** Delete a blog */
   deleteBlog(id: string): Observable<{ message: string }> {
-    throw new Error('Delete blog requires backend API - local JSON is read-only');
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
 }

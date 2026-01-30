@@ -11,6 +11,7 @@ import { PoliciesModule } from './modules/policies/policies.module';
 import { TownhallsModule } from './modules/townhalls/townhalls.module';
 import { PetitionsModule } from './modules/petitions/petitions.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BlogsModule } from './modules/blogs/blogs.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AuthModule } from './modules/auth/auth.module';
     PoliciesModule,
     TownhallsModule,
     PetitionsModule,
+    BlogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -14,12 +14,12 @@ export class UsersregComponent implements OnInit {
   users: any[] = [];              // Filtered list for display
   allUsers: any[] = [];           // Full unfiltered list
   subCounties: string[] = [       // Available sub-counties
-    'Chesumei',
-    'Emgwen',
-    'Mosop',
-    'Nandi Hills',
-    'Aldai',
-    'Tinderet'
+    'Tetu',
+    'Kieni',
+    'Mathira East',
+    'Mathira West',
+    'Othaya',
+    'Mukurweini'
   ];
   selectedSubCounty: string = '';
 

@@ -25,12 +25,12 @@ export class RegisterComponent implements OnInit {
   wards: string[] = [];
 
   subCounties = [
-    { name: 'Mosop', wards: ['Chepterwai', 'Kipkaren', 'Kurgung/Surungai', 'Kabiyet', 'Ndalat', 'Kabisaga', 'Sangalo/Kebulonik'] },
-    { name: 'Aldai', wards: ['Kabwareng', 'Terik', 'Kemeloi–Maraba', 'Kobujoi', 'Kaptumo–Kaboi', 'Koyo–Ndurio'] },
-    { name: 'Chesumei', wards: ['Chemundu/Kapng’etuny', 'Kosirai', 'Lelmokwo/Ngechek', 'Kaptel/Kamoiywo', 'Kiptuya'] },
-    { name: 'Emgwen', wards: ['Chepkumia', 'Kapkangani', 'Kapsabet', 'Kilibwoni'] },
-    { name: 'Nandi Hills', wards: ['Nandi Hills', 'Chepkunyuk', 'Ol’lessos', 'Kapchorua'] },
-    { name: 'Tinderet', wards: ['Songhor/Soba', 'Tinderet', 'Chemelil/Chemase', 'Kapsimotwo'] },
+    { name: 'Tetu', wards: ['Dedan Kimathi', 'Wamagana', 'Aguthi-Gaaki'] },
+    { name: 'Kieni', wards: ['Gatarakwa', 'Naromoru Kiamathaga', 'Mweiga', 'Mugunda', 'Kabaru', 'Thegu River', 'Konyu'] },
+    { name: 'Mathira East', wards: ['Magutu', 'Mutithi', 'Karatina Town', 'Kirimukuyu'] },
+    { name: 'Mathira West', wards: ['Ruguru', 'Mbiriri', 'Iria-Ini'] },
+    { name: 'Othaya', wards: ['Karima', 'Irigithathi', 'Mahiga', 'Chinga', 'Mugunda'] },
+    { name: 'Mukurweini', wards: ['Rugi', 'Gikondi', 'Mukurwe-Ini West', 'Mukurwe-Ini Central'] },
   ];
 
   showPassword = false;

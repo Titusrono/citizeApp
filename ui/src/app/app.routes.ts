@@ -1,5 +1,4 @@
 import { Routes } from "@angular/router";
-import { DashboardComponent } from "./admin/dashboard/dashboard.component";
 import { ModeratorComponent } from "./admin/dashboard/moderator/moderator.component";
 import { VoteCreateComponent } from "./admin/dashboard/vote-create/vote-create.component";
 import { ForgotPasswordComponent } from "./auth/forgot-password/forgot-password.component";
@@ -8,7 +7,7 @@ import { LoginComponent } from "./auth/login/login.component";
 import { RegisterComponent } from "./auth/register/register.component";
 import { ResetPasswordComponent } from "./auth/reset-password/reset-password.component";
 import { UpdatePasswordComponent } from "./auth/update-password/update-password.component";
-import { PortalComponent } from "./citizen/portal/portal.component";
+import { MainLayoutComponent } from "./shared/main-layout/main-layout.component";
 import { AboutComponent } from "./components/about/about.component";
 import { BlogComponent } from "./components/blog/blog.component";
 import { ContactComponent } from "./components/contact/contact.component";
@@ -29,7 +28,6 @@ import { BlogsdetailsComponent } from "./components/blogsdetails/blogsdetails.co
 import { VirtualCreateComponent } from "./admin/dashboard/virtual-create/virtual-create.component";
 import { RoleGuard } from "./core/auth/role.guard";
 import { AuthGuard } from "./core/auth/auth.guard";
-import { AuthService } from "./core/auth/auth.service";
 import { AdminpetitionComponent } from "./admin/dashboard/adminpetition/adminpetition.component";
 import { UnauthorizedComponent } from "./shared/unauthorized/unauthorized.component";
 
@@ -55,37 +53,37 @@ export const routes: Routes = [
   {path:'profile', title:'Profile', component:ProfileComponent},
   { path: 'unauthorized', title: 'Unauthorized', component: UnauthorizedComponent },
 
-  // Authenticated dashboard
+  // Authenticated routes with sidebar
   {
-    path: 'dashboard',
-    title: 'Admin Dashboard',
-    canActivate: [RoleGuard,AuthGuard],
-    data: { roles: ['admin', 'super_admin'] },
-    component: DashboardComponent,
+    path: 'portal',
+    component: MainLayoutComponent,
+    canActivate: [RoleGuard, AuthGuard],
+    data: { roles: ['citizen', 'ward_manager', 'constituency_manager', 'admin', 'super_admin'] },
     children: [
-      { path: 'moderator', component: ModeratorComponent },
-      { path: 'report-admin', component: ReportAdminComponent },
-      { path: 'vote-create', component: VoteCreateComponent },
-      { path: 'virtual-create', component: VirtualCreateComponent },
-      {path:'adminpetition', title:'Admin Petition', component:AdminpetitionComponent},
-      {path: 'usersreg', title: 'Users Register', component:UsersregComponent},
-      {path:'blog_admin', title:'Admin Blog', component:BlogAdminComponent},
-      {path:'profile', title:'Profile', component:ProfileComponent},
+      { path: '', redirectTo: 'realtimereport', pathMatch: 'full' },
+      { path: 'realtimereport', title: 'Report Issue', component: RealtimereportComponent },
+      { path: 'petition', title: 'Petitions', component: PetitionComponent },
+      { path: 'proposal', title: 'Vote on Projects', component: ProposalComponent },
+      { path: 'streaminglive', title: 'Virtual Hall', component: StreamingliveComponent },
     ],
   },
-   {
-        path: 'portal',
-        component: PortalComponent,
-        canActivate: [RoleGuard,AuthGuard],
-        data: { roles: ['citizen', 'ward_manager', 'constituency_manager', 'admin', 'super_admin'] },
-        children: [
-          { path: '', redirectTo: 'realtimereport', pathMatch: 'full' },
-          { path: 'realtimereport', component: RealtimereportComponent },
-          { path: 'petition', component: PetitionComponent },
-          { path: 'proposal', component: ProposalComponent },
-          { path: 'streaminglive', component: StreamingliveComponent },
-        ],
-      },
+  {
+    path: 'dashboard',
+    component: MainLayoutComponent,
+    canActivate: [RoleGuard, AuthGuard],
+    data: { roles: ['admin', 'super_admin'] },
+    children: [
+      { path: '', redirectTo: 'report-admin', pathMatch: 'full' },
+      { path: 'moderator', title: 'Moderator', component: ModeratorComponent },
+      { path: 'report-admin', title: 'Reports Admin', component: ReportAdminComponent },
+      { path: 'vote-create', title: 'Vote Create', component: VoteCreateComponent },
+      { path: 'virtual-create', title: 'Virtual Meet', component: VirtualCreateComponent },
+      { path: 'adminpetition', title: 'Admin Petition', component: AdminpetitionComponent },
+      { path: 'usersreg', title: 'Users Register', component: UsersregComponent },
+      { path: 'blog_admin', title: 'Admin Blog', component: BlogAdminComponent },
+      { path: 'profile', title: 'Profile', component: ProfileComponent },
+    ],
+  },
 
   // Fallback
   { path: '**', title: '404 - Page Not Found', component: PagenotfoundComponent },

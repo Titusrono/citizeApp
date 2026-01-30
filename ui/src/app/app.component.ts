@@ -14,6 +14,7 @@ import { FooterComponent } from './shared/footer/footer.component';
 export class AppComponent implements OnInit {
   title = 'citizenConnectFrontend';
   showFooter = true;
+  showHeader = true;
 
   constructor(private router: Router) {}
 
@@ -22,7 +23,9 @@ export class AppComponent implements OnInit {
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         const url = event.urlAfterRedirects;
-        this.showFooter = !(url.startsWith('/portal') || url.startsWith('/dashboard'));
+        const isAuthenticatedRoute = url.startsWith('/portal') || url.startsWith('/dashboard');
+        this.showFooter = !isAuthenticatedRoute;
+        this.showHeader = !isAuthenticatedRoute;
       });
   }
 }

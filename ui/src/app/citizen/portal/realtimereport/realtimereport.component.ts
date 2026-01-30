@@ -51,7 +51,7 @@ export class RealtimereportComponent implements OnInit {
       images: imageArray
     };
 
-    fetch(`${this.apiBaseUrl}/report`, {
+    fetch(`${this.apiBaseUrl}/issues`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ export class RealtimereportComponent implements OnInit {
   }
 
   fetchIssues() {
-    fetch(`${this.apiBaseUrl}/report`)
+    fetch(`${this.apiBaseUrl}/issues`)
       .then(res => res.json())
       .then(data => {
         this.issues = data;

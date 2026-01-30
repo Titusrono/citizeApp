@@ -1,0 +1,28 @@
+// Sidebar component styles
+
+/* Mobile Touch Improvements */
+@media (max-width: 768px) {
+  aside {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  nav a {
+    /* Larger touch targets on mobile */
+    min-height: 48px;
+    /* Prevent text selection on touch */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  button {
+    /* Better touch feedback */
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Smooth transitions */
+aside {
+  will-change: transform;
+  backface-visibility: hidden;
+}
