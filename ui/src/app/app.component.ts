@@ -4,6 +4,7 @@ import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { HeaderComponent } from './shared/header/header.component';
 import { FooterComponent } from './shared/footer/footer.component';
+import { ThemeService } from './services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -16,7 +17,12 @@ export class AppComponent implements OnInit {
   showFooter = true;
   showHeader = true;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private themeService: ThemeService
+  ) {
+    // Initialize theme service (constructor will handle initialization)
+  }
 
   ngOnInit() {
     this.router.events

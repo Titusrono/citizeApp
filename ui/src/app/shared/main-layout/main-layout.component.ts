@@ -3,6 +3,7 @@ import { Router, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/auth/auth.service';
+import { ThemeService, Theme } from '../../services/theme.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -14,12 +15,22 @@ import { AuthService } from '../../core/auth/auth.service';
 export class MainLayoutComponent implements OnInit {
   userRole: string = '';
   showUserMenu = false;
+  currentTheme: Theme = 'system';
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService, 
+    private router: Router,
+    public themeService: ThemeService
+  ) {}
 
   ngOnInit(): void {
     this.authService.getRoleStream().subscribe(role => {
       this.userRole = role ?? '';
+    });
+
+    // Subscribe to theme changes
+    this.themeService.theme$.subscribe(theme => {
+      this.currentTheme = theme;
     });
   }
 
@@ -48,5 +59,32 @@ export class MainLayoutComponent implements OnInit {
   goToProfile(): void {
     this.showUserMenu = false;
     this.router.navigate(['/profile']);
+  }
+
+  /**
+   * Toggle theme between light, dark, and system
+   */
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
+  }
+
+  /**
+   * Get theme icon based on current theme
+   */
+  getThemeIcon(): string {
+    const effectiveTheme = this.themeService.getEffectiveTheme();
+    return effectiveTheme === 'dark' ? '☀️' : '🌙';
+  }
+
+  /**
+   * Get theme display text
+   */
+  getThemeDisplay(): string {
+    switch(this.currentTheme) {
+      case 'light': return 'Light Mode';
+      case 'dark': return 'Dark Mode';
+      case 'system': return 'System Mode';
+      default: return 'System Mode';
+    }
   }
 }

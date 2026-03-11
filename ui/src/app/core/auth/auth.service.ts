@@ -64,7 +64,22 @@ export class AuthService {
   /** Login user and store token */
   login(credentials: { email: string; password: string }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap(res => this.setToken(res.access_token))
+      tap(res => {
+        this.setToken(res.access_token);
+        
+        // Store user email and ID for vote tracking
+        if (isPlatformBrowser(this.platformId)) {
+          const decoded = this.decodeToken(res.access_token);
+          if (decoded) {
+            if (decoded['email'] || credentials.email) {
+              localStorage.setItem('user_email', decoded['email'] || credentials.email);
+            }
+            if (decoded['userId'] || decoded['sub'] || decoded['_id']) {
+              localStorage.setItem('user_id', decoded['userId'] || decoded['sub'] || decoded['_id']);
+            }
+          }
+        }
+      })
     );
   }
 
@@ -93,6 +108,8 @@ export class AuthService {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem('userRole');
+      localStorage.removeItem('user_email');
+      localStorage.removeItem('user_id');
     }
 
     this.currentUserRole$.next(null);
@@ -190,5 +207,35 @@ export class AuthService {
       clearTimeout(this.tokenExpiryTimeoutId);
       this.tokenExpiryTimeoutId = null;
     }
+  }
+
+  /** Get user email from localStorage or token */
+  getUserEmail(): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    
+    const email = localStorage.getItem('user_email');
+    if (email) return email;
+
+    const token = this.getToken();
+    if (token) {
+      const decoded = this.decodeToken(token);
+      return decoded?.['email'] || decoded?.['sub'] || null;
+    }
+    return null;
+  }
+
+  /** Get user ID from localStorage or token */
+  getUserId(): string | null {
+    if (!isPlatformBrowser(this.platformId)) return null;
+    
+    const userId = localStorage.getItem('user_id');
+    if (userId) return userId;
+
+    const token = this.getToken();
+    if (token) {
+      const decoded = this.decodeToken(token);
+      return decoded?.['userId'] || decoded?.['sub'] || decoded?.['_id'] || null;
+    }
+    return null;
   }
 }
