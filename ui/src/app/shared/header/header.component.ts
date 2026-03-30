@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { ThemeService, Theme } from '../../services/theme.service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
@@ -17,35 +18,42 @@ export class HeaderComponent implements OnInit, OnDestroy {
   mobileMenuVisible = false;
   mobileAdminMenuVisible = false;
   isProfileOpen = false;
-  isDark = false;
+  currentTheme: Theme = 'system';
 
   isLoggedIn = false;
   userRole: string | null = null;
 
   private loginSub?: Subscription;
 
+
+  private themeSub?: Subscription;
+
   constructor(
     private router: Router,
-    public authService: AuthService
+    public authService: AuthService,
+    public themeService: ThemeService
   ) {}
 
   ngOnInit() {
-    // ✅ Subscribe to the exposed public observable
+    // Subscribe to auth state
     this.loginSub = this.authService.authStateObservable$.subscribe((loggedIn: boolean) => {
       this.isLoggedIn = loggedIn;
       this.userRole = this.authService.getRole();
-
-      // Close menus if logged out
       if (!loggedIn) {
         this.closeMobileMenu();
         this.closeDropdown();
         this.isProfileOpen = false;
       }
     });
+    // Subscribe to theme changes
+    this.themeSub = this.themeService.theme$.subscribe(theme => {
+      this.currentTheme = theme;
+    });
   }
 
   ngOnDestroy() {
     this.loginSub?.unsubscribe();
+    this.themeSub?.unsubscribe();
   }
 
   // Toggle Admin dropdown (Desktop)
@@ -81,8 +89,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   toggleTheme() {
-    this.isDark = !this.isDark;
-    document.documentElement.classList.toggle('dark', this.isDark);
+    this.themeService.toggleTheme();
   }
 
   // Close dropdowns when clicking outside

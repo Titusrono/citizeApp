@@ -1,17 +1,17 @@
-<div class="min-h-screen flex items-center justify-center bg-gray-100 px-2 p-18">
-  <div class="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
-    <h2 class="text-xl font-semibold mb-4 text-center">Register</h2>
+<div class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-2 py-4">
+  <div class="w-full max-w-sm p-3 sm:p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
+    <h2 class="text-lg sm:text-xl font-semibold mb-3 text-center text-gray-800 dark:text-white">Register</h2>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
 
       <!-- Username -->
       <div class="mb-3">
-        <label for="username" class="block text-sm font-medium mb-1">Username</label>
+        <label for="username" class="block text-xs sm:text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Username</label>
         <input
           type="text"
           id="username"
           formControlName="username"
-          class="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="w-full px-2 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="Enter your username"
         />
         <div *ngIf="registerForm.get('username')?.invalid && (registerForm.get('username')?.touched || registerForm.get('username')?.dirty)" class="text-red-600 text-xs mt-1">

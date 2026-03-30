@@ -1,8 +1,10 @@
+
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, HostListener } from '@angular/core';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { filter } from 'rxjs/operators';
+import { ThemeService, Theme } from '../../services/theme.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -110,7 +112,13 @@ export class SidebarComponent implements OnInit {
     }
   ];
 
-  constructor(private router: Router, private authService: AuthService) {
+  currentTheme: Theme = 'system';
+
+  constructor(
+    private router: Router,
+    private authService: AuthService,
+    public themeService: ThemeService
+  ) {
     this.checkScreenSize();
   }
 
@@ -118,6 +126,11 @@ export class SidebarComponent implements OnInit {
     // Subscribe to role stream
     this.authService.getRoleStream().subscribe(role => {
       this.userRole = role ?? '';
+    });
+
+    // Subscribe to theme changes for future logic if needed
+    this.themeService.theme$.subscribe(theme => {
+      this.currentTheme = theme;
     });
 
     // Track current route

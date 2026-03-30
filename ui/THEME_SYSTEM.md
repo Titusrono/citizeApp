@@ -43,10 +43,28 @@ Dark mode is implemented using Tailwind CSS v4 with the `dark:` utility classes:
 
 ### Components with Dark Mode Support
 The following components have been updated with dark mode styling:
+
+**Admin Dashboard:**
 - ✅ Main Layout (header, user menu)
 - ✅ Sidebar (navigation, badges, footer)
 - ✅ Theme toggle button
-- ⚠️ Other components need manual dark mode classes added
+- ✅ Vote Create (voting proposals)
+- ✅ Blog Admin (blog management)
+- ✅ Moderator (dashboard welcome)
+- ✅ Report Admin (citizen reports management)
+- ✅ Users Registration (user management with table)
+- ✅ Admin Petition (petition management)
+- ✅ Virtual Create (virtual meetings)
+
+**Citizen Portal:**
+- ✅ Petition (petition submission)
+- ✅ Proposal (voting on proposals)
+
+**Components Still Needing Dark Mode:**
+- ⚠️ Auth components (login, register, forgot-password, etc.)
+- ⚠️ Public components (home, about, services, blog viewer)
+- ⚠️ Real-time Report (citizen issues reporting)
+- ⚠️ Streaming Live (virtual meeting viewer)
 
 ## Usage
 

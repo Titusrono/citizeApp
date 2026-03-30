@@ -1,66 +1,62 @@
-<div class="w-full max-w-6xl mx-auto">
-  <h2 class="text-xl sm:text-2xl md:text-3xl font-bold mb-6 text-blue-700 text-center">🗳️ Active Proposals</h2>
+<div class="w-full max-w-7xl mx-auto">
+  <h2 class="text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 text-blue-700 dark:text-blue-400 text-center">🗳️ Active Proposals</h2>
 
-  <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+  <div class="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     <div 
       *ngFor="let p of proposals" 
-      class="bg-white p-5 rounded-lg border border-gray-200 shadow hover:shadow-md transition space-y-4 text-sm"
+      class="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition space-y-3 text-xs sm:text-sm"
     >
       <!-- Title & Description -->
       <div class="space-y-1">
-        <h3 class="text-base font-bold text-gray-800">{{ p.title }}</h3>
-        <p class="text-gray-600">{{ p.description }}</p>
+        <h3 class="text-base font-bold text-gray-800 dark:text-white">{{ p.title }}</h3>
+        <p class="text-gray-600 dark:text-gray-300">{{ p.description }}</p>
       </div>
 
       <!-- Metadata -->
-      <div class="text-xs text-gray-500 space-y-1">
-        <div><strong>Eligibility:</strong> {{ p.eligibility }}</div>
-        <div><strong>Ends:</strong> {{ p.endDate | date }}</div>
+      <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+        <div><strong class="text-gray-700 dark:text-gray-300">Eligibility:</strong> {{ p.eligibility }}</div>
+        <div><strong class="text-gray-700 dark:text-gray-300">Ends:</strong> {{ p.endDate | date }}</div>
       </div>
 
       <!-- Always show vote summary -->
-      <div class="pt-2 border-t text-sm text-gray-700">
-        <label class="text-xs text-gray-500 block mb-1">Total Votes</label>
+      <div class="pt-2 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">
+        <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">Total Votes</label>
         <div>✅ Yes: {{ p.yesVotes || 0 }} |  No: {{ p.noVotes || 0 }}</div>
       </div>
 
       <!-- Voting Form -->
-      <div *ngIf="!voteStatus[p._id]" class="pt-2 border-t space-y-3">
-        <p class="text-sm text-gray-700 font-medium">Cast Your Vote:</p>
+      <div *ngIf="!voteStatus[p._id]" class="pt-2 border-t border-gray-200 dark:border-gray-700 space-y-3">
+        <p class="text-sm text-gray-700 dark:text-gray-300 font-medium">Cast Your Vote:</p>
 
         <div class="flex gap-3">
           <button 
             type="button"
-            class="px-4 py-1.5 rounded-md text-sm font-semibold transition-all"
-            [class.bg-green-600]="selectedVote[p._id] === 'yes'"
-            [class.hover:bg-green-700]="selectedVote[p._id] === 'yes'"
-            [class.text-white]="selectedVote[p._id] === 'yes'"
-            [class.bg-green-100]="selectedVote[p._id] !== 'yes'"
-            [class.text-green-700]="selectedVote[p._id] !== 'yes'"
-            [class.hover:bg-green-200]="selectedVote[p._id] !== 'yes'"
-            (click)="selectVote(p._id, 'yes')">
+            (click)="selectVote(p._id, 'yes')"
+            [ngClass]="{
+              'bg-green-600 hover:bg-green-700 text-white': selectedVote[p._id] === 'yes',
+              'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50': selectedVote[p._id] !== 'yes'
+            }"
+            class="px-4 py-1.5 rounded-md text-sm font-semibold transition-all">
             ✅ Yes
           </button>
           <button 
             type="button"
-            class="px-4 py-1.5 rounded-md text-sm font-semibold transition-all"
-            [class.bg-red-600]="selectedVote[p._id] === 'no'"
-            [class.hover:bg-red-700]="selectedVote[p._id] === 'no'"
-            [class.text-white]="selectedVote[p._id] === 'no'"
-            [class.bg-red-100]="selectedVote[p._id] !== 'no'"
-            [class.text-red-700]="selectedVote[p._id] !== 'no'"
-            [class.hover:bg-red-200]="selectedVote[p._id] !== 'no'"
-            (click)="selectVote(p._id, 'no')">
+            (click)="selectVote(p._id, 'no')"
+            [ngClass]="{
+              'bg-red-600 hover:bg-red-700 text-white': selectedVote[p._id] === 'no',
+              'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50': selectedVote[p._id] !== 'no'
+            }"
+            class="px-4 py-1.5 rounded-md text-sm font-semibold transition-all">
              No
           </button>
         </div>
 
         <!-- Reason Input -->
         <div>
-          <label class="text-xs text-gray-600 block mb-1">Reason (optional)</label>
+          <label class="text-xs text-gray-600 dark:text-gray-400 block mb-1">Reason (optional)</label>
           <input 
             type="text"
-            class="w-full px-3 py-1.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400"
+            class="w-full px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-md focus:ring-2 focus:ring-blue-400"
             [(ngModel)]="reasons[p._id]"
             [name]="'reason_' + p._id" />
         </div>
@@ -70,14 +66,14 @@
           <button 
             (click)="submitVote(p._id)"
             [disabled]="!selectedVote[p._id]"
-            class="bg-blue-700 hover:bg-blue-800 text-white px-4 py-1.5 rounded-md text-sm font-semibold disabled:opacity-50">
+            class="bg-blue-700 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-700 text-white px-4 py-1.5 rounded-md text-sm font-semibold disabled:opacity-50">
             Submit
           </button>
         </div>
       </div>
 
       <!-- Already Voted -->
-      <div *ngIf="voteStatus[p._id]" class="text-green-600 text-sm font-medium">
+      <div *ngIf="voteStatus[p._id]" class="text-green-600 dark:text-green-400 text-sm font-medium">
         ✅ Thank you! You’ve already voted.
       </div>
     </div>

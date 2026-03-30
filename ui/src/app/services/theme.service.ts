@@ -84,21 +84,37 @@ export class ThemeService {
    * Apply theme to DOM
    */
   private applyTheme(theme: Theme): void {
-    const root = document.documentElement;
-    
-    // Remove existing theme classes
-    root.classList.remove('light', 'dark');
+    // Always apply theme class to <html> element for global Tailwind dark mode
+    const html = document.documentElement;
+    html.classList.remove('dark', 'light');
 
     if (theme === 'system') {
-      // Use system preference
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const effectiveTheme = prefersDark ? 'dark' : 'light';
-      root.classList.add(effectiveTheme);
-      console.log('Theme applied (system):', effectiveTheme, 'Classes:', root.classList.value);
+      if (prefersDark) {
+        html.classList.add('dark');
+      }
+      // If not dark, do not add any class (light is default)
+      // Safety: ensure sidebar and all content respond to <html>.dark
+      setTimeout(() => {
+        if (theme === 'system' && prefersDark && !html.classList.contains('dark')) {
+          html.classList.add('dark');
+        }
+      }, 10);
+      console.log('Theme applied (system):', prefersDark ? 'dark' : 'light', 'Classes:', html.classList.value);
+    } else if (theme === 'dark') {
+      html.classList.add('dark');
+      setTimeout(() => {
+        if (!html.classList.contains('dark')) {
+          html.classList.add('dark');
+        }
+      }, 10);
+      console.log('Theme applied: dark', 'Classes:', html.classList.value);
     } else {
-      // Use explicit theme
-      root.classList.add(theme);
-      console.log('Theme applied:', theme, 'Classes:', root.classList.value);
+      // For light, do not add any class (light is default)
+      setTimeout(() => {
+        html.classList.remove('dark');
+      }, 10);
+      console.log('Theme applied: light', 'Classes:', html.classList.value);
     }
   }
 

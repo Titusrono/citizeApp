@@ -1,6 +1,27 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
 
+/* Tailwind Dark Mode Configuration */
+@layer base {
+  /* Enable class-based dark mode */
+  .dark {
+    color-scheme: dark;
+  }
+  
+  .light {
+    color-scheme: light;
+  }
+  
+  /* Default background and text colors */
+  :root {
+    color-scheme: light;
+  }
+  
+  :root.dark {
+    color-scheme: dark;
+  }
+}
+
 /* Global Mobile Responsive Styles */
 * {
   box-sizing: border-box;
@@ -40,4 +61,61 @@ body {
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;
+}
+
+/* Utility classes for text truncation */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+/* Compact spacing utilities */
+.compact-grid {
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .compact-grid {
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .compact-grid {
+    gap: 1rem;
+  }
+}
+
+/* Better card layouts on mobile */
+@media (max-width: 640px) {
+  /* Reduce padding on cards for mobile */
+  .card-mobile {
+    padding: 0.75rem;
+  }
+  
+  /* Stack form elements vertically on mobile */
+  .form-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }

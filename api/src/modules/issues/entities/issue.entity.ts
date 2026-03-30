@@ -13,9 +13,18 @@ export class Issue {
   @Column('text')
   description: string;
 
+  @Column({ type: 'varchar', length: 255 })
+  location: string;
+
+  @Column({ type: 'varchar', length: 100 })
+  category: string;
+
+  @Column('simple-array', { nullable: true })
+  images: string[];
+
   @Column({ type: 'enum', enum: ['open', 'in_progress', 'resolved'], default: 'open' })
   status: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  geolocation: string;
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 }

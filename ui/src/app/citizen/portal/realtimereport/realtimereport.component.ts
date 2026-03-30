@@ -1,3 +1,4 @@
+// (Removed duplicate misplaced deleteIssue and editIssue methods)
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -17,6 +18,10 @@ export class RealtimereportComponent implements OnInit {
   selectedCategory: string = '';
   currentPage: number = 1;
   pageSize: number = 6;
+
+  // Modal state
+  showModal = false;
+  selectedIssue: any = null;
 
   formData = {
     description: '',
@@ -48,8 +53,12 @@ export class RealtimereportComponent implements OnInit {
       description: this.formData.description,
       location: this.formData.location || this.location,
       category: this.formData.category,
-      images: imageArray
+      images: imageArray,
+      createdAt: new Date().toISOString()
     };
+
+    // Debug log to confirm payload
+    console.log('Submitting issue payload:', payload);
 
     fetch(`${this.apiBaseUrl}/issues`, {
       method: 'POST',
@@ -135,6 +144,17 @@ export class RealtimereportComponent implements OnInit {
     }, 3000);
   }
 
+  // Modal handlers
+  openModal(issue: any) {
+    this.selectedIssue = issue;
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.selectedIssue = null;
+  }
+
   get filteredIssues(): any[] {
     return this.selectedCategory
       ? this.issues.filter(issue => issue.category === this.selectedCategory)
@@ -160,5 +180,30 @@ export class RealtimereportComponent implements OnInit {
     if (this.currentPage < this.totalPages()) {
       this.currentPage++;
     }
+  }
+  // Delete an issue
+  deleteIssue(issue: any) {
+    if (!confirm('Are you sure you want to delete this issue?')) return;
+    fetch(`${this.apiBaseUrl}/issues/${issue.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`
+      }
+    })
+      .then(res => {
+        if (res.ok) {
+          this.showPopup('✅ Issue deleted successfully!');
+          this.fetchIssues();
+        } else {
+          this.showPopup('❌ Failed to delete issue.', true);
+        }
+      })
+      .catch(() => this.showPopup('❌ Error deleting issue.', true));
+  }
+
+  // Edit an issue (placeholder)
+  editIssue(issue: any) {
+    this.showPopup('Edit functionality coming soon!', true);
   }
 }

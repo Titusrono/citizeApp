@@ -17,14 +17,19 @@ citizeApp/
 ### Prerequisites
 
 - Node.js >= 18.0.0
-- npm >= 9.0.0
+- pnpm >= 8.0.0
+
+If you don't have pnpm installed, install it globally:
+```bash
+npm install -g pnpm
+```
 
 ### Installation
 
 Install all dependencies for both projects:
 
 ```bash
-npm install
+pnpm install
 ```
 
 This will install dependencies for the root workspace and all sub-projects (api and ui).
@@ -35,64 +40,64 @@ This will install dependencies for the root workspace and all sub-projects (api 
 
 ```bash
 # Run both api and ui in development mode concurrently
-npm run dev
+pnpm run dev
 
 # Run only the API
-npm run dev:api
+pnpm run dev:api
 
 # Run only the UI
-npm run dev:ui
+pnpm run dev:ui
 ```
 
 ### Build
 
 ```bash
 # Build both projects
-npm run build
+pnpm run build
 
 # Build only the API
-npm run build:api
+pnpm run build:api
 
 # Build only the UI
-npm run build:ui
+pnpm run build:ui
 ```
 
 ### Testing
 
 ```bash
 # Run tests for all projects
-npm run test
+pnpm run test
 
 # Run tests for API only
-npm run test:api
+pnpm run test:api
 
 # Run tests for UI only
-npm run test:ui
+pnpm run test:ui
 ```
 
 ### Clean
 
 ```bash
 # Clean all node_modules
-npm run clean
+pnpm run clean
 ```
 
 ## 📦 Workspace Management
 
-This monorepo uses npm workspaces. You can run commands in specific workspaces using:
+This monorepo uses pnpm workspaces. You can run commands in specific workspaces using:
 
 ```bash
 # Run a command in a specific workspace
-npm run <script> --workspace=<workspace-name>
+pnpm --filter <workspace-name> <script>
 
 # Example: Start the UI project
-npm run start --workspace=ui
+pnpm --filter ui start
 
 # Install a package in a specific workspace
-npm install <package-name> --workspace=<workspace-name>
+pnpm --filter <workspace-name> add <package-name>
 
 # Example: Install axios in the API workspace
-npm install axios --workspace=api
+pnpm --filter api add axios
 ```
 
 ## 🏗️ Project Details
@@ -117,11 +122,11 @@ npm install axios --workspace=api
 ## 🤝 Contributing
 
 1. Clone the repository
-2. Install dependencies: `npm install`
+2. Install dependencies: `pnpm install`
 3. Create a feature branch
 4. Make your changes
-5. Test your changes: `npm run test`
-6. Build to ensure no errors: `npm run build`
+5. Test your changes: `pnpm run test`
+6. Build to ensure no errors: `pnpm run build`
 7. Submit a pull request
 
 ## � Deployment to Vercel

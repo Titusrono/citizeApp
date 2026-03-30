@@ -72,18 +72,25 @@ export class MainLayoutComponent implements OnInit {
    * Get theme icon based on current theme
    */
   getThemeIcon(): string {
-    const effectiveTheme = this.themeService.getEffectiveTheme();
-    return effectiveTheme === 'dark' ? '☀️' : '🌙';
+    const effective = this.themeService.getEffectiveTheme();
+    switch (effective) {
+      case 'light':
+        return '☀️'; // Sun for light
+      case 'dark':
+        return '🌙'; // Moon for dark
+      default:
+        return '🖥️'; // Monitor for system (should not happen)
+    }
   }
 
   /**
    * Get theme display text
    */
   getThemeDisplay(): string {
-    switch(this.currentTheme) {
-      case 'light': return 'Light Mode';
-      case 'dark': return 'Dark Mode';
-      case 'system': return 'System Mode';
+    const effective = this.themeService.getEffectiveTheme();
+    switch (effective) {
+      case 'light': return this.currentTheme === 'system' ? 'System (Light)' : 'Light Mode';
+      case 'dark': return this.currentTheme === 'system' ? 'System (Dark)' : 'Dark Mode';
       default: return 'System Mode';
     }
   }
