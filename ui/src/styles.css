@@ -1,5 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
+
+/* Tailwind v4: make dark: utilities follow the .dark class instead of OS media query. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* Tailwind Dark Mode Configuration */
 @layer base {

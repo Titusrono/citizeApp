@@ -84,38 +84,40 @@ export class ThemeService {
    * Apply theme to DOM
    */
   private applyTheme(theme: Theme): void {
-    // Always apply theme class to <html> element for global Tailwind dark mode
-    const html = document.documentElement;
-    html.classList.remove('dark', 'light');
+    if (!isPlatformBrowser(this.platformId)) return;
 
-    if (theme === 'system') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) {
-        html.classList.add('dark');
+    const html = document.documentElement;
+    const body = document.body;
+    const classesToClear = ['dark', 'light'];
+
+    const resolveTheme = (selected: Theme): 'light' | 'dark' => {
+      if (selected === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
       }
-      // If not dark, do not add any class (light is default)
-      // Safety: ensure sidebar and all content respond to <html>.dark
-      setTimeout(() => {
-        if (theme === 'system' && prefersDark && !html.classList.contains('dark')) {
-          html.classList.add('dark');
-        }
-      }, 10);
-      console.log('Theme applied (system):', prefersDark ? 'dark' : 'light', 'Classes:', html.classList.value);
-    } else if (theme === 'dark') {
-      html.classList.add('dark');
-      setTimeout(() => {
-        if (!html.classList.contains('dark')) {
-          html.classList.add('dark');
-        }
-      }, 10);
-      console.log('Theme applied: dark', 'Classes:', html.classList.value);
-    } else {
-      // For light, do not add any class (light is default)
-      setTimeout(() => {
-        html.classList.remove('dark');
-      }, 10);
-      console.log('Theme applied: light', 'Classes:', html.classList.value);
-    }
+      return selected;
+    };
+
+    const apply = (resolved: 'light' | 'dark') => {
+      html.classList.remove(...classesToClear);
+      body.classList.remove(...classesToClear);
+      html.dataset['theme'] = resolved;
+      body.dataset['theme'] = resolved;
+      html.style.colorScheme = resolved;
+      body.style.colorScheme = resolved;
+
+      if (resolved === 'dark') {
+        html.classList.add('dark');
+        body.classList.add('dark');
+      } else {
+        html.classList.add('light');
+        body.classList.add('light');
+      }
+    };
+
+    const resolvedTheme = resolveTheme(theme);
+    apply(resolvedTheme);
+    // Re-apply on next frame to beat conflicting class mutations
+    requestAnimationFrame(() => apply(resolvedTheme));
   }
 
   /**
