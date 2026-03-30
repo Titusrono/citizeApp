@@ -18,7 +18,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   mobileMenuVisible = false;
   mobileAdminMenuVisible = false;
   isProfileOpen = false;
-  currentTheme: Theme = 'system';
+  currentTheme: Theme = 'light';
 
   isLoggedIn = false;
   userRole: string | null = null;

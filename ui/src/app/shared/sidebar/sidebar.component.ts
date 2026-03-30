@@ -112,7 +112,7 @@ export class SidebarComponent implements OnInit {
     }
   ];
 
-  currentTheme: Theme = 'system';
+  currentTheme: Theme = 'light';
 
   constructor(
     private router: Router,

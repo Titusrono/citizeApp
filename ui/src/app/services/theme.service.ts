@@ -2,45 +2,39 @@ import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 
-export type Theme = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ThemeService {
   private readonly THEME_KEY = 'app-theme';
-  private currentTheme$ = new BehaviorSubject<Theme>('system');
+  private currentTheme$ = new BehaviorSubject<Theme>('light');
   public theme$: Observable<Theme> = this.currentTheme$.asObservable();
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     if (isPlatformBrowser(this.platformId)) {
       this.initializeTheme();
-      this.listenToSystemThemeChanges();
     }
   }
 
   /**
-   * Initialize theme from localStorage or default to system
+   * Initialize theme from localStorage or fallback default
    */
   private initializeTheme(): void {
-    const savedTheme = localStorage.getItem(this.THEME_KEY) as Theme | null;
-    const theme = savedTheme || 'system';
+    const savedTheme = localStorage.getItem(this.THEME_KEY);
+    const theme: Theme = savedTheme === 'dark' || savedTheme === 'light'
+      ? savedTheme
+      : this.getDefaultTheme();
     this.setTheme(theme);
   }
 
   /**
-   * Listen to system theme preference changes
+   * Resolve first-load default theme
    */
-  private listenToSystemThemeChanges(): void {
-    if (!window.matchMedia) return;
-
-    const darkModeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    
-    darkModeQuery.addEventListener('change', (e) => {
-      if (this.currentTheme$.value === 'system') {
-        this.applyTheme('system');
-      }
-    });
+  private getDefaultTheme(): Theme {
+    if (!window.matchMedia) return 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 
   /**
@@ -51,7 +45,7 @@ export class ThemeService {
   }
 
   /**
-   * Set theme (light, dark, or system)
+   * Set theme (light or dark)
    */
   setTheme(theme: Theme): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -66,18 +60,7 @@ export class ThemeService {
    */
   toggleTheme(): void {
     const currentTheme = this.currentTheme$.value;
-    console.log('Toggling theme from:', currentTheme);
-    
-    if (currentTheme === 'system') {
-      // If on system, switch to light
-      this.setTheme('light');
-    } else if (currentTheme === 'light') {
-      // If light, switch to dark
-      this.setTheme('dark');
-    } else {
-      // If dark, switch to system
-      this.setTheme('system');
-    }
+    this.setTheme(currentTheme === 'light' ? 'dark' : 'light');
   }
 
   /**
@@ -90,14 +73,7 @@ export class ThemeService {
     const body = document.body;
     const classesToClear = ['dark', 'light'];
 
-    const resolveTheme = (selected: Theme): 'light' | 'dark' => {
-      if (selected === 'system') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-      return selected;
-    };
-
-    const apply = (resolved: 'light' | 'dark') => {
+    const apply = (resolved: Theme) => {
       html.classList.remove(...classesToClear);
       body.classList.remove(...classesToClear);
       html.dataset['theme'] = resolved;
@@ -114,10 +90,9 @@ export class ThemeService {
       }
     };
 
-    const resolvedTheme = resolveTheme(theme);
-    apply(resolvedTheme);
+    apply(theme);
     // Re-apply on next frame to beat conflicting class mutations
-    requestAnimationFrame(() => apply(resolvedTheme));
+    requestAnimationFrame(() => apply(theme));
   }
 
   /**
@@ -129,15 +104,9 @@ export class ThemeService {
   }
 
   /**
-   * Get the effective theme (resolves 'system' to actual theme)
+   * Get the current effective theme
    */
-  getEffectiveTheme(): 'light' | 'dark' {
-    const theme = this.currentTheme$.value;
-    
-    if (theme === 'system') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    
-    return theme;
+  getEffectiveTheme(): Theme {
+    return this.currentTheme$.value;
   }
 }

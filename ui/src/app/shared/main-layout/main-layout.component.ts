@@ -15,7 +15,7 @@ import { ThemeService, Theme } from '../../services/theme.service';
 export class MainLayoutComponent implements OnInit {
   userRole: string = '';
   showUserMenu = false;
-  currentTheme: Theme = 'system';
+  currentTheme: Theme = 'light';
 
   constructor(
     private authService: AuthService, 
@@ -62,7 +62,7 @@ export class MainLayoutComponent implements OnInit {
   }
 
   /**
-   * Toggle theme between light, dark, and system
+   * Toggle theme between light and dark
    */
   toggleTheme(): void {
     this.themeService.toggleTheme();
@@ -79,7 +79,7 @@ export class MainLayoutComponent implements OnInit {
       case 'dark':
         return '🌙'; // Moon for dark
       default:
-        return '🖥️'; // Monitor for system (should not happen)
+        return '☀️';
     }
   }
 
@@ -87,11 +87,6 @@ export class MainLayoutComponent implements OnInit {
    * Get theme display text
    */
   getThemeDisplay(): string {
-    const effective = this.themeService.getEffectiveTheme();
-    switch (effective) {
-      case 'light': return this.currentTheme === 'system' ? 'System (Light)' : 'Light Mode';
-      case 'dark': return this.currentTheme === 'system' ? 'System (Dark)' : 'Dark Mode';
-      default: return 'System Mode';
-    }
+    return this.currentTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
   }
 }
