@@ -87,13 +87,45 @@ export class RealtimereportComponent implements OnInit {
   }
 
   fetchIssues() {
-    fetch(`${this.apiBaseUrl}/issues`)
-      .then(res => res.json())
-      .then(data => {
-        this.issues = data;
+    const token = localStorage.getItem('access_token');
+    const fetchOptions: RequestInit = {};
+    
+    if (token) {
+      fetchOptions.headers = {
+        Authorization: `Bearer ${token}`
+      };
+    }
+    
+    fetch(`${this.apiBaseUrl}/issues`, fetchOptions)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
       })
-      .catch(() => {
-        console.error('Error fetching issues.');
+      .then(data => {
+        console.log('Fetched issues:', data);
+        if (Array.isArray(data)) {
+          this.issues = [...data].sort((a, b) => {
+            const dateA = new Date(a?.createdAt || 0).getTime();
+            const dateB = new Date(b?.createdAt || 0).getTime();
+            return dateB - dateA;
+          });
+        } else if (data && typeof data === 'object' && data.data && Array.isArray(data.data)) {
+          console.log('Issues wrapped in data property');
+          this.issues = [...data.data].sort((a, b) => {
+            const dateA = new Date(a?.createdAt || 0).getTime();
+            const dateB = new Date(b?.createdAt || 0).getTime();
+            return dateB - dateA;
+          });
+        } else {
+          console.warn('Unexpected issues data format:', data);
+          this.issues = [];
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching issues:', error);
+        this.issues = [];
       });
   }
 
