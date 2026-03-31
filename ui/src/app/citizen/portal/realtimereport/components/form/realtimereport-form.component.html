@@ -1,0 +1,64 @@
+<div class="form-container">
+  <h3>{{ isEditing ? 'Edit Report' : 'Submit Realtime Report' }}</h3>
+  
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="title">Report Title *</label>
+      <input 
+        type="text" 
+        id="title" 
+        [(ngModel)]="data.title" 
+        name="title"
+        placeholder="Enter report title"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="location">Location *</label>
+      <input 
+        type="text" 
+        id="location" 
+        [(ngModel)]="data.location" 
+        name="location"
+        placeholder="Enter location"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description *</label>
+      <textarea 
+        id="description" 
+        [(ngModel)]="data.description" 
+        name="description"
+        placeholder="Enter detailed report description"
+        rows="4"
+        required
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="severity">Severity Level *</label>
+      <select 
+        id="severity" 
+        [(ngModel)]="data.severity" 
+        name="severity"
+        required
+      >
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+        <option value="critical">Critical</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update' : 'Submit' }}</button>
+      <button type="button" class="btn btn-secondary" (click)="onReset()">Reset</button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,72 @@
+<div class="form-wrapper">
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <form (ngSubmit)="onSubmit()" class="modal-form">
+    <div class="form-group">
+      <label for="email">Email *</label>
+      <input 
+        type="email" 
+        id="email" 
+        [(ngModel)]="data.email" 
+        name="email"
+        placeholder="Enter email address"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="username">Username *</label>
+      <input 
+        type="text" 
+        id="username" 
+        [(ngModel)]="data.username" 
+        name="username"
+        placeholder="Enter username"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="phone_no">Phone Number *</label>
+      <input 
+        type="tel" 
+        id="phone_no" 
+        [(ngModel)]="data.phone_no" 
+        name="phone_no"
+        placeholder="Enter phone number"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="subCounty">Sub-County *</label>
+      <select 
+        id="subCounty" 
+        [(ngModel)]="data.subCounty" 
+        name="subCounty"
+        required
+      >
+        <option value="">Select Sub-County</option>
+        <option *ngFor="let sc of subCounties" [value]="sc">{{ sc }}</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="ward">Ward *</label>
+      <input 
+        type="text" 
+        id="ward" 
+        [(ngModel)]="data.ward" 
+        name="ward"
+        placeholder="Enter ward"
+        required
+      />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update User' : 'Add User' }}</button>
+      <button type="button" class="btn btn-secondary" (click)="onClose()">Cancel</button>
+    </div>
+  </form>
+</div>

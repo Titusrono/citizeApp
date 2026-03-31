@@ -1,0 +1,21 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { VoteFormComponent } from './form.component';
+
+describe('VoteFormComponent', () => {
+  let component: VoteFormComponent;
+  let fixture: ComponentFixture<VoteFormComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [VoteFormComponent]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(VoteFormComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});

@@ -1,0 +1,63 @@
+<div class="form-container">
+  <h3>{{ isEditing ? 'Edit Proposal' : 'Create New Proposal' }}</h3>
+  
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input 
+        type="text" 
+        id="title" 
+        [(ngModel)]="proposal.title" 
+        name="title"
+        placeholder="Enter proposal title"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description *</label>
+      <textarea 
+        id="description" 
+        [(ngModel)]="proposal.description" 
+        name="description"
+        placeholder="Enter proposal description"
+        rows="4"
+        required
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="eligibility">Eligibility</label>
+      <input 
+        type="text" 
+        id="eligibility" 
+        [(ngModel)]="proposal.eligibility" 
+        name="eligibility"
+        placeholder="Enter eligibility criteria"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="endDate">End Date *</label>
+      <input 
+        type="date" 
+        id="endDate" 
+        [(ngModel)]="proposal.endDate" 
+        name="endDate"
+        required
+      />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        {{ isEditing ? 'Update Proposal' : 'Create Proposal' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="onReset()">
+        Reset
+      </button>
+    </div>
+  </form>
+</div>

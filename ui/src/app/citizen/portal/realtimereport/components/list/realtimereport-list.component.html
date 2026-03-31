@@ -1,0 +1,83 @@
+<div class="realtimereport-container">
+  <!-- Header -->
+  <div class="header-section">
+    <h1>Report an Issue</h1>
+    <button class="btn-add" (click)="openModal()">
+      ➕ Report Issue
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <!-- Filter Section -->
+  <div class="filter-section" *ngIf="selectedCategory">
+    <label for="categoryFilter">Filter by Category:</label>
+    <select [(ngModel)]="selectedCategory" (change)="getPaginatedIssues()" class="form-select">
+      <option value="">All Categories</option>
+      <option value="pothole">Pothole</option>
+      <option value="flooding">Flooding</option>
+      <option value="sanitation">Sanitation</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+
+  <!-- Issues List -->
+  <div class="list-section">
+    <div *ngIf="itemsList.length === 0" class="no-data">
+      No issues reported yet.
+    </div>
+
+    <table *ngIf="itemsList.length > 0" class="items-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Location</th>
+          <th>Category</th>
+          <th>Date Reported</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let issue of getPaginatedIssues()">
+          <td>{{ issue.description | slice:0:50 }}...</td>
+          <td>{{ issue.location }}</td>
+          <td>{{ issue.category }}</td>
+          <td>{{ issue.createdAt | date:'short' }}</td>
+          <td>
+            <button class="btn-sm btn-edit" (click)="onEdit(issue)">✏️ Edit</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(issue._id)">🗑️ Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 1">
+      <button [disabled]="currentPage === 1" (click)="currentPage = currentPage - 1">← Previous</button>
+      <span>Page {{ currentPage }} of {{ totalPages }}</span>
+      <button [disabled]="currentPage === totalPages" (click)="currentPage = currentPage + 1">Next →</button>
+    </div>
+  </div>
+
+  <!-- Modal Form -->
+  <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? '✏️ Edit Issue' : '➕ Report New Issue' }}</h2>
+        <button class="btn-close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <app-realtimereport-form
+        [data]="currentData"
+        [isEditing]="isEditing"
+        [successMessage]="successMessage"
+        [errorMessage]="errorMessage"
+        [showModal]="showModal"
+        (submit)="onFormSubmit($event)"
+        (close)="closeModal()">
+      </app-realtimereport-form>
+    </div>
+  </div>
+</div>

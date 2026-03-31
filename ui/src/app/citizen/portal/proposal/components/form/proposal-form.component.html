@@ -1,0 +1,60 @@
+<div class="form-container">
+  <h3>{{ isEditing ? 'Edit Proposal' : 'Submit New Proposal' }}</h3>
+  
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="title">Proposal Title *</label>
+      <input 
+        type="text" 
+        id="title" 
+        [(ngModel)]="data.title" 
+        name="title"
+        placeholder="Enter proposal title"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="topic">Topic *</label>
+      <input 
+        type="text" 
+        id="topic" 
+        [(ngModel)]="data.topic" 
+        name="topic"
+        placeholder="Enter proposal topic"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description *</label>
+      <textarea 
+        id="description" 
+        [(ngModel)]="data.description" 
+        name="description"
+        placeholder="Enter detailed proposal description"
+        rows="4"
+        required
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="deadline">Deadline *</label>
+      <input 
+        type="date" 
+        id="deadline" 
+        [(ngModel)]="data.deadline" 
+        name="deadline"
+        required
+      />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update' : 'Submit' }}</button>
+      <button type="button" class="btn btn-secondary" (click)="onReset()">Reset</button>
+    </div>
+  </form>
+</div>

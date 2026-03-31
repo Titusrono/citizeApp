@@ -1,0 +1,64 @@
+<div class="form-container">
+  <h3>{{ isEditing ? 'Edit Report' : 'Create New Report' }}</h3>
+  
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input 
+        type="text" 
+        id="title" 
+        [(ngModel)]="data.title" 
+        name="title"
+        placeholder="Enter report title"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="category">Category *</label>
+      <input 
+        type="text" 
+        id="category" 
+        [(ngModel)]="data.category" 
+        name="category"
+        placeholder="Enter report category"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description *</label>
+      <textarea 
+        id="description" 
+        [(ngModel)]="data.description" 
+        name="description"
+        placeholder="Enter report description"
+        rows="4"
+        required
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="status">Status *</label>
+      <select 
+        id="status" 
+        [(ngModel)]="data.status" 
+        name="status"
+        required
+      >
+        <option value="pending">Pending</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update' : 'Create' }}</button>
+      <button type="button" class="btn btn-secondary" (click)="onReset()">Reset</button>
+    </div>
+  </form>
+</div>

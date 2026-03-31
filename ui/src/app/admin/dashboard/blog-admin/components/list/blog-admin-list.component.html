@@ -1,0 +1,64 @@
+<div class="blog-admin-container">
+  <!-- Header -->
+  <div class="header-section">
+    <h1>Blog Management</h1>
+    <button class="btn-add" (click)="openModal()">
+      ➕ Add New Blog
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <!-- Blogs List -->
+  <div class="list-section">
+    <div *ngIf="items.length === 0" class="no-data">
+      No blogs found.
+    </div>
+
+    <table *ngIf="items.length > 0" class="items-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Summary</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items">
+          <td>{{ item.title }}</td>
+          <td><span class="category-badge">{{ item.category }}</span></td>
+          <td>{{ item.summary | slice:0:50 }}...</td>
+          <td>{{ item.date | date:'short' }}</td>
+          <td>
+            <button class="btn-sm btn-edit" (click)="onEdit(item)">✏️ Edit</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(item._id)">🗑️ Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal Form -->
+  <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? '✏️ Edit Blog' : '➕ Add New Blog' }}</h2>
+        <button class="btn-close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <app-blog-admin-form
+        [data]="currentData"
+        [isEditing]="isEditing"
+        [successMessage]="successMessage"
+        [errorMessage]="errorMessage"
+        [showModal]="showModal"
+        (submit)="onFormSubmit($event)"
+        (close)="closeModal()"
+      ></app-blog-admin-form>
+    </div>
+  </div>
+</div>

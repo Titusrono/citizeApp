@@ -1,0 +1,76 @@
+<div class="form-container">
+  <h3>{{ isEditing ? 'Edit Petition' : 'Create New Petition' }}</h3>
+  
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input 
+        type="text" 
+        id="title" 
+        [(ngModel)]="data.title" 
+        name="title"
+        placeholder="Enter petition title"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="category">Category *</label>
+      <input 
+        type="text" 
+        id="category" 
+        [(ngModel)]="data.category" 
+        name="category"
+        placeholder="Enter petition category"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description *</label>
+      <textarea 
+        id="description" 
+        [(ngModel)]="data.description" 
+        name="description"
+        placeholder="Enter petition description"
+        rows="4"
+        required
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="targetSignatures">Target Signatures *</label>
+      <input 
+        type="number" 
+        id="targetSignatures" 
+        [(ngModel)]="data.targetSignatures" 
+        name="targetSignatures"
+        placeholder="Enter target number of signatures"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="status">Status *</label>
+      <select 
+        id="status" 
+        [(ngModel)]="data.status" 
+        name="status"
+        required
+      >
+        <option value="open">Open</option>
+        <option value="closed">Closed</option>
+        <option value="rejected">Rejected</option>
+        <option value="approved">Approved</option>
+      </select>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update' : 'Create' }}</button>
+      <button type="button" class="btn btn-secondary" (click)="onReset()">Reset</button>
+    </div>
+  </form>
+</div>

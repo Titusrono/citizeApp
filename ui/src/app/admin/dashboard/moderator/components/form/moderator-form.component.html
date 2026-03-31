@@ -1,0 +1,61 @@
+<div class="form-container">
+  <h3>{{ isEditing ? 'Edit Moderator' : 'Create New Moderator' }}</h3>
+  
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="username">Username *</label>
+      <input 
+        type="text" 
+        id="username" 
+        [(ngModel)]="data.username" 
+        name="username"
+        placeholder="Enter username"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email *</label>
+      <input 
+        type="email" 
+        id="email" 
+        [(ngModel)]="data.email" 
+        name="email"
+        placeholder="Enter email address"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="department">Department *</label>
+      <input 
+        type="text" 
+        id="department" 
+        [(ngModel)]="data.department" 
+        name="department"
+        placeholder="Enter department"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="permissions">Permissions *</label>
+      <textarea 
+        id="permissions" 
+        [(ngModel)]="data.permissions" 
+        name="permissions"
+        placeholder="Enter moderator permissions"
+        rows="3"
+        required
+      ></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update' : 'Create' }}</button>
+      <button type="button" class="btn btn-secondary" (click)="onReset()">Reset</button>
+    </div>
+  </form>
+</div>

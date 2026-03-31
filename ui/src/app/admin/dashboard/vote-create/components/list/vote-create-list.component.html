@@ -1,0 +1,64 @@
+<div class="vote-create-container">
+  <!-- Header -->
+  <div class="header-section">
+    <h1>Proposals Management</h1>
+    <button class="btn-add" (click)="openModal()">
+      ➕ Add New Proposal
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <!-- Proposals List -->
+  <div class="list-section">
+    <div *ngIf="proposals.length === 0" class="no-data">
+      No proposals found.
+    </div>
+
+    <table *ngIf="proposals.length > 0" class="items-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Description</th>
+          <th>End Date</th>
+          <th>Eligibility</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let proposal of proposals">
+          <td>{{ proposal.title }}</td>
+          <td>{{ proposal.description | slice:0:50 }}...</td>
+          <td>{{ proposal.endDate | date:'short' }}</td>
+          <td>{{ proposal.eligibility || '-' }}</td>
+          <td>
+            <button class="btn-sm btn-edit" (click)="onEdit(proposal)">✏️ Edit</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(proposal._id)">🗑️ Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal Form -->
+  <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? '✏️ Edit Proposal' : '➕ Add New Proposal' }}</h2>
+        <button class="btn-close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <app-vote-create-form
+        [proposal]="proposal"
+        [isEditing]="isEditing"
+        [successMessage]="successMessage"
+        [errorMessage]="errorMessage"
+        [showModal]="showModal"
+        (submit)="onFormSubmit($event)"
+        (close)="closeModal()"
+      ></app-vote-create-form>
+    </div>
+  </div>
+</div>

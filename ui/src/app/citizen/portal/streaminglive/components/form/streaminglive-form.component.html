@@ -1,0 +1,60 @@
+<div class="form-container">
+  <h3>{{ isEditing ? 'Edit Stream' : 'Create Live Stream' }}</h3>
+  
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="title">Stream Title *</label>
+      <input 
+        type="text" 
+        id="title" 
+        [(ngModel)]="data.title" 
+        name="title"
+        placeholder="Enter stream title"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description *</label>
+      <textarea 
+        id="description" 
+        [(ngModel)]="data.description" 
+        name="description"
+        placeholder="Enter stream description"
+        rows="4"
+        required
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="streamUrl">Stream URL *</label>
+      <input 
+        type="url" 
+        id="streamUrl" 
+        [(ngModel)]="data.streamUrl" 
+        name="streamUrl"
+        placeholder="Enter streaming URL"
+        required
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="startTime">Start Time *</label>
+      <input 
+        type="datetime-local" 
+        id="startTime" 
+        [(ngModel)]="data.startTime" 
+        name="startTime"
+        required
+      />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update' : 'Create' }}</button>
+      <button type="button" class="btn btn-secondary" (click)="onReset()">Reset</button>
+    </div>
+  </form>
+</div>

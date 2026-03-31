@@ -1,0 +1,100 @@
+<div class="virtual-create-container">
+  <!-- Header -->
+  <div class="header-section">
+    <h1>Virtual Meetings Management</h1>
+    <button class="btn-add" (click)="openModal()">
+      ➕ Add New Meeting
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <!-- Filter Buttons -->
+  <div class="filter-buttons">
+    <button 
+      [class.active]="filter === 'all'" 
+      (click)="setFilter('all')"
+      class="btn-filter"
+    >
+      All
+    </button>
+    <button 
+      [class.active]="filter === 'upcoming'" 
+      (click)="setFilter('upcoming')"
+      class="btn-filter"
+    >
+      Upcoming
+    </button>
+    <button 
+      [class.active]="filter === 'done'" 
+      (click)="setFilter('done')"
+      class="btn-filter"
+    >
+      Done
+    </button>
+    <button 
+      [class.active]="filter === 'live'" 
+      (click)="setFilter('live')"
+      class="btn-filter"
+    >
+      Live
+    </button>
+  </div>
+
+  <!-- Meetings List -->
+  <div class="list-section">
+    <div *ngIf="items.length === 0" class="no-data">
+      No meetings found.
+    </div>
+
+    <table *ngIf="items.length > 0" class="items-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Agenda</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items">
+          <td>{{ item.title }}</td>
+          <td>{{ item.agenda | slice:0:50 }}...</td>
+          <td>{{ item.date | date:'short' }}</td>
+          <td>
+            <span *ngIf="item.isLive" class="badge badge-live">🔴 Live</span>
+            <span *ngIf="!item.isLive && item.isUpcoming" class="badge badge-upcoming">⏳ Upcoming</span>
+            <span *ngIf="item.isDone" class="badge badge-done">✓ Done</span>
+          </td>
+          <td>
+            <button class="btn-sm btn-edit" (click)="onEdit(item)">✏️ Edit</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(item._id!)" [disabled]="!item._id">🗑️ Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal Form -->
+  <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? '✏️ Edit Meeting' : '➕ Add New Meeting' }}</h2>
+        <button class="btn-close" (click)="closeModal()">&times;</button>
+      </div>
+
+      <app-virtual-create-form
+        [data]="currentData"
+        [isEditing]="isEditing"
+        [successMessage]="successMessage"
+        [errorMessage]="errorMessage"
+        [showModal]="showModal"
+        (submit)="onFormSubmit($event)"
+        (close)="closeModal()"
+      ></app-virtual-create-form>
+    </div>
+  </div>
+</div>
