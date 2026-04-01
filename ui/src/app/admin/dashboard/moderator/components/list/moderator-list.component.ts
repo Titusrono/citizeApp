@@ -9,7 +9,8 @@ import { ModeratorFormComponent } from '../form/moderator-form.component';
   selector: 'app-moderator-list',
   standalone: true,
   imports: [CommonModule, FormsModule, ModeratorFormComponent],
-  templateUrl: './moderator-list.component.html'
+  templateUrl: './moderator-list.component.html',
+  styleUrls: ['./moderator-list.component.scss']
 })
 export class ModeratorListComponent implements OnInit {
   currentData: any = {
@@ -48,7 +49,7 @@ export class ModeratorListComponent implements OnInit {
         this.items = data;
       },
       error: (err: HttpErrorResponse) => {
-        this.errorMessage = '❌ Failed to load moderators';
+        this.errorMessage = 'Failed to load moderators';
         console.error(err);
       }
     });
@@ -65,13 +66,13 @@ export class ModeratorListComponent implements OnInit {
   createModerator() {
     this.moderatorService.createModerator(this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Moderator created successfully!';
+        this.successMessage = 'Moderator created successfully!';
         this.errorMessage = '';
         this.closeModal();
         this.loadModerators();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to create moderator.';
+        this.errorMessage = 'Failed to create moderator.';
         this.successMessage = '';
       }
     });
@@ -82,7 +83,7 @@ export class ModeratorListComponent implements OnInit {
 
     this.moderatorService.updateModerator(this.editingModerator._id, this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Moderator updated successfully!';
+        this.successMessage = 'Moderator updated successfully!';
         this.errorMessage = '';
         this.editingModerator = null;
         this.isEditing = false;
@@ -90,7 +91,7 @@ export class ModeratorListComponent implements OnInit {
         this.loadModerators();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to update moderator.';
+        this.errorMessage = 'Failed to update moderator.';
         this.successMessage = '';
       }
     });
@@ -110,12 +111,12 @@ export class ModeratorListComponent implements OnInit {
 
     this.moderatorService.deleteModerator(id).subscribe({
       next: () => {
-        this.successMessage = '✅ Moderator deleted successfully!';
+        this.successMessage = 'Moderator deleted successfully!';
         this.errorMessage = '';
         this.loadModerators();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to delete moderator.';
+        this.errorMessage = 'Failed to delete moderator.';
         this.successMessage = '';
       }
     });

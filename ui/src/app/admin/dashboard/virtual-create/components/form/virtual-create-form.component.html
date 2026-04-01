@@ -1,60 +1,136 @@
-<div class="form-container">
-  <h3>{{ isEditing ? 'Edit Virtual Event' : 'Create New Virtual Event' }}</h3>
-  
-  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
-  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
-
-  <form (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="title">Title *</label>
-      <input 
-        type="text" 
-        id="title" 
-        [(ngModel)]="data.title" 
-        name="title"
-        placeholder="Enter event title"
-        required
-      />
+<div class="modal-form-body flex flex-col h-full">
+  <!-- Scrollable Form Content -->
+  <div class="overflow-y-auto flex-1">
+    <!-- Alert Messages -->
+    <div class="px-6 py-4 space-y-3">
+      <div *ngIf="successMessage" class="bg-green-100 text-green-800 border-l-4 border-green-500 px-4 py-3 rounded dark:bg-green-900/20 dark:text-green-300 dark:border-green-600">
+        <strong>Success:</strong> {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="bg-red-100 text-red-800 border-l-4 border-red-500 px-4 py-3 rounded dark:bg-red-900/20 dark:text-red-300 dark:border-red-600">
+        <strong>Error:</strong> {{ errorMessage }}
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="description">Description *</label>
-      <textarea 
-        id="description" 
-        [(ngModel)]="data.description" 
-        name="description"
-        placeholder="Enter event description"
-        rows="4"
-        required
-      ></textarea>
-    </div>
+    <!-- Form -->
+    <form class="px-6 pb-4 space-y-4" id="virtual-create-form" (ngSubmit)="onSubmit()">
+      <!-- Title -->
+      <div>
+        <label for="title" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Event Title <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          [(ngModel)]="data.title"
+          placeholder="Enter event title"
+          required
+          maxlength="200"
+          (blur)="markFieldTouched('title')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('title'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('title')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+        />
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('title')">
+          {{ errors.title }}
+        </p>
+        <p class="text-xs text-gray-500 mt-1" *ngIf="!hasError('title')">
+          {{ data.title?.length || 0 }}/200 characters
+        </p>
+      </div>
 
-    <div class="form-group">
-      <label for="date">Date *</label>
-      <input 
-        type="date" 
-        id="date" 
-        [(ngModel)]="data.date" 
-        name="date"
-        required
-      />
-    </div>
+      <!-- Description -->
+      <div>
+        <label for="description" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Description <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          [(ngModel)]="data.description"
+          placeholder="Enter event description"
+          rows="4"
+          maxlength="2000"
+          required
+          (blur)="markFieldTouched('description')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('description'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('description')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all resize-none"
+        ></textarea>
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('description')">
+          {{ errors.description }}
+        </p>
+        <p class="text-xs text-gray-500 mt-1" *ngIf="!hasError('description')">
+          {{ getDescriptionCharCount() }}/2000 characters
+        </p>
+      </div>
 
-    <div class="form-group">
-      <label for="link">Event Link *</label>
-      <input 
-        type="url" 
-        id="link" 
-        [(ngModel)]="data.link" 
-        name="link"
-        placeholder="Enter event URL"
-        required
-      />
-    </div>
+      <!-- Date -->
+      <div>
+        <label for="date" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Event Date <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="date"
+          id="date"
+          name="date"
+          [(ngModel)]="data.date"
+          required
+          (blur)="markFieldTouched('date')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('date'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('date')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+        />
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('date')">
+          {{ errors.date }}
+        </p>
+      </div>
 
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update' : 'Create' }}</button>
-      <button type="button" class="btn btn-secondary" (click)="onReset()">Reset</button>
-    </div>
-  </form>
+      <!-- Event Link -->
+      <div>
+        <label for="link" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Event Link <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="url"
+          id="link"
+          name="link"
+          [(ngModel)]="data.link"
+          placeholder="Enter event URL (e.g., https://...)"
+          required
+          (blur)="markFieldTouched('link')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('link'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('link')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+        />
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('link')">
+          {{ errors.link }}
+        </p>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex gap-3 justify-end pt-3 border-t border-gray-200 dark:border-gray-700">
+        <button
+          type="button"
+          (click)="onClose()"
+          [disabled]="isSubmitting"
+          class="px-5 py-2 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-md text-sm border border-gray-300 disabled:opacity-60 disabled:cursor-not-allowed transition-all dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="onReset()"
+          [disabled]="isSubmitting"
+          class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-md text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100"
+        >
+          Reset
+        </button>
+        <button
+          type="submit"
+          [disabled]="isSubmitting"
+          class="px-6 py-2 bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-md text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:shadow-md"
+        >
+          <span *ngIf="!isSubmitting">{{ isEditing ? 'Update Event' : 'Create Event' }}</span>
+          <span *ngIf="isSubmitting">Processing...</span>
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

@@ -1,0 +1,12 @@
+@use '../../../../../shared/styles/list-table.scss';
+
+.blog-admin-container {
+  padding: 20px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  transition: background 0.3s ease;
+
+  .dark & {
+    background: #1a1a1a;
+  }
+}

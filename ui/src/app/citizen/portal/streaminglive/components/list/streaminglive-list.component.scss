@@ -1,0 +1,66 @@
+@use '../../../../../shared/styles/list-table.scss';
+
+.streaminglive-container {
+  padding: 20px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  transition: background 0.3s ease;
+
+  .dark & {
+    background: #1a1a1a;
+  }
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+
+  .tab-btn {
+    padding: 8px 16px;
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #333;
+    transition: all 0.3s ease;
+
+    .dark & {
+      background: #2a2a2a;
+      color: #e0e0e0;
+      border-color: #444;
+    }
+
+    &:hover {
+      border-color: #667eea;
+      color: #667eea;
+
+      .dark & {
+        border-color: #667eea;
+        color: #8b9eff;
+      }
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-color: transparent;
+      color: white;
+    }
+  }
+}
+
+.meeting-row {
+  &.status-live td {
+    background-color: rgba(255, 0, 0, 0.05);
+  }
+
+  &.status-upcoming td {
+    background-color: rgba(0, 102, 204, 0.05);
+  }
+
+  &.status-past td {
+    background-color: rgba(128, 128, 128, 0.05);
+  }
+}

@@ -11,7 +11,8 @@ declare type ErrorResponse = { error?: { message?: string } };
   selector: 'app-realtimereport-list',
   standalone: true,
   imports: [CommonModule, FormsModule, RealtimereportFormComponent],
-  templateUrl: './realtimereport-list.component.html'
+  templateUrl: './realtimereport-list.component.html',
+  styleUrls: ['./realtimereport-list.component.scss']
 })
 export class RealtimereportListComponent implements OnInit {
   currentData: any = {
@@ -27,6 +28,7 @@ export class RealtimereportListComponent implements OnInit {
   editingIssue: any = null;
   isEditing = false;
   showModal = false;
+  isLoading = true;
 
   selectedCategory: string = '';
   currentPage: number = 1;
@@ -49,12 +51,16 @@ export class RealtimereportListComponent implements OnInit {
   }
 
   fetchIssues(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
     this.issueService.getAllIssues().subscribe({
       next: (data: any[]) => {
         this.itemsList = data;
+        this.isLoading = false;
       },
       error: (error: ErrorResponse) => {
-        this.errorMessage = '❌ Failed to load issues.';
+        this.errorMessage = 'Failed to load issues. Please try again.';
+        this.isLoading = false;
         console.error('Error fetching issues:', error);
       }
     });
@@ -71,13 +77,13 @@ export class RealtimereportListComponent implements OnInit {
   createIssue(): void {
     this.issueService.createIssue(this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Issue reported successfully!';
+        this.successMessage = 'Issue reported successfully!';
         this.errorMessage = '';
         this.closeModal();
         this.fetchIssues();
       },
       error: (err: ErrorResponse) => {
-        this.errorMessage = err?.error?.message || '❌ Failed to report issue.';
+        this.errorMessage = err?.error?.message || 'Failed to report issue.';
         this.successMessage = '';
       }
     });
@@ -89,7 +95,7 @@ export class RealtimereportListComponent implements OnInit {
 
     this.issueService.updateIssue(id, this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Issue updated successfully!';
+        this.successMessage = 'Issue updated successfully!';
         this.errorMessage = '';
         this.editingIssue = null;
         this.isEditing = false;
@@ -97,7 +103,7 @@ export class RealtimereportListComponent implements OnInit {
         this.fetchIssues();
       },
       error: (err: ErrorResponse) => {
-        this.errorMessage = err?.error?.message || '❌ Failed to update issue.';
+        this.errorMessage = err?.error?.message || 'Failed to update issue.';
         this.successMessage = '';
       }
     });
@@ -117,12 +123,12 @@ export class RealtimereportListComponent implements OnInit {
 
     this.issueService.deleteIssue(id).subscribe({
       next: () => {
-        this.successMessage = '✅ Issue deleted successfully!';
+        this.successMessage = 'Issue deleted successfully!';
         this.errorMessage = '';
         this.fetchIssues();
       },
       error: (err: ErrorResponse) => {
-        this.errorMessage = err?.error?.message || '❌ Failed to delete issue.';
+        this.errorMessage = err?.error?.message || 'Failed to delete issue.';
         this.successMessage = '';
       }
     });

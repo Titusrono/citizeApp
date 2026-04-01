@@ -8,7 +8,8 @@ import { VirtualCreateFormComponent } from '../form/virtual-create-form.componen
   selector: 'app-virtual-create-list',
   standalone: true,
   imports: [CommonModule, FormsModule, VirtualCreateFormComponent],
-  templateUrl: './virtual-create-list.component.html'
+  templateUrl: './virtual-create-list.component.html',
+  styleUrls: ['./virtual-create-list.component.scss']
 })
 export class VirtualCreateListComponent implements OnInit {
   currentData: VirtualMeet = {
@@ -109,13 +110,13 @@ export class VirtualCreateListComponent implements OnInit {
 
     this.virtualService.createMeeting(meetData).subscribe({
       next: () => {
-        this.successMessage = '✅ Meeting created successfully!';
+        this.successMessage = 'Meeting created successfully!';
         this.errorMessage = '';
         this.closeModal();
         this.fetchMeetings();
       },
       error: err => {
-        this.errorMessage = err?.error?.message || '❌ Failed to create meeting.';
+        this.errorMessage = err?.error?.message || 'Failed to create meeting.';
         this.successMessage = '';
       }
     });
@@ -134,7 +135,7 @@ export class VirtualCreateListComponent implements OnInit {
 
     this.virtualService.updateMeeting(id, meetData).subscribe({
       next: () => {
-        this.successMessage = '✅ Meeting updated successfully!';
+        this.successMessage = 'Meeting updated successfully!';
         this.errorMessage = '';
         this.editingMeeting = null;
         this.isEditing = false;
@@ -142,7 +143,7 @@ export class VirtualCreateListComponent implements OnInit {
         this.fetchMeetings();
       },
       error: err => {
-        this.errorMessage = err?.error?.message || '❌ Failed to update meeting.';
+        this.errorMessage = err?.error?.message || 'Failed to update meeting.';
         this.successMessage = '';
       }
     });
@@ -162,12 +163,12 @@ export class VirtualCreateListComponent implements OnInit {
 
     this.virtualService.deleteMeeting(id).subscribe({
       next: () => {
-        this.successMessage = '✅ Meeting deleted successfully!';
+        this.successMessage = 'Meeting deleted successfully!';
         this.errorMessage = '';
         this.fetchMeetings();
       },
       error: err => {
-        this.errorMessage = err?.error?.message || '❌ Failed to delete meeting.';
+        this.errorMessage = err?.error?.message || 'Failed to delete meeting.';
         this.successMessage = '';
       }
     });

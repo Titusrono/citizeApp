@@ -3,7 +3,7 @@
   <div class="header-section">
     <h1>User Registration Management</h1>
     <button class="btn-add" (click)="openModal()">
-      ➕ Add New User
+      + Add New User
     </button>
   </div>
 
@@ -57,8 +57,8 @@
           <td>{{ user.subCounty }}</td>
           <td>{{ user.ward }}</td>
           <td>
-            <button class="btn-sm btn-edit" (click)="onEdit(user)">✏️ Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(user.email)">🗑️ Delete</button>
+            <button class="btn-sm btn-edit" (click)="onEdit(user)">Edit</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(user.email)">Delete</button>
           </td>
         </tr>
       </tbody>
@@ -69,7 +69,7 @@
   <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{ isEditing ? '✏️ Edit User' : '➕ Add New User' }}</h2>
+        <h2>{{ isEditing ? 'Edit User' : 'Add New User' }}</h2>
         <button class="btn-close" (click)="closeModal()">&times;</button>
       </div>
 

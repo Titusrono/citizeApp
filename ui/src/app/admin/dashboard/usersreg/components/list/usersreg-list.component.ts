@@ -8,7 +8,8 @@ import { UsersregFormComponent } from '../form/usersreg-form.component';
   selector: 'app-usersreg-list',
   standalone: true,
   imports: [CommonModule, FormsModule, UsersregFormComponent],
-  templateUrl: './usersreg-list.component.html'
+  templateUrl: './usersreg-list.component.html',
+  styleUrls: ['./usersreg-list.component.scss']
 })
 export class UsersregListComponent implements OnInit {
   currentData: any = {
@@ -97,13 +98,13 @@ export class UsersregListComponent implements OnInit {
   createUser(): void {
     this.usersregService.createUser(this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ User created successfully!';
+        this.successMessage = 'User created successfully!';
         this.errorMessage = '';
         this.closeModal();
         this.fetchUsers();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to create user.';
+        this.errorMessage = 'Failed to create user.';
         this.successMessage = '';
       }
     });
@@ -114,7 +115,7 @@ export class UsersregListComponent implements OnInit {
 
     this.usersregService.updateUser(this.editingUser.email, this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ User updated successfully!';
+        this.successMessage = 'User updated successfully!';
         this.errorMessage = '';
         this.editingUser = null;
         this.isEditing = false;
@@ -122,7 +123,7 @@ export class UsersregListComponent implements OnInit {
         this.fetchUsers();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to update user.';
+        this.errorMessage = 'Failed to update user.';
         this.successMessage = '';
       }
     });
@@ -142,12 +143,12 @@ export class UsersregListComponent implements OnInit {
 
     this.usersregService.deleteUser(email).subscribe({
       next: () => {
-        this.successMessage = '✅ User deleted successfully!';
+        this.successMessage = 'User deleted successfully!';
         this.errorMessage = '';
         this.fetchUsers();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to delete user.';
+        this.errorMessage = 'Failed to delete user.';
         this.successMessage = '';
       }
     });

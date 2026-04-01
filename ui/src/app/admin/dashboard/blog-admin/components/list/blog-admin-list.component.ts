@@ -8,7 +8,8 @@ import { BlogAdminFormComponent } from '../form/blog-admin-form.component';
   selector: 'app-blog-admin-list',
   standalone: true,
   imports: [CommonModule, FormsModule, BlogAdminFormComponent],
-  templateUrl: './blog-admin-list.component.html'
+  templateUrl: './blog-admin-list.component.html',
+  styleUrls: ['./blog-admin-list.component.scss']
 })
 export class BlogAdminListComponent implements OnInit {
   currentData: Blog = {
@@ -57,7 +58,7 @@ export class BlogAdminListComponent implements OnInit {
         this.items = data;
       },
       error: () => {
-        this.errorMessage = '❌ Failed to load blogs.';
+        this.errorMessage = 'Failed to load blogs.';
       },
     });
   }
@@ -73,13 +74,13 @@ export class BlogAdminListComponent implements OnInit {
   createBlog() {
     this.blogsService.createBlog(this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Blog created successfully!';
+        this.successMessage = 'Blog created successfully!';
         this.errorMessage = '';
         this.closeModal();
         this.fetchBlogs();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to create blog.';
+        this.errorMessage = 'Failed to create blog.';
         this.successMessage = '';
       },
     });
@@ -91,7 +92,7 @@ export class BlogAdminListComponent implements OnInit {
 
     this.blogsService.updateBlog(id, this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Blog updated successfully!';
+        this.successMessage = 'Blog updated successfully!';
         this.errorMessage = '';
         this.editingBlog = null;
         this.isEditing = false;
@@ -99,7 +100,7 @@ export class BlogAdminListComponent implements OnInit {
         this.fetchBlogs();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to update blog.';
+        this.errorMessage = 'Failed to update blog.';
         this.successMessage = '';
       },
     });
@@ -119,12 +120,12 @@ export class BlogAdminListComponent implements OnInit {
 
     this.blogsService.deleteBlog(id).subscribe({
       next: () => {
-        this.successMessage = '✅ Blog deleted successfully!';
+        this.successMessage = 'Blog deleted successfully!';
         this.errorMessage = '';
         this.fetchBlogs();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to delete blog.';
+        this.errorMessage = 'Failed to delete blog.';
         this.successMessage = '';
       }
     });

@@ -37,31 +37,31 @@ password: any;
         const returnUrl = params['returnUrl']?.trim() || '/dashboard';
 
         if (token) {
-          console.log('✅ Google token received:', token);
+          console.log('Google token received:', token);
 
           if (isPlatformBrowser(this.platformId)) {
             try {
               this.authService.setToken(token); // Save token in localStorage
               console.log('🔐 Token stored successfully');
             } catch (error) {
-              console.error('❌ Error saving token:', error);
+              console.error('Error saving token:', error);
               this.router.navigate(['/login'], { queryParams: { error: 'storage' } });
               return;
             }
           } else {
-            console.warn('⚠️ Platform not browser, skipping token storage.');
+            console.warn('Platform not browser, skipping token storage.');
           }
 
           setTimeout(() => {
             this.router.navigateByUrl(returnUrl);
           }, 500); // small delay for UX
         } else {
-          console.warn('❌ No token found.');
+          console.warn('No token found.');
           this.router.navigate(['/login'], { queryParams: { error: 'notoken' } });
         }
       },
       error: (err) => {
-        console.error('❌ Error handling Google callback:', err);
+        console.error('Error handling Google callback:', err);
         this.router.navigate(['/login'], { queryParams: { error: 'callback' } });
       }
     });

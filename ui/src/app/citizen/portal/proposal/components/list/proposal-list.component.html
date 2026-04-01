@@ -34,8 +34,8 @@
           <td>{{ item.eligibility || '-' }}</td>
           <td>{{ item.endDate | date:'short' }}</td>
           <td>
-            <button class="btn-sm btn-edit" (click)="onEdit(item)">✏️ Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(item._id)">🗑️ Delete</button>
+            <button class="btn-sm btn-edit" (click)="onEdit(item)">Edit</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(item._id)">Delete</button>
           </td>
         </tr>
       </tbody>
@@ -46,7 +46,7 @@
   <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{ isEditing ? '✏️ Edit Proposal' : '➕ Create New Proposal' }}</h2>
+        <h2>{{ isEditing ? 'Edit Proposal' : 'Create New Proposal' }}</h2>
         <button class="btn-close" (click)="closeModal()">&times;</button>
       </div>
 

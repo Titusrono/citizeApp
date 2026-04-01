@@ -1,61 +1,189 @@
-<div class="form-container">
-  <h3>{{ isEditing ? 'Edit Petition' : 'Create New Petition' }}</h3>
-  
-  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
-  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
-
-  <form (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="title">Petition Title *</label>
-      <input 
-        type="text" 
-        id="title" 
-        [(ngModel)]="data.title" 
-        name="title"
-        placeholder="Enter petition title"
-        required
-      />
+<div class="flex flex-col h-full bg-gradient-to-b from-slate-50 to-white">
+  <!-- Scrollable Form Content -->
+  <div class="overflow-y-auto flex-1">
+    <!-- Alert Messages -->
+    <div class="px-6 py-4 space-y-3">
+      <div *ngIf="successMessage" class="bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border-l-4 border-green-500 px-5 py-4 rounded-lg shadow-sm dark:bg-green-900/20 dark:text-green-300 dark:border-green-600">
+        <strong>Success:</strong> {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="bg-gradient-to-r from-red-50 to-rose-50 text-red-800 border-l-4 border-red-500 px-5 py-4 rounded-lg shadow-sm dark:bg-red-900/20 dark:text-red-300 dark:border-red-600">
+        <strong>Error:</strong> {{ errorMessage }}
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="category">Category *</label>
-      <input 
-        type="text" 
-        id="category" 
-        [(ngModel)]="data.category" 
-        name="category"
-        placeholder="Enter category"
-        required
-      />
-    </div>
+    <!-- Form -->
+    <form class="px-6 pb-6 space-y-5" id="petition-form" (ngSubmit)="onSubmit()">
+      <!-- Title Field -->
+      <div class="space-y-2">
+        <label for="title" class="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+          Petition Title <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="title"
+          name="title"
+          [(ngModel)]="data.title"
+          placeholder="Enter petition title"
+          required
+          maxlength="200"
+          (blur)="markFieldTouched('title')"
+          [ngClass]="{
+            'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('title'),
+            'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('title'),
+            'border-slate-300 dark:border-slate-600': !hasError('title') && !hasSuccess('title')
+          }"
+          class="w-full px-4 py-2.5 border-2 rounded-lg bg-white text-slate-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-blue-900 transition-all shadow-sm"
+        />
+        <div class="flex justify-between items-start">
+          <p *ngIf="hasError('title')" class="text-xs text-red-500 dark:text-red-400">
+            {{ errors.title }}
+          </p>
+          <p *ngIf="!hasError('title')" class="text-xs text-slate-500 dark:text-slate-400 ml-auto">
+            {{ data.title?.length || 0 }}/200
+          </p>
+        </div>
+      </div>
 
-    <div class="form-group">
-      <label for="description">Description *</label>
-      <textarea 
-        id="description" 
-        [(ngModel)]="data.description" 
-        name="description"
-        placeholder="Enter detailed description"
-        rows="4"
-        required
-      ></textarea>
-    </div>
+      <!-- Category Field -->
+      <div class="space-y-2">
+        <label for="category" class="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+          Category <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="category"
+          name="category"
+          [(ngModel)]="data.category"
+          required
+          (blur)="markFieldTouched('category')"
+          [ngClass]="{
+            'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('category'),
+            'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('category'),
+            'border-slate-300 dark:border-slate-600': !hasError('category') && !hasSuccess('category')
+          }"
+          class="w-full px-4 py-2.5 border-2 rounded-lg bg-white text-slate-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-blue-900 transition-all shadow-sm"
+        >
+          <option value="">Select a category</option>
+          <option *ngFor="let cat of categories" [value]="cat.value">
+            {{ cat.label }}
+          </option>
+        </select>
+        <p *ngIf="hasError('category')" class="text-xs text-red-500 dark:text-red-400">
+          {{ errors.category }}
+        </p>
+      </div>
 
-    <div class="form-group">
-      <label for="targetSignatures">Target Signatures *</label>
-      <input 
-        type="number" 
-        id="targetSignatures" 
-        [(ngModel)]="data.targetSignatures" 
-        name="targetSignatures"
-        placeholder="Enter target number of signatures"
-        required
-      />
-    </div>
+      <!-- Target Authority Field -->
+      <div class="space-y-2">
+        <label for="targetAuthority" class="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+          Target Authority <span class="text-slate-400 text-xs font-normal">(Optional)</span>
+        </label>
+        <select
+          id="targetAuthority"
+          name="targetAuthority"
+          [(ngModel)]="data.targetAuthority"
+          (blur)="markFieldTouched('targetAuthority')"
+          [ngClass]="{
+            'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('targetAuthority'),
+            'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('targetAuthority'),
+            'border-slate-300 dark:border-slate-600': !hasError('targetAuthority') && !hasSuccess('targetAuthority')
+          }"
+          class="w-full px-4 py-2.5 border-2 rounded-lg bg-white text-slate-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-blue-900 transition-all shadow-sm"
+        >
+          <option value="">Select target authority</option>
+          <option *ngFor="let authority of authorities" [value]="authority">
+            {{ authority }}
+          </option>
+        </select>
+        <p *ngIf="hasError('targetAuthority')" class="text-xs text-red-500 dark:text-red-400">
+          {{ errors.targetAuthority }}
+        </p>
+      </div>
 
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update' : 'Submit' }}</button>
-      <button type="button" class="btn btn-secondary" (click)="onReset()">Reset</button>
-    </div>
-  </form>
+      <!-- Description Field -->
+      <div class="space-y-2">
+        <label for="description" class="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+          Description <span class="text-red-500">*</span>
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          [(ngModel)]="data.description"
+          placeholder="Enter detailed petition description..."
+          rows="4"
+          maxlength="2000"
+          required
+          (blur)="markFieldTouched('description')"
+          [ngClass]="{
+            'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('description'),
+            'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('description'),
+            'border-slate-300 dark:border-slate-600': !hasError('description') && !hasSuccess('description')
+          }"
+          class="w-full px-4 py-2.5 border-2 rounded-lg bg-white text-slate-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-blue-900 transition-all shadow-sm resize-none"
+        ></textarea>
+        <div class="flex justify-between items-start">
+          <p *ngIf="hasError('description')" class="text-xs text-red-500 dark:text-red-400">
+            {{ errors.description }}
+          </p>
+          <p *ngIf="!hasError('description')" class="text-xs text-slate-500 dark:text-slate-400 ml-auto">
+            {{ getDescriptionCharCount() }}/2000
+          </p>
+        </div>
+      </div>
+
+      <!-- Target Signatures Field -->
+      <div class="space-y-2">
+        <label for="targetSignatures" class="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+          Target Signatures <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="number"
+          id="targetSignatures"
+          name="targetSignatures"
+          [(ngModel)]="data.targetSignatures"
+          placeholder="10 - 100,000"
+          required
+          min="10"
+          max="100000"
+          (blur)="markFieldTouched('targetSignatures')"
+          [ngClass]="{
+            'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('targetSignatures'),
+            'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('targetSignatures'),
+            'border-slate-300 dark:border-slate-600': !hasError('targetSignatures') && !hasSuccess('targetSignatures')
+          }"
+          class="w-full px-4 py-2.5 border-2 rounded-lg bg-white text-slate-900 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:bg-slate-800 dark:text-slate-100 dark:focus:ring-blue-900 transition-all shadow-sm"
+        />
+        <p *ngIf="hasError('targetSignatures')" class="text-xs text-red-500 dark:text-red-400">
+          {{ errors.targetSignatures }}
+        </p>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex gap-3 justify-end pt-5 border-t border-slate-200 dark:border-slate-700">
+        <button
+          type="button"
+          (click)="onClose()"
+          [disabled]="isSubmitting"
+          class="px-5 py-2.5 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-lg text-sm border border-slate-300 disabled:opacity-60 disabled:cursor-not-allowed transition-all dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-600 shadow-sm"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="onReset()"
+          [disabled]="isSubmitting"
+          class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold rounded-lg text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-100 shadow-sm"
+        >
+          Reset
+        </button>
+        <button
+          type="submit"
+          [disabled]="isSubmitting"
+          class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+        >
+          <span *ngIf="!isSubmitting">{{ isEditing ? 'Update Petition' : 'Submit Petition' }}</span>
+          <span *ngIf="isSubmitting">Processing...</span>
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

@@ -1,72 +1,155 @@
-<div class="form-wrapper">
-  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
-  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
-
-  <form (ngSubmit)="onSubmit()" class="modal-form">
-    <div class="form-group">
-      <label for="email">Email *</label>
-      <input 
-        type="email" 
-        id="email" 
-        [(ngModel)]="data.email" 
-        name="email"
-        placeholder="Enter email address"
-        required
-      />
+<div class="modal-form-body flex flex-col h-full">
+  <!-- Scrollable Form Content -->
+  <div class="overflow-y-auto flex-1">
+    <!-- Alert Messages -->
+    <div class="px-6 py-4 space-y-3">
+      <div *ngIf="successMessage" class="bg-green-100 text-green-800 border-l-4 border-green-500 px-4 py-3 rounded dark:bg-green-900/20 dark:text-green-300 dark:border-green-600">
+        <strong>Success:</strong> {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="bg-red-100 text-red-800 border-l-4 border-red-500 px-4 py-3 rounded dark:bg-red-900/20 dark:text-red-300 dark:border-red-600">
+        <strong>Error:</strong> {{ errorMessage }}
+      </div>
     </div>
 
-    <div class="form-group">
-      <label for="username">Username *</label>
-      <input 
-        type="text" 
-        id="username" 
-        [(ngModel)]="data.username" 
-        name="username"
-        placeholder="Enter username"
-        required
-      />
-    </div>
+    <!-- Form -->
+    <form class="px-6 pb-4 space-y-4" id="usersreg-form" (ngSubmit)="onSubmit()">
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Email <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="data.email"
+          placeholder="Enter email address"
+          required
+          (blur)="markFieldTouched('email')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('email'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('email')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+        />
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('email')">
+          {{ errors.email }}
+        </p>
+      </div>
 
-    <div class="form-group">
-      <label for="phone_no">Phone Number *</label>
-      <input 
-        type="tel" 
-        id="phone_no" 
-        [(ngModel)]="data.phone_no" 
-        name="phone_no"
-        placeholder="Enter phone number"
-        required
-      />
-    </div>
+      <!-- Username -->
+      <div>
+        <label for="username" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Username <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          [(ngModel)]="data.username"
+          placeholder="Enter username"
+          required
+          maxlength="50"
+          (blur)="markFieldTouched('username')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('username'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('username')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+        />
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('username')">
+          {{ errors.username }}
+        </p>
+        <p class="text-xs text-gray-500 mt-1" *ngIf="!hasError('username')">
+          {{ data.username?.length || 0 }}/50 characters
+        </p>
+      </div>
 
-    <div class="form-group">
-      <label for="subCounty">Sub-County *</label>
-      <select 
-        id="subCounty" 
-        [(ngModel)]="data.subCounty" 
-        name="subCounty"
-        required
-      >
-        <option value="">Select Sub-County</option>
-        <option *ngFor="let sc of subCounties" [value]="sc">{{ sc }}</option>
-      </select>
-    </div>
+      <!-- Phone Number -->
+      <div>
+        <label for="phone_no" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Phone Number <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="tel"
+          id="phone_no"
+          name="phone_no"
+          [(ngModel)]="data.phone_no"
+          placeholder="Enter phone number"
+          required
+          (blur)="markFieldTouched('phone_no')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('phone_no'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('phone_no')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+        />
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('phone_no')">
+          {{ errors.phone_no }}
+        </p>
+      </div>
 
-    <div class="form-group">
-      <label for="ward">Ward *</label>
-      <input 
-        type="text" 
-        id="ward" 
-        [(ngModel)]="data.ward" 
-        name="ward"
-        placeholder="Enter ward"
-        required
-      />
-    </div>
+      <!-- Sub-County -->
+      <div>
+        <label for="subCounty" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Sub-County <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="subCounty"
+          name="subCounty"
+          [(ngModel)]="data.subCounty"
+          required
+          (blur)="markFieldTouched('subCounty')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('subCounty'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('subCounty')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+        >
+          <option value="">Select Sub-County</option>
+          <option *ngFor="let sc of subCounties" [value]="sc">{{ sc }}</option>
+        </select>
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('subCounty')">
+          {{ errors.subCounty }}
+        </p>
+      </div>
 
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">{{ isEditing ? 'Update User' : 'Add User' }}</button>
-      <button type="button" class="btn btn-secondary" (click)="onClose()">Cancel</button>
-    </div>
-  </form>
+      <!-- Ward -->
+      <div>
+        <label for="ward" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Ward <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="ward"
+          name="ward"
+          [(ngModel)]="data.ward"
+          placeholder="Enter ward name"
+          required
+          (blur)="markFieldTouched('ward')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('ward'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('ward')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+        />
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('ward')">
+          {{ errors.ward }}
+        </p>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex gap-3 justify-end pt-3 border-t border-gray-200 dark:border-gray-700">
+        <button
+          type="button"
+          (click)="onClose()"
+          [disabled]="isSubmitting"
+          class="px-5 py-2 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-md text-sm border border-gray-300 disabled:opacity-60 disabled:cursor-not-allowed transition-all dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="onReset()"
+          [disabled]="isSubmitting"
+          class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-md text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-100"
+        >
+          Reset
+        </button>
+        <button
+          type="submit"
+          [disabled]="isSubmitting"
+          class="px-6 py-2 bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-md text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:shadow-md"
+        >
+          <span *ngIf="!isSubmitting">{{ isEditing ? 'Update User' : 'Add User' }}</span>
+          <span *ngIf="isSubmitting">Processing...</span>
+        </button>
+      </div>
+    </form>
+  </div>
 </div>

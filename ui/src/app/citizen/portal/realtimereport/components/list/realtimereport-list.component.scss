@@ -1,0 +1,40 @@
+@use '../../../../../shared/styles/list-table.scss';
+
+// Minimal SCSS - Tailwind CSS handles most styling
+
+.realtimereport-container {
+  padding: 20px;
+  min-height: 100vh;
+  background: #f5f7fa;
+  transition: background 0.3s ease;
+
+  .dark & {
+    background: #1a1a1a;
+  }
+}
+
+// Loading spinner animation
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-in {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateBlogDto } from './dto/create-blog.dto';
@@ -13,6 +13,17 @@ export class BlogsService {
     private blogRepository: Repository<Blog>,
   ) {}
 
+  private isValidObjectId(id: string): boolean {
+    return /^[0-9a-f]{24}$/i.test(id);
+  }
+
+  private convertToObjectId(id: string): ObjectId {
+    if (!this.isValidObjectId(id)) {
+      throw new BadRequestException(`Invalid blog ID format: ${id}`);
+    }
+    return new ObjectId(id);
+  }
+
   async create(createBlogDto: CreateBlogDto): Promise<Blog> {
     const blog = this.blogRepository.create(createBlogDto);
     return this.blogRepository.save(blog);
@@ -26,20 +37,20 @@ export class BlogsService {
 
   async findOne(id: string): Promise<Blog | null> {
     return this.blogRepository.findOne({
-      where: { _id: new ObjectId(id) } as any,
+      where: { _id: this.convertToObjectId(id) } as any,
     });
   }
 
   async update(id: string, updateBlogDto: UpdateBlogDto): Promise<Blog | null> {
     await this.blogRepository.update(
-      { _id: new ObjectId(id) } as any,
+      { _id: this.convertToObjectId(id) } as any,
       updateBlogDto,
     );
     return this.findOne(id);
   }
 
   async remove(id: string): Promise<{ message: string }> {
-    await this.blogRepository.delete({ _id: new ObjectId(id) } as any);
+    await this.blogRepository.delete({ _id: this.convertToObjectId(id) } as any);
     return { message: 'Blog deleted successfully' };
   }
 }

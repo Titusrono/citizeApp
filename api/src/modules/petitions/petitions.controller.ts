@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { PetitionsService } from './petitions.service';
 import { CreatePetitionDto } from './dto/create-petition.dto';
 import { UpdatePetitionDto } from './dto/update-petition.dto';
@@ -14,7 +15,16 @@ export class PetitionsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CITIZEN, UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  async create(@Body() createPetitionDto: CreatePetitionDto, @Req() req) {
+  @UseInterceptors(FileInterceptor('supportingDocs'))
+  async create(
+    @Body() createPetitionDto: CreatePetitionDto,
+    @UploadedFile() file: any,
+    @Req() req: any
+  ) {
+    // If file is uploaded, store the filename
+    if (file) {
+      createPetitionDto.supportingDocs = file.originalname;
+    }
     return this.petitionsService.create(createPetitionDto, req.user);
   }
 

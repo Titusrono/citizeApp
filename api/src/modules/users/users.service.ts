@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -12,6 +12,17 @@ export class UsersService {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
   ) {}
+
+  private isValidObjectId(id: string): boolean {
+    return /^[0-9a-f]{24}$/i.test(id);
+  }
+
+  private convertToObjectId(id: string): ObjectId {
+    if (!this.isValidObjectId(id)) {
+      throw new BadRequestException(`Invalid user ID format: ${id}`);
+    }
+    return new ObjectId(id);
+  }
 
   async create(createUserDto: CreateUserDto) {
     const user = this.usersRepository.create(createUserDto);
@@ -76,12 +87,12 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    await this.usersRepository.update(id, updateUserDto);
+    await this.usersRepository.update(this.convertToObjectId(id), updateUserDto);
     return this.findOne(id);
   }
 
   async remove(id: string) {
-    await this.usersRepository.delete(new ObjectId(id));
+    await this.usersRepository.delete(this.convertToObjectId(id));
     return { deleted: true };
   }
 }

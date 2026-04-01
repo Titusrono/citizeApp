@@ -8,7 +8,8 @@ import { VoteCreateFormComponent } from '../form/vote-create-form.component';
   selector: 'app-vote-create-list',
   standalone: true,
   imports: [CommonModule, FormsModule, VoteCreateFormComponent],
-  templateUrl: './vote-create-list.component.html'
+  templateUrl: './vote-create-list.component.html',
+  styleUrls: ['./vote-create-list.component.scss']
 })
 export class VoteCreateListComponent implements OnInit {
   proposal: CreateVoteCreateDto = {
@@ -48,7 +49,7 @@ export class VoteCreateListComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error fetching proposals:', err);
-        this.errorMessage = '❌ Could not fetch proposals.';
+        this.errorMessage = 'Could not fetch proposals.';
       }
     });
   }
@@ -64,14 +65,14 @@ export class VoteCreateListComponent implements OnInit {
   createProposal() {
     this.voteService.createVote(this.proposal).subscribe({
       next: () => {
-        this.successMessage = '✅ Proposal created successfully!';
+        this.successMessage = 'Proposal created successfully!';
         this.errorMessage = '';
         this.closeModal();
         this.fetchProposals();
       },
       error: (err) => {
         console.error('Error creating proposal:', err);
-        this.errorMessage = err?.error?.message || '❌ Failed to create proposal.';
+        this.errorMessage = err?.error?.message || 'Failed to create proposal.';
         this.successMessage = '';
       }
     });
@@ -83,7 +84,7 @@ export class VoteCreateListComponent implements OnInit {
 
     this.voteService.updateVote(id, this.proposal).subscribe({
       next: () => {
-        this.successMessage = '✅ Proposal updated successfully!';
+        this.successMessage = 'Proposal updated successfully!';
         this.errorMessage = '';
         this.editingProposal = null;
         this.isEditing = false;
@@ -92,7 +93,7 @@ export class VoteCreateListComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error updating proposal:', err);
-        this.errorMessage = err?.error?.message || '❌ Failed to update proposal.';
+        this.errorMessage = err?.error?.message || 'Failed to update proposal.';
         this.successMessage = '';
       }
     });
@@ -112,13 +113,13 @@ export class VoteCreateListComponent implements OnInit {
 
     this.voteService.deleteVote(id).subscribe({
       next: () => {
-        this.successMessage = '✅ Proposal deleted successfully!';
+        this.successMessage = 'Proposal deleted successfully!';
         this.errorMessage = '';
         this.fetchProposals();
       },
       error: (err) => {
         console.error('Error deleting proposal:', err);
-        this.errorMessage = '❌ Failed to delete proposal.';
+        this.errorMessage = 'Failed to delete proposal.';
         this.successMessage = '';
       }
     });

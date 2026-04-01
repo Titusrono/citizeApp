@@ -22,6 +22,9 @@ import { AuthGuard } from "./core/auth/auth.guard";
 import { AdminPetitionListComponent } from "./admin/dashboard/adminpetition/components/list/adminpetition-list.component";
 
 export const routes: Routes = [
+  // Root route - redirect to login or dashboard based on auth state
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+
   // Public routes
 
   // Auth routes
@@ -64,4 +67,6 @@ export const routes: Routes = [
       { path: 'profile', title: 'Profile', component: ProfileComponent },
     ],
   },
+  // Wildcard route - redirect to login for any undefined routes
+  { path: '**', redirectTo: '/login', pathMatch: 'full' }
 ];

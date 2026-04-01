@@ -8,7 +8,8 @@ import { ReportAdminFormComponent } from '../form/report-admin-form.component';
   selector: 'app-report-admin-list',
   standalone: true,
   imports: [CommonModule, FormsModule, ReportAdminFormComponent],
-  templateUrl: './report-admin-list.component.html'
+  templateUrl: './report-admin-list.component.html',
+  styleUrls: ['./report-admin-list.component.scss']
 })
 export class ReportAdminListComponent implements OnInit {
   currentData: any = {
@@ -53,7 +54,7 @@ export class ReportAdminListComponent implements OnInit {
         this.computeCategoryStats();
       },
       error: (err) => {
-        this.errorMessage = '❌ Failed to load reports.';
+        this.errorMessage = 'Failed to load reports.';
         console.error('Error fetching reports:', err);
       }
     });
@@ -88,13 +89,13 @@ export class ReportAdminListComponent implements OnInit {
   createReport() {
     this.reportService.submitReport(this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Report created successfully!';
+        this.successMessage = 'Report created successfully!';
         this.errorMessage = '';
         this.closeModal();
         this.fetchReports();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to create report.';
+        this.errorMessage = 'Failed to create report.';
         this.successMessage = '';
       }
     });
@@ -106,7 +107,7 @@ export class ReportAdminListComponent implements OnInit {
 
     this.reportService.updateReport(id, this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Report updated successfully!';
+        this.successMessage = 'Report updated successfully!';
         this.errorMessage = '';
         this.editingReport = null;
         this.isEditing = false;
@@ -114,7 +115,7 @@ export class ReportAdminListComponent implements OnInit {
         this.fetchReports();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to update report.';
+        this.errorMessage = 'Failed to update report.';
         this.successMessage = '';
       }
     });
@@ -134,12 +135,12 @@ export class ReportAdminListComponent implements OnInit {
 
     this.reportService.deleteReport(id).subscribe({
       next: () => {
-        this.successMessage = '✅ Report deleted successfully!';
+        this.successMessage = 'Report deleted successfully!';
         this.errorMessage = '';
         this.fetchReports();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to delete report.';
+        this.errorMessage = 'Failed to delete report.';
         this.successMessage = '';
       }
     });

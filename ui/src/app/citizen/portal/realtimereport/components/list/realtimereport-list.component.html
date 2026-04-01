@@ -1,72 +1,111 @@
 <div class="realtimereport-container">
   <!-- Header -->
-  <div class="header-section">
-    <h1>Report an Issue</h1>
-    <button class="btn-add" (click)="openModal()">
+  <div class="header-section flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Report an Issue</h1>
+    <button class="px-6 py-3 bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-lg transition-all hover:shadow-lg" (click)="openModal()">
       ➕ Report Issue
     </button>
   </div>
 
-  <!-- Success/Error Messages -->
-  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
-  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-800 px-4 py-3 rounded dark:bg-green-900/20 dark:text-green-300 dark:border-green-600 animate-in">
+    {{ successMessage }}
+  </div>
+
+  <!-- Error Message - Enhanced -->
+  <div *ngIf="errorMessage" class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-800 px-4 py-3 rounded dark:bg-red-900/20 dark:text-red-300 dark:border-red-600 animate-in">
+    <div class="flex items-center gap-2">
+      <span class="text-lg">⚠️</span>
+      <div>
+        <p class="font-semibold">{{ errorMessage }}</p>
+        <p class="text-sm mt-1">Backend connection issue. Please check your internet or try again.</p>
+      </div>
+    </div>
+  </div>
 
   <!-- Filter Section -->
-  <div class="filter-section" *ngIf="selectedCategory">
-    <label for="categoryFilter">Filter by Category:</label>
-    <select [(ngModel)]="selectedCategory" (change)="getPaginatedIssues()" class="form-select">
+  <div class="mb-6" *ngIf="itemsList.length > 0">
+    <label for="categoryFilter" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Filter by Category:</label>
+    <select [(ngModel)]="selectedCategory" (change)="getPaginatedIssues()" id="categoryFilter" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-blue-500">
       <option value="">All Categories</option>
       <option value="pothole">Pothole</option>
       <option value="flooding">Flooding</option>
       <option value="sanitation">Sanitation</option>
+      <option value="damaged-sign">Damaged Sign</option>
+      <option value="streetlight">Street Light</option>
       <option value="other">Other</option>
     </select>
   </div>
 
-  <!-- Issues List -->
-  <div class="list-section">
-    <div *ngIf="itemsList.length === 0" class="no-data">
-      No issues reported yet.
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-16">
+    <div class="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin dark:border-gray-600"></div>
+    <p class="mt-4 text-gray-600 dark:text-gray-400">Loading issues...</p>
+  </div>
+
+  <!-- Issues List Container -->
+  <div *ngIf="!isLoading" class="list-section">
+    <!-- Empty State -->
+    <div *ngIf="itemsList.length === 0" class="flex flex-col items-center justify-center py-16 bg-gray-50 dark:bg-gray-800/30 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+      <div class="text-5xl mb-4">📋</div>
+      <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">No Issues Reported Yet</h3>
+      <p class="text-gray-600 dark:text-gray-400 text-center max-w-sm mb-6">
+        Help improve your community by reporting infrastructure issues in your area.
+      </p>
+      <button (click)="openModal()" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-all hover:shadow-lg">
+        Be the First to Report 🚀
+      </button>
     </div>
 
-    <table *ngIf="itemsList.length > 0" class="items-table">
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th>Location</th>
-          <th>Category</th>
-          <th>Date Reported</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let issue of getPaginatedIssues()">
-          <td>{{ issue.description | slice:0:50 }}...</td>
-          <td>{{ issue.location }}</td>
-          <td>{{ issue.category }}</td>
-          <td>{{ issue.createdAt | date:'short' }}</td>
-          <td>
-            <button class="btn-sm btn-edit" (click)="onEdit(issue)">✏️ Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(issue._id)">🗑️ Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- Issues Table -->
+    <div *ngIf="itemsList.length > 0" class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+      <table class="w-full text-left text-sm">
+        <thead class="bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+          <tr>
+            <th class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-200">Description</th>
+            <th class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-200">Location</th>
+            <th class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-200">Category</th>
+            <th class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-200">Date Reported</th>
+            <th class="px-4 py-3 font-semibold text-gray-700 dark:text-gray-200">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let issue of getPaginatedIssues()" class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+            <td class="px-4 py-3 text-gray-800 dark:text-gray-100">{{ issue.description | slice:0:50 }}...</td>
+            <td class="px-4 py-3 text-gray-800 dark:text-gray-100">{{ issue.location }}</td>
+            <td class="px-4 py-3">
+              <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-full text-xs font-semibold">
+                {{ issue.category }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ issue.createdAt | date:'short' }}</td>
+            <td class="px-4 py-3 flex gap-2">
+              <button class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 rounded text-sm font-semibold transition-colors" (click)="onEdit(issue)">Edit</button>
+              <button class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 rounded text-sm font-semibold transition-colors" (click)="onDelete(issue._id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Pagination -->
-    <div class="pagination" *ngIf="totalPages > 1">
-      <button [disabled]="currentPage === 1" (click)="currentPage = currentPage - 1">← Previous</button>
-      <span>Page {{ currentPage }} of {{ totalPages }}</span>
-      <button [disabled]="currentPage === totalPages" (click)="currentPage = currentPage + 1">Next →</button>
+    <div *ngIf="totalPages > 1" class="flex justify-center items-center gap-4 mt-6">
+      <button [disabled]="currentPage === 1" (click)="currentPage = currentPage - 1" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 rounded-lg transition-colors font-semibold">
+        ← Previous
+      </button>
+      <span class="text-gray-700 dark:text-gray-300 font-semibold">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button [disabled]="currentPage === totalPages" (click)="currentPage = currentPage + 1" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 rounded-lg transition-colors font-semibold">
+        Next →
+      </button>
     </div>
   </div>
 
   <!-- Modal Form -->
-  <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>{{ isEditing ? '✏️ Edit Issue' : '➕ Report New Issue' }}</h2>
-        <button class="btn-close" (click)="closeModal()">&times;</button>
+  <div *ngIf="showModal" class="modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center z-50" (click)="closeModal()">
+    <div class="modal-content bg-white dark:bg-gray-900 rounded-lg shadow-2xl max-w-2xl w-11/12 max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
+      <div class="modal-header flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ isEditing ? 'Edit Issue' : 'Report New Issue' }}</h2>
+        <button class="text-2xl text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors" (click)="closeModal()">&times;</button>
       </div>
 
       <app-realtimereport-form

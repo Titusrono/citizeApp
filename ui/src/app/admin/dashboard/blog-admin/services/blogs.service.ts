@@ -10,6 +10,8 @@ export interface Blog {
   summary: string;
   category: string;
   content: string;   // full blog content
+  author?: string;   // optional author name
+  publishDate?: string; // optional publish date
 }
 
 @Injectable({

@@ -35,7 +35,7 @@ export class LoginComponent implements OnInit {
 
   onSubmit(form: NgForm) {
     if (form.invalid) {
-      this.errorMessage = '⚠️ Please fill all fields correctly.';
+      this.errorMessage = 'Please fill all fields correctly.';
       this.autoDismissError();
       return;
     }
@@ -47,7 +47,7 @@ export class LoginComponent implements OnInit {
     this.authService.login({ email: this.email, password: this.password }).subscribe({
       next: () => {
         this.loading = false;
-        this.successMessage = '✅ Login successful!';
+        this.successMessage = 'Login successful!';
         setTimeout(() => {
           this.successMessage = null;
         }, 3000); // auto dismiss success after 3s
@@ -66,7 +66,7 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.errorMessage = err.error?.message || '❌ Login failed. Please try again.';
+        this.errorMessage = err.error?.message || 'Login failed. Please try again.';
         this.autoDismissError();
       },
     });

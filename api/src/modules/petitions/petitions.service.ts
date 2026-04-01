@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Petition } from './entities/petition.entity';
@@ -14,6 +14,17 @@ export class PetitionsService {
     private petitionsRepository: Repository<Petition>,
   ) {}
 
+  private isValidObjectId(id: string): boolean {
+    return /^[0-9a-f]{24}$/i.test(id);
+  }
+
+  private convertToObjectId(id: string): ObjectId {
+    if (!this.isValidObjectId(id)) {
+      throw new BadRequestException(`Invalid petition ID format: ${id}`);
+    }
+    return new ObjectId(id);
+  }
+
   async create(createPetitionDto: CreatePetitionDto, user: User) {
     const petition = this.petitionsRepository.create({
       ...createPetitionDto,
@@ -27,15 +38,15 @@ export class PetitionsService {
   }
 
   async findOne(id: string) {
-    return this.petitionsRepository.findOne({ where: { id: new ObjectId(id) }, relations: ['user'] });
+    return this.petitionsRepository.findOne({ where: { id: this.convertToObjectId(id) }, relations: ['user'] });
   }
 
   async update(id: string, updatePetitionDto: UpdatePetitionDto) {
-    await this.petitionsRepository.update(id, updatePetitionDto);
+    await this.petitionsRepository.update(this.convertToObjectId(id), updatePetitionDto);
     return this.findOne(id);
   }
 
   async remove(id: string) {
-    return this.petitionsRepository.delete(id);
+    return this.petitionsRepository.delete(this.convertToObjectId(id));
   }
 }

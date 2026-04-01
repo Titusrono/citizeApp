@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PetitionService } from '../../services/petition.service';
 import { AdminPetitionFormComponent } from '../form/adminpetition-form.component';
+import { ConfirmDialogComponent, ViewModalComponent } from '../../../../../shared/components';
 
 // Type for error responses
 declare type ErrorResponse = { error?: { message?: string } };
@@ -10,13 +11,21 @@ declare type ErrorResponse = { error?: { message?: string } };
 @Component({
   selector: 'app-admin-petition-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, AdminPetitionFormComponent],
-  templateUrl: './adminpetition-list.component.html'
+  imports: [
+    CommonModule,
+    FormsModule,
+    AdminPetitionFormComponent,
+    ConfirmDialogComponent,
+    ViewModalComponent
+  ],
+  templateUrl: './adminpetition-list.component.html',
+  styleUrls: ['./adminpetition-list.component.scss']
 })
 export class AdminPetitionListComponent implements OnInit {
   currentData: any = {
     title: '',
     description: '',
+    category: '',
     targetAuthority: '',
     status: 'pending'
   };
@@ -27,6 +36,19 @@ export class AdminPetitionListComponent implements OnInit {
   editingPetition: any = null;
   isEditing = false;
   showModal = false;
+
+  // Confirm dialog state
+  showConfirmDialog = false;
+  confirmDialogTitle = '';
+  confirmDialogMessage = '';
+  pendingDeleteId: string | null = null;
+  isDeleting = false;
+
+  // View modal state
+  showViewModal = false;
+  viewModalTitle = '';
+  viewModalData: any = {};
+  viewModalFields: any[] = [];
 
   selectedAuthority: string = '';
   authorities: string[] = [
@@ -71,7 +93,7 @@ export class AdminPetitionListComponent implements OnInit {
         this.computeAuthorityStats();
       },
       error: (err: ErrorResponse) => {
-        this.errorMessage = '❌ Failed to load petitions';
+        this.errorMessage = 'Failed to load petitions';
         console.error('Failed to load petitions', err);
       }
     });
@@ -108,13 +130,13 @@ export class AdminPetitionListComponent implements OnInit {
   createPetition() {
     this.petitionService.createPetition(this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Petition created successfully!';
+        this.successMessage = 'Petition created successfully!';
         this.errorMessage = '';
         this.closeModal();
         this.fetchPetitions();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to create petition.';
+        this.errorMessage = 'Failed to create petition.';
         this.successMessage = '';
       }
     });
@@ -126,7 +148,7 @@ export class AdminPetitionListComponent implements OnInit {
 
     this.petitionService.updatePetition(id, this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Petition updated successfully!';
+        this.successMessage = 'Petition updated successfully!';
         this.errorMessage = '';
         this.editingPetition = null;
         this.isEditing = false;
@@ -134,7 +156,7 @@ export class AdminPetitionListComponent implements OnInit {
         this.fetchPetitions();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to update petition.';
+        this.errorMessage = 'Failed to update petition.';
         this.successMessage = '';
       }
     });
@@ -150,25 +172,72 @@ export class AdminPetitionListComponent implements OnInit {
   }
 
   onDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this petition?')) return;
+    this.pendingDeleteId = id;
+    this.confirmDialogTitle = 'Delete Petition';
+    this.confirmDialogMessage = 'Are you sure you want to delete this petition? This action cannot be undone.';
+    this.showConfirmDialog = true;
+  }
+
+  onConfirmDelete(): void {
+    if (!this.pendingDeleteId) return;
+
+    this.isDeleting = true;
+    const id = this.pendingDeleteId;
 
     this.petitionService.deletePetition(id).subscribe({
       next: () => {
-        this.successMessage = '✅ Petition deleted successfully!';
+        this.successMessage = 'Petition deleted successfully!';
         this.errorMessage = '';
+        this.showConfirmDialog = false;
+        this.pendingDeleteId = null;
+        this.isDeleting = false;
         this.fetchPetitions();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to delete petition.';
+        this.errorMessage = 'Failed to delete petition.';
         this.successMessage = '';
+        this.isDeleting = false;
       }
     });
+  }
+
+  onCancelDelete(): void {
+    this.showConfirmDialog = false;
+    this.pendingDeleteId = null;
+  }
+
+  onView(petition: any): void {
+    this.viewModalTitle = petition.title || 'Petition Details';
+    this.viewModalData = petition;
+    this.viewModalFields = [
+      { key: 'title', label: 'Title' },
+      { key: 'description', label: 'Description', type: 'longtext' },
+      { key: 'category', label: 'Category' },
+      { key: 'targetAuthority', label: 'Target Authority' },
+      { key: 'status', label: 'Status' },
+      {
+        key: 'createdAt',
+        label: 'Created Date',
+        type: 'date'
+      },
+      {
+        key: 'updatedAt',
+        label: 'Updated Date',
+        type: 'date'
+      }
+    ];
+    this.showViewModal = true;
+  }
+
+  onCloseViewModal(): void {
+    this.showViewModal = false;
   }
 
   resetForm() {
     this.currentData = {
       title: '',
       description: '',
+      category: '',
       targetAuthority: '',
       status: 'pending'
     };

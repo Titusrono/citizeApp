@@ -3,7 +3,7 @@
   <div class="header-section">
     <h1>Petitions</h1>
     <button class="btn-add" (click)="openModal()">
-      ➕ Create Petition
+      + Create Petition
     </button>
   </div>
 
@@ -22,7 +22,6 @@
         <tr>
           <th>Title</th>
           <th>Target Authority</th>
-          <th>Description</th>
           <th>Created</th>
           <th>Actions</th>
         </tr>
@@ -31,11 +30,11 @@
         <tr *ngFor="let item of items">
           <td>{{ item.title }}</td>
           <td>{{ item.targetAuthority }}</td>
-          <td>{{ item.description | slice:0:50 }}...</td>
           <td>{{ item.createdAt | date:'short' }}</td>
           <td>
-            <button class="btn-sm btn-edit" (click)="onEdit(item)">✏️ Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(item._id)">🗑️ Delete</button>
+            <button class="btn-sm btn-view" (click)="onView(item)">View</button>
+            <button class="btn-sm btn-edit" (click)="onEdit(item)">Edit</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(item._id)">Delete</button>
           </td>
         </tr>
       </tbody>
@@ -46,7 +45,7 @@
   <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{ isEditing ? '✏️ Edit Petition' : '➕ Create New Petition' }}</h2>
+        <h2>{{ isEditing ? 'Edit Petition' : 'Create New Petition' }}</h2>
         <button class="btn-close" (click)="closeModal()">&times;</button>
       </div>
 
@@ -61,4 +60,26 @@
       ></app-petition-form>
     </div>
   </div>
+
+  <!-- Confirm Delete Dialog -->
+  <app-confirm-dialog
+    [isVisible]="showConfirmDialog"
+    [title]="confirmDialogTitle"
+    [message]="confirmDialogMessage"
+    confirmText="Delete"
+    cancelText="Cancel"
+    [isLoading]="isDeleting"
+    [isDangerous]="true"
+    (confirm)="onConfirmDelete()"
+    (cancel)="onCancelDelete()"
+  ></app-confirm-dialog>
+
+  <!-- View Modal -->
+  <app-view-modal
+    [isVisible]="showViewModal"
+    [title]="viewModalTitle"
+    [data]="viewModalData"
+    [fields]="viewModalFields"
+    (close)="onCloseViewModal()"
+  ></app-view-modal>
 </div>

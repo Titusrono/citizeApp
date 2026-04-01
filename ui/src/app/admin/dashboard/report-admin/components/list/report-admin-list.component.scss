@@ -1,0 +1,69 @@
+@use '../../../../../shared/styles/list-table.scss';
+
+.report-admin-container {
+  padding: 20px;
+  background: #f5f7fa;
+  min-height: 100vh;
+  transition: background 0.3s ease;
+
+  .dark & {
+    background: #1a1a1a;
+  }
+}
+
+.stats-section {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 0 0 20px 0;
+  transition: all 0.3s ease;
+
+  .dark & {
+    background: #1e1e1e;
+    border-color: #333333;
+  }
+
+  h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+
+    .dark & {
+      color: #e0e0e0;
+    }
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 6px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      .stat-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        opacity: 0.9;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 8px 0;
+      }
+
+      .stat-percentage {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+    }
+  }
+}

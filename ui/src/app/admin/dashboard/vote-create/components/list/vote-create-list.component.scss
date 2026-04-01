@@ -1,92 +1,12 @@
-.list-container {
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+@use '../../../../../shared/styles/list-table.scss';
+
+.vote-create-container {
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #f5f7fa;
+  min-height: 100vh;
+  transition: background 0.3s ease;
 
-  h3 {
-    margin-top: 0;
-    color: #333;
-    font-size: 1.2rem;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 10px;
-  }
-
-  .loading {
-    text-align: center;
-    color: #666;
-    padding: 20px;
-    font-style: italic;
-  }
-
-  .no-data {
-    text-align: center;
-    color: #999;
-    padding: 20px;
-  }
-
-  .proposals-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-
-    thead {
-      background-color: #f8f9fa;
-
-      tr {
-        th {
-          padding: 12px;
-          text-align: left;
-          font-weight: 600;
-          color: #333;
-          border-bottom: 2px solid #dee2e6;
-        }
-      }
-    }
-
-    tbody {
-      tr {
-        &:hover {
-          background-color: #f8f9fa;
-        }
-
-        td {
-          padding: 12px;
-          border-bottom: 1px solid #dee2e6;
-          color: #333;
-        }
-      }
-    }
-  }
-
-  .btn-sm {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-right: 5px;
-
-    &.btn-edit {
-      background-color: #28a745;
-      color: white;
-
-      &:hover {
-        background-color: #218838;
-      }
-    }
-
-    &.btn-delete {
-      background-color: #dc3545;
-      color: white;
-
-      &:hover {
-        background-color: #c82333;
-      }
-    }
+  .dark & {
+    background: #1a1a1a;
   }
 }

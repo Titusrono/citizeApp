@@ -8,7 +8,8 @@ import { StreamingLiveFormComponent } from '../form/streaminglive-form.component
   selector: 'app-streaming-live-list',
   standalone: true,
   imports: [CommonModule, FormsModule, StreamingLiveFormComponent],
-  templateUrl: './streaminglive-list.component.html'
+  templateUrl: './streaminglive-list.component.html',
+  styleUrls: ['./streaminglive-list.component.scss']
 })
 export class StreamingLiveListComponent implements OnInit {
   meetings: (VirtualMeet & { isUpcoming: boolean; isPast: boolean; isLive: boolean })[] = [];
@@ -76,7 +77,7 @@ export class StreamingLiveListComponent implements OnInit {
         this.loading = false;
       },
       error: () => {
-        this.errorMessage = '❌ Failed to load meetings.';
+        this.errorMessage = 'Failed to load meetings.';
         this.loading = false;
       }
     });
@@ -93,13 +94,13 @@ export class StreamingLiveListComponent implements OnInit {
   createMeeting(): void {
     this.virtualService.createMeeting(this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Meeting created successfully!';
+        this.successMessage = 'Meeting created successfully!';
         this.errorMessage = '';
         this.closeModal();
         this.fetchMeetings();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to create meeting.';
+        this.errorMessage = 'Failed to create meeting.';
         this.successMessage = '';
       }
     });
@@ -110,7 +111,7 @@ export class StreamingLiveListComponent implements OnInit {
 
     this.virtualService.updateMeeting(this.editingMeeting._id, this.currentData).subscribe({
       next: () => {
-        this.successMessage = '✅ Meeting updated successfully!';
+        this.successMessage = 'Meeting updated successfully!';
         this.errorMessage = '';
         this.editingMeeting = null;
         this.isEditing = false;
@@ -118,7 +119,7 @@ export class StreamingLiveListComponent implements OnInit {
         this.fetchMeetings();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to update meeting.';
+        this.errorMessage = 'Failed to update meeting.';
         this.successMessage = '';
       }
     });
@@ -138,12 +139,12 @@ export class StreamingLiveListComponent implements OnInit {
 
     this.virtualService.deleteMeeting(id).subscribe({
       next: () => {
-        this.successMessage = '✅ Meeting deleted successfully!';
+        this.successMessage = 'Meeting deleted successfully!';
         this.errorMessage = '';
         this.fetchMeetings();
       },
       error: () => {
-        this.errorMessage = '❌ Failed to delete meeting.';
+        this.errorMessage = 'Failed to delete meeting.';
         this.successMessage = '';
       }
     });

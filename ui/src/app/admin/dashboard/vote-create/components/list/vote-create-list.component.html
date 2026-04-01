@@ -3,7 +3,7 @@
   <div class="header-section">
     <h1>Proposals Management</h1>
     <button class="btn-add" (click)="openModal()">
-      ➕ Add New Proposal
+      + Add New Proposal
     </button>
   </div>
 
@@ -34,8 +34,8 @@
           <td>{{ proposal.endDate | date:'short' }}</td>
           <td>{{ proposal.eligibility || '-' }}</td>
           <td>
-            <button class="btn-sm btn-edit" (click)="onEdit(proposal)">✏️ Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(proposal._id)">🗑️ Delete</button>
+            <button class="btn-sm btn-edit" (click)="onEdit(proposal)">Edit</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(proposal._id)">Delete</button>
           </td>
         </tr>
       </tbody>
@@ -46,7 +46,7 @@
   <div *ngIf="showModal" class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{ isEditing ? '✏️ Edit Proposal' : '➕ Add New Proposal' }}</h2>
+        <h2>{{ isEditing ? 'Edit Proposal' : 'Add New Proposal' }}</h2>
         <button class="btn-close" (click)="closeModal()">&times;</button>
       </div>
 
