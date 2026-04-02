@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } fro
 import { VotesService } from './votes.service';
 import { CreateVoteDto } from './dto/create-vote.dto';
 import { UpdateVoteDto } from './dto/update-vote.dto';
+import { CastVoteDto } from './dto/cast-vote.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -40,5 +41,10 @@ export class VotesController {
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   async remove(@Param('id') id: string) {
     return this.votesService.remove(id);
+  }
+
+  @Post(':id/vote')
+  async castVote(@Param('id') id: string, @Body() castVoteDto: CastVoteDto) {
+    return this.votesService.castVote(id, castVoteDto);
   }
 }
