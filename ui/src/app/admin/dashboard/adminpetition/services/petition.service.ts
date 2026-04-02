@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
 export interface Petition {
+  id?: string;
   _id?: string;
   title: string;
   description: string;

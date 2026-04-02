@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VirtualMeet, VirtualService } from '../../services/virtual.service';
 import { VirtualCreateFormComponent } from '../form/virtual-create-form.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components';
 
 @Component({
   selector: 'app-virtual-create-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, VirtualCreateFormComponent],
+  imports: [CommonModule, FormsModule, VirtualCreateFormComponent, ConfirmDialogComponent],
   templateUrl: './virtual-create-list.component.html',
   styleUrls: ['./virtual-create-list.component.scss']
 })
@@ -27,6 +28,11 @@ export class VirtualCreateListComponent implements OnInit {
   editingMeeting: any = null;
   isEditing = false;
   showModal = false;
+
+  // Delete confirmation dialog state
+  showDeleteConfirm = false;
+  meetingToDelete: any = null;
+  isDeleting = false;
 
   filter: 'all' | 'upcoming' | 'done' | 'live' = 'all';
 
@@ -159,19 +165,34 @@ export class VirtualCreateListComponent implements OnInit {
   }
 
   onDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this meeting?')) return;
+    this.meetingToDelete = { id };
+    this.showDeleteConfirm = true;
+  }
+
+  onDeleteConfirmed() {
+    const id = this.meetingToDelete.id;
+    this.isDeleting = true;
 
     this.virtualService.deleteMeeting(id).subscribe({
       next: () => {
         this.successMessage = 'Meeting deleted successfully!';
         this.errorMessage = '';
+        this.showDeleteConfirm = false;
+        this.meetingToDelete = null;
+        this.isDeleting = false;
         this.fetchMeetings();
       },
       error: err => {
         this.errorMessage = err?.error?.message || 'Failed to delete meeting.';
         this.successMessage = '';
+        this.isDeleting = false;
       }
     });
+  }
+
+  onDeleteCancelled() {
+    this.showDeleteConfirm = false;
+    this.meetingToDelete = null;
   }
 
   resetForm() {

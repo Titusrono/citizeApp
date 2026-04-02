@@ -34,7 +34,15 @@ export class VotesService {
   }
 
   async findAll() {
-    return this.votesRepository.find({ relations: ['user'] });
+    const votes = await this.votesRepository.find({ relations: ['user'] });
+    return votes.map(vote => ({
+      id: vote.id,
+      title: vote.title,
+      description: vote.description,
+      eligibility: vote.eligibility,
+      end_date: vote.end_date,
+      // Add other properties you want to return
+    }));
   }
 
   async findOne(id: string) {

@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
 export interface VirtualMeet {
-  _id?: string;
+  id?: string;
+  _id?: string; // MongoDB alias
   title: string;
   agenda: string;
   date: string; // ISO string format

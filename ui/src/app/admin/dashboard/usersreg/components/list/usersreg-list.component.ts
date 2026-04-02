@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersregService } from '../../services/usersreg.service';
 import { UsersregFormComponent } from '../form/usersreg-form.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components';
 
 @Component({
   selector: 'app-usersreg-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, UsersregFormComponent],
+  imports: [CommonModule, FormsModule, UsersregFormComponent, ConfirmDialogComponent],
   templateUrl: './usersreg-list.component.html',
   styleUrls: ['./usersreg-list.component.scss']
 })
@@ -27,13 +28,17 @@ export class UsersregListComponent implements OnInit {
   isEditing = false;
   showModal = false;
 
+  // Delete confirmation dialog state
+  showDeleteConfirm = false;
+  userToDelete: any = null;
+  isDeleting = false;
+
   subCounties: string[] = [
-    'Tetu',
-    'Kieni',
-    'Mathira East',
-    'Mathira West',
-    'Othaya',
-    'Mukurweini'
+    'Kajiado North',
+    'Kajiado South',
+    'Kajiado East',
+    'Kajiado West',
+    'Kajiado Central'
   ];
   selectedSubCounty: string = '';
   subCountyStats: { subCounty: string; count: number; percentage: number }[] = [];
@@ -139,19 +144,34 @@ export class UsersregListComponent implements OnInit {
   }
 
   onDelete(email: string): void {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    this.userToDelete = { email };
+    this.showDeleteConfirm = true;
+  }
+
+  onDeleteConfirmed(): void {
+    const email = this.userToDelete.email;
+    this.isDeleting = true;
 
     this.usersregService.deleteUser(email).subscribe({
       next: () => {
         this.successMessage = 'User deleted successfully!';
         this.errorMessage = '';
+        this.showDeleteConfirm = false;
+        this.userToDelete = null;
+        this.isDeleting = false;
         this.fetchUsers();
       },
       error: () => {
         this.errorMessage = 'Failed to delete user.';
         this.successMessage = '';
+        this.isDeleting = false;
       }
     });
+  }
+
+  onDeleteCancelled(): void {
+    this.showDeleteConfirm = false;
+    this.userToDelete = null;
   }
 
   resetForm(): void {

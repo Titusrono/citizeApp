@@ -12,13 +12,13 @@
   <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
 
   <!-- Sub-County Stats -->
-  <div class="stats-section">
-    <h3>User Distribution by Sub-County</h3>
-    <div class="stats-grid">
-      <div *ngFor="let stat of subCountyStats" class="stat-card">
-        <div class="stat-label">{{ stat.subCounty }}</div>
-        <div class="stat-value">{{ stat.count }}</div>
-        <div class="stat-percentage">{{ stat.percentage }}%</div>
+  <div class="mb-6" *ngIf="subCountyStats.length > 0">
+    <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4">User Distribution by Sub-County</h3>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+      <div *ngFor="let stat of subCountyStats" class="bg-linear-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+        <div class="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide truncate">{{ stat.subCounty }}</div>
+        <div class="text-2xl font-bold text-slate-800 dark:text-slate-100 mt-2">{{ stat.count }}</div>
+        <div class="text-sm font-semibold text-blue-600 dark:text-blue-400 mt-1">{{ stat.percentage }}%</div>
       </div>
     </div>
   </div>
@@ -84,4 +84,17 @@
       </app-usersreg-form>
     </div>
   </div>
+
+  <!-- Delete Confirmation Dialog -->
+  <app-confirm-dialog
+    [isVisible]="showDeleteConfirm"
+    title="Delete User"
+    message="Are you sure you want to permanently delete this user? This action cannot be undone."
+    confirmText="Delete Permanently"
+    cancelText="Cancel"
+    [isDangerous]="true"
+    [isLoading]="isDeleting"
+    (confirm)="onDeleteConfirmed()"
+    (cancel)="onDeleteCancelled()"
+  ></app-confirm-dialog>
 </div>

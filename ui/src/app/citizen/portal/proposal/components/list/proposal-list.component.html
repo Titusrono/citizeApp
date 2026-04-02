@@ -34,8 +34,9 @@
           <td>{{ item.eligibility || '-' }}</td>
           <td>{{ item.endDate | date:'short' }}</td>
           <td>
+            <button class="btn-sm btn-view" (click)="onView(item)">View</button>
             <button class="btn-sm btn-edit" (click)="onEdit(item)">Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(item._id)">Delete</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(item.id)">Delete</button>
           </td>
         </tr>
       </tbody>
@@ -62,3 +63,24 @@
     </div>
   </div>
 </div>
+
+<!-- View Modal -->
+<app-proposal-view
+  *ngIf="showViewModal"
+  [data]="viewModalData"
+  (close)="closeViewModal()"
+></app-proposal-view>
+
+<!-- Confirm Delete Dialog -->
+<app-confirm-dialog
+  [isVisible]="showConfirmDialog"
+  title="Confirm Deletion"
+  message="Are you sure you want to delete this proposal?"
+  confirmText="Delete"
+  cancelText="Cancel"
+  [isLoading]="isDeleting"
+  [isDangerous]="true"
+  (confirm)="onConfirmDelete()"
+  (cancel)="onCancelDelete()"
+></app-confirm-dialog>
+

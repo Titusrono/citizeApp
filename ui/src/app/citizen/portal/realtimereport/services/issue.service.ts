@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
 export interface Issue {
+  id?: string;
   _id?: string;
   description: string;
   location: string;

@@ -5,11 +5,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { VoteCreateService, CastVoteDto } from '../../../../../services/vote-create.service';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { ProposalFormComponent } from '../form/proposal-form.component';
+import { ProposalViewComponent } from '../view/proposal-view.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components';
 
 @Component({
   selector: 'app-proposal-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ProposalFormComponent],
+  imports: [CommonModule, FormsModule, ProposalFormComponent, ProposalViewComponent, ConfirmDialogComponent],
   templateUrl: './proposal-list.component.html',
   styleUrls: ['./proposal-list.component.scss']
 })
@@ -27,6 +29,15 @@ export class ProposalListComponent implements OnInit {
   editingProposal: any = null;
   isEditing = false;
   showModal = false;
+
+  // View Modal
+  showViewModal = false;
+  viewModalData: any = null;
+
+  // Confirm Dialog
+  showConfirmDialog = false;
+  pendingDeleteId: string | null = null;
+  isDeleting = false;
 
   voteStatus: { [key: string]: boolean } = {};
   selectedVote: { [key: string]: 'yes' | 'no' } = {};
@@ -60,6 +71,49 @@ export class ProposalListComponent implements OnInit {
   closeModal(): void {
     this.showModal = false;
     this.resetForm();
+  }
+
+  onView(item: any) {
+    this.viewModalData = item;
+    this.showViewModal = true;
+  }
+
+  closeViewModal() {
+    this.showViewModal = false;
+    this.viewModalData = null;
+  }
+
+  onDelete(id: string) {
+    this.pendingDeleteId = id;
+    this.showConfirmDialog = true;
+  }
+
+  onConfirmDelete() {
+    if (this.pendingDeleteId) {
+      this.isDeleting = true;
+      this.voteService.deleteVote(this.pendingDeleteId).subscribe({
+        next: () => {
+          this.successMessage = 'Proposal deleted successfully.';
+          this.proposals = this.proposals.filter(p => p.id !== this.pendingDeleteId && p._id !== this.pendingDeleteId);
+          this.closeConfirmDialog();
+        },
+        error: (err) => {
+          this.errorMessage = 'Failed to delete proposal.';
+          console.error(err);
+          this.closeConfirmDialog();
+        }
+      });
+    }
+  }
+
+  onCancelDelete() {
+    this.closeConfirmDialog();
+  }
+
+  private closeConfirmDialog() {
+    this.showConfirmDialog = false;
+    this.pendingDeleteId = null;
+    this.isDeleting = false;
   }
 
   loadVoteStatus(): void {
@@ -187,22 +241,6 @@ export class ProposalListComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
     this.showModal = true;
-  }
-
-  onDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this proposal?')) return;
-
-    this.voteService.deleteVote(id).subscribe({
-      next: () => {
-        this.successMessage = 'Proposal deleted successfully!';
-        this.errorMessage = '';
-        this.fetchProposals();
-      },
-      error: (err: HttpErrorResponse) => {
-        this.errorMessage = 'Failed to delete proposal.';
-        this.successMessage = '';
-      }
-    });
   }
 
   resetForm() {

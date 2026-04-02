@@ -40,15 +40,15 @@ export class PetitionsController {
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  async update(@Param('id') id: string, @Body() updatePetitionDto: UpdatePetitionDto) {
-    return this.petitionsService.update(id, updatePetitionDto);
+  @Roles(UserRole.CITIZEN, UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  async update(@Param('id') id: string, @Body() updatePetitionDto: UpdatePetitionDto, @Req() req: any) {
+    return this.petitionsService.update(id, updatePetitionDto, req.user);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
-  async remove(@Param('id') id: string) {
-    return this.petitionsService.remove(id);
+  @Roles(UserRole.CITIZEN, UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  async remove(@Param('id') id: string, @Req() req: any) {
+    return this.petitionsService.remove(id, req.user);
   }
 }

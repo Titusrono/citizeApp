@@ -71,7 +71,7 @@
           </td>
           <td>
             <button class="btn-sm btn-edit" (click)="onEdit(item)">Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(item._id!)" [disabled]="!item._id">Delete</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(item.id!)" [disabled]="!item.id">Delete</button>
           </td>
         </tr>
       </tbody>
@@ -97,4 +97,17 @@
       ></app-virtual-create-form>
     </div>
   </div>
+
+  <!-- Delete Confirmation Dialog -->
+  <app-confirm-dialog
+    [isVisible]="showDeleteConfirm"
+    title="Delete Meeting"
+    message="Are you sure you want to permanently delete this meeting? This action cannot be undone."
+    confirmText="Delete Permanently"
+    cancelText="Cancel"
+    [isDangerous]="true"
+    [isLoading]="isDeleting"
+    (confirm)="onDeleteConfirmed()"
+    (cancel)="onDeleteCancelled()"
+  ></app-confirm-dialog>
 </div>

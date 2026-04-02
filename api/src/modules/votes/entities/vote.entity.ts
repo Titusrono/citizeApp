@@ -1,4 +1,4 @@
-import { Entity, ObjectIdColumn, ManyToOne } from 'typeorm';
+import { Entity, ObjectIdColumn, ManyToOne, Column } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Policy } from '../../policies/entities/policy.entity';
 import { ObjectId } from 'mongodb';
@@ -7,6 +7,18 @@ import { ObjectId } from 'mongodb';
 export class Vote {
   @ObjectIdColumn()
   id: ObjectId;
+
+  @Column()
+  title: string;
+
+  @Column()
+  description: string;
+
+  @Column()
+  eligibility: string;
+
+  @Column()
+  end_date: Date;
 
   @ManyToOne(() => Policy, (policy: Policy) => policy.votes, { onDelete: 'CASCADE' })
   policy: Policy;

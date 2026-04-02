@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReportService } from '../../services/report.service';
 import { ReportAdminFormComponent } from '../form/report-admin-form.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components';
 
 @Component({
   selector: 'app-report-admin-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReportAdminFormComponent],
+  imports: [CommonModule, FormsModule, ReportAdminFormComponent, ConfirmDialogComponent],
   templateUrl: './report-admin-list.component.html',
   styleUrls: ['./report-admin-list.component.scss']
 })
@@ -25,6 +26,11 @@ export class ReportAdminListComponent implements OnInit {
   editingReport: any = null;
   isEditing = false;
   showModal = false;
+
+  // Delete confirmation dialog state
+  showDeleteConfirm = false;
+  reportToDelete: any = null;
+  isDeleting = false;
 
   selectedCategory: string = '';
   availableCategories: string[] = [];
@@ -131,19 +137,34 @@ export class ReportAdminListComponent implements OnInit {
   }
 
   onDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this report?')) return;
+    this.reportToDelete = { id };
+    this.showDeleteConfirm = true;
+  }
+
+  onDeleteConfirmed() {
+    const id = this.reportToDelete.id;
+    this.isDeleting = true;
 
     this.reportService.deleteReport(id).subscribe({
       next: () => {
         this.successMessage = 'Report deleted successfully!';
         this.errorMessage = '';
+        this.showDeleteConfirm = false;
+        this.reportToDelete = null;
+        this.isDeleting = false;
         this.fetchReports();
       },
       error: () => {
         this.errorMessage = 'Failed to delete report.';
         this.successMessage = '';
+        this.isDeleting = false;
       }
     });
+  }
+
+  onDeleteCancelled() {
+    this.showDeleteConfirm = false;
+    this.reportToDelete = null;
   }
 
   resetForm() {

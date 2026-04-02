@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Blog {
+  id?: string;
   _id?: string;
   title: string;
   date: string;      // ISO string format from backend

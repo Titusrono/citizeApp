@@ -51,7 +51,7 @@
           <td><span class="status-badge" [ngClass]="'status-' + getStatus(meeting).toLowerCase()">{{ getStatus(meeting) }}</span></td>
           <td>
             <button class="btn-sm btn-edit" (click)="onEdit(meeting)">Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(meeting._id!)" [disabled]="!meeting._id">Delete</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(meeting.id!)" [disabled]="!meeting.id">Delete</button>
             <a *ngIf="meeting.meetLink && meeting.isLive" [href]="meeting.meetLink" target="_blank" class="btn-sm btn-primary">Join</a>
           </td>
         </tr>

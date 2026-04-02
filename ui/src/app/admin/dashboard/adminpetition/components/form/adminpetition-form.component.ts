@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -15,7 +15,7 @@ interface FormErrors {
   templateUrl: './adminpetition-form.component.html',
   styleUrls: ['./adminpetition-form.component.scss']
 })
-export class AdminPetitionFormComponent {
+export class AdminPetitionFormComponent implements OnChanges {
   @Input() data: any = {
     title: '',
     description: '',
@@ -43,6 +43,17 @@ export class AdminPetitionFormComponent {
 
   @Output() submit = new EventEmitter<any>();
   @Output() close = new EventEmitter<void>();
+
+  /**
+   * Handle input changes - reset validation when data changes (e.g., during edit)
+   */
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data'] && !changes['data'].firstChange) {
+      // Reset touched state when data changes to avoid showing validation errors on edit load
+      this.touched = {};
+      this.errors = {};
+    }
+  }
 
   validateField(fieldName: string): boolean {
     const value = this.data[fieldName]?.toString().trim();

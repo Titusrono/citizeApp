@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Blog, BlogsService } from '../../services/blogs.service';
 import { BlogAdminFormComponent } from '../form/blog-admin-form.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components';
 
 @Component({
   selector: 'app-blog-admin-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, BlogAdminFormComponent],
+  imports: [CommonModule, FormsModule, BlogAdminFormComponent, ConfirmDialogComponent],
   templateUrl: './blog-admin-list.component.html',
   styleUrls: ['./blog-admin-list.component.scss']
 })
@@ -26,6 +27,11 @@ export class BlogAdminListComponent implements OnInit {
   editingBlog: any = null;
   isEditing = false;
   showModal = false;
+
+  // Delete confirmation dialog state
+  showDeleteConfirm = false;
+  blogToDelete: any = null;
+  isDeleting = false;
 
   categoryOptions = [
     'Governance',
@@ -116,19 +122,34 @@ export class BlogAdminListComponent implements OnInit {
   }
 
   onDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this blog?')) return;
+    this.blogToDelete = { id };
+    this.showDeleteConfirm = true;
+  }
+
+  onDeleteConfirmed() {
+    const id = this.blogToDelete.id;
+    this.isDeleting = true;
 
     this.blogsService.deleteBlog(id).subscribe({
       next: () => {
         this.successMessage = 'Blog deleted successfully!';
         this.errorMessage = '';
+        this.showDeleteConfirm = false;
+        this.blogToDelete = null;
+        this.isDeleting = false;
         this.fetchBlogs();
       },
       error: () => {
         this.errorMessage = 'Failed to delete blog.';
         this.successMessage = '';
+        this.isDeleting = false;
       }
     });
+  }
+
+  onDeleteCancelled() {
+    this.showDeleteConfirm = false;
+    this.blogToDelete = null;
   }
 
   resetForm() {

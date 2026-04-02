@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminVoteCreateService, CreateVoteCreateDto } from '../../services/vote-create.service';
 import { VoteCreateFormComponent } from '../form/vote-create-form.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components';
 
 @Component({
   selector: 'app-vote-create-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, VoteCreateFormComponent],
+  imports: [CommonModule, FormsModule, VoteCreateFormComponent, ConfirmDialogComponent],
   templateUrl: './vote-create-list.component.html',
   styleUrls: ['./vote-create-list.component.scss']
 })
@@ -25,6 +26,11 @@ export class VoteCreateListComponent implements OnInit {
   editingProposal: any = null;
   isEditing = false;
   showModal = false;
+
+  // Delete confirmation dialog state
+  showDeleteConfirm = false;
+  proposalToDelete: any = null;
+  isDeleting = false;
 
   constructor(private voteService: AdminVoteCreateService) {}
 
@@ -109,20 +115,35 @@ export class VoteCreateListComponent implements OnInit {
   }
 
   onDelete(id: string) {
-    if (!confirm('Are you sure you want to delete this proposal?')) return;
+    this.proposalToDelete = { id };
+    this.showDeleteConfirm = true;
+  }
+
+  onDeleteConfirmed() {
+    const id = this.proposalToDelete.id;
+    this.isDeleting = true;
 
     this.voteService.deleteVote(id).subscribe({
       next: () => {
         this.successMessage = 'Proposal deleted successfully!';
         this.errorMessage = '';
+        this.showDeleteConfirm = false;
+        this.proposalToDelete = null;
+        this.isDeleting = false;
         this.fetchProposals();
       },
       error: (err) => {
         console.error('Error deleting proposal:', err);
         this.errorMessage = 'Failed to delete proposal.';
         this.successMessage = '';
+        this.isDeleting = false;
       }
     });
+  }
+
+  onDeleteCancelled() {
+    this.showDeleteConfirm = false;
+    this.proposalToDelete = null;
   }
 
   resetForm() {

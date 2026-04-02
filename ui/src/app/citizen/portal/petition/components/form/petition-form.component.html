@@ -1,12 +1,12 @@
-<div class="flex flex-col h-full bg-gradient-to-b from-slate-50 to-white">
+<div class="flex flex-col h-full bg-linear-to-b from-slate-50 to-white">
   <!-- Scrollable Form Content -->
   <div class="overflow-y-auto flex-1">
     <!-- Alert Messages -->
     <div class="px-6 py-4 space-y-3">
-      <div *ngIf="successMessage" class="bg-gradient-to-r from-green-50 to-emerald-50 text-green-800 border-l-4 border-green-500 px-5 py-4 rounded-lg shadow-sm dark:bg-green-900/20 dark:text-green-300 dark:border-green-600">
+      <div *ngIf="successMessage" class="bg-linear-to-r from-green-50 to-emerald-50 text-green-800 border-l-4 border-green-500 px-5 py-4 rounded-lg shadow-sm dark:bg-green-900/20 dark:text-green-300 dark:border-green-600">
         <strong>Success:</strong> {{ successMessage }}
       </div>
-      <div *ngIf="errorMessage" class="bg-gradient-to-r from-red-50 to-rose-50 text-red-800 border-l-4 border-red-500 px-5 py-4 rounded-lg shadow-sm dark:bg-red-900/20 dark:text-red-300 dark:border-red-600">
+      <div *ngIf="errorMessage" class="bg-linear-to-r from-red-50 to-rose-50 text-red-800 border-l-4 border-red-500 px-5 py-4 rounded-lg shadow-sm dark:bg-red-900/20 dark:text-red-300 dark:border-red-600">
         <strong>Error:</strong> {{ errorMessage }}
       </div>
     </div>
@@ -178,7 +178,7 @@
         <button
           type="submit"
           [disabled]="isSubmitting"
-          class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+          class="px-6 py-2.5 bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
         >
           <span *ngIf="!isSubmitting">{{ isEditing ? 'Update Petition' : 'Submit Petition' }}</span>
           <span *ngIf="isSubmitting">Processing...</span>

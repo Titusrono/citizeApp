@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
 export interface Blog {
-  _id?: string;
+  id?: string;
+  _id?: string; // MongoDB alias
   title: string;
   date: string;      // ISO string format from backend
   summary: string;

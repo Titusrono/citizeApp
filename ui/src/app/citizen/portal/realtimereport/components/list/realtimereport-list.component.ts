@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IssueService } from '../../services/issue.service';
 import { RealtimereportFormComponent } from '../form/realtimereport-form.component';
+import { ConfirmDialogComponent } from '../../../../../shared/components';
 
 // Add type annotations for error parameters
 declare type ErrorResponse = { error?: { message?: string } };
@@ -10,7 +11,7 @@ declare type ErrorResponse = { error?: { message?: string } };
 @Component({
   selector: 'app-realtimereport-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RealtimereportFormComponent],
+  imports: [CommonModule, FormsModule, RealtimereportFormComponent, ConfirmDialogComponent],
   templateUrl: './realtimereport-list.component.html',
   styleUrls: ['./realtimereport-list.component.scss']
 })
@@ -29,10 +30,17 @@ export class RealtimereportListComponent implements OnInit {
   isEditing = false;
   showModal = false;
   isLoading = true;
+  Math = Math; // Add Math reference for template
+
+  // Delete confirmation dialog state
+  showDeleteConfirm = false;
+  issueToDelete: any = null;
+  isDeleting = false;
 
   selectedCategory: string = '';
   currentPage: number = 1;
-  pageSize: number = 6;
+  pageSize: number = 10;
+  pageSizeOptions: number[] = [10, 25, 50, 100];
 
   constructor(private issueService: IssueService) {}
 
@@ -55,7 +63,13 @@ export class RealtimereportListComponent implements OnInit {
     this.errorMessage = '';
     this.issueService.getAllIssues().subscribe({
       next: (data: any[]) => {
-        this.itemsList = data;
+        // Sort by createdAt descending (newest first)
+        this.itemsList = data.sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA;
+        });
+        this.currentPage = 1; // Reset to first page
         this.isLoading = false;
       },
       error: (error: ErrorResponse) => {
@@ -119,19 +133,34 @@ export class RealtimereportListComponent implements OnInit {
   }
 
   onDelete(id: string): void {
-    if (!confirm('Are you sure you want to delete this issue?')) return;
+    this.issueToDelete = { id };
+    this.showDeleteConfirm = true;
+  }
+
+  onDeleteConfirmed(): void {
+    const id = this.issueToDelete.id;
+    this.isDeleting = true;
 
     this.issueService.deleteIssue(id).subscribe({
       next: () => {
         this.successMessage = 'Issue deleted successfully!';
         this.errorMessage = '';
+        this.showDeleteConfirm = false;
+        this.issueToDelete = null;
+        this.isDeleting = false;
         this.fetchIssues();
       },
       error: (err: ErrorResponse) => {
         this.errorMessage = err?.error?.message || 'Failed to delete issue.';
         this.successMessage = '';
+        this.isDeleting = false;
       }
     });
+  }
+
+  onDeleteCancelled(): void {
+    this.showDeleteConfirm = false;
+    this.issueToDelete = null;
   }
 
   resetForm(): void {
@@ -161,5 +190,9 @@ export class RealtimereportListComponent implements OnInit {
 
   get totalPages(): number {
     return Math.ceil(this.getFilteredIssues().length / this.pageSize);
+  }
+
+  onPageSizeChange(): void {
+    this.currentPage = 1; // Reset to first page when page size changes
   }
 }

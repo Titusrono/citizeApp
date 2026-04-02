@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
 export interface Moderator {
+  id?: string;
   _id?: string;
   name: string;
   email: string;

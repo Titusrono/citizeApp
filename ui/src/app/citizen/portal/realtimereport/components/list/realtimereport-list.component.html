@@ -24,17 +24,27 @@
   </div>
 
   <!-- Filter Section -->
-  <div class="mb-6" *ngIf="itemsList.length > 0">
-    <label for="categoryFilter" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Filter by Category:</label>
-    <select [(ngModel)]="selectedCategory" (change)="getPaginatedIssues()" id="categoryFilter" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-blue-500">
-      <option value="">All Categories</option>
-      <option value="pothole">Pothole</option>
-      <option value="flooding">Flooding</option>
-      <option value="sanitation">Sanitation</option>
-      <option value="damaged-sign">Damaged Sign</option>
-      <option value="streetlight">Street Light</option>
-      <option value="other">Other</option>
-    </select>
+  <div class="mb-6 flex flex-col gap-4" *ngIf="itemsList.length > 0">
+    <div>
+      <label for="categoryFilter" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Filter by Category:</label>
+      <select [(ngModel)]="selectedCategory" (change)="getPaginatedIssues()" id="categoryFilter" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-blue-500">
+        <option value="">All Categories</option>
+        <option value="pothole">Pothole</option>
+        <option value="flooding">Flooding</option>
+        <option value="sanitation">Sanitation</option>
+        <option value="damaged-sign">Damaged Sign</option>
+        <option value="streetlight">Street Light</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    
+    <!-- Items Per Page -->
+    <div>
+      <label for="pageSizeFilter" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Items per page:</label>
+      <select [(ngModel)]="pageSize" (change)="onPageSizeChange()" id="pageSizeFilter" class="px-4 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-600 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-blue-500">
+        <option *ngFor="let size of pageSizeOptions" [value]="size">{{ size }} items</option>
+      </select>
+    </div>
   </div>
 
   <!-- Loading State -->
@@ -81,7 +91,7 @@
             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ issue.createdAt | date:'short' }}</td>
             <td class="px-4 py-3 flex gap-2">
               <button class="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300 rounded text-sm font-semibold transition-colors" (click)="onEdit(issue)">Edit</button>
-              <button class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 rounded text-sm font-semibold transition-colors" (click)="onDelete(issue._id)">Delete</button>
+              <button class="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 rounded text-sm font-semibold transition-colors" (click)="onDelete(issue.id)">Delete</button>
             </td>
           </tr>
         </tbody>
@@ -89,14 +99,62 @@
     </div>
 
     <!-- Pagination -->
-    <div *ngIf="totalPages > 1" class="flex justify-center items-center gap-4 mt-6">
-      <button [disabled]="currentPage === 1" (click)="currentPage = currentPage - 1" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 rounded-lg transition-colors font-semibold">
-        ← Previous
-      </button>
-      <span class="text-gray-700 dark:text-gray-300 font-semibold">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button [disabled]="currentPage === totalPages" (click)="currentPage = currentPage + 1" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 rounded-lg transition-colors font-semibold">
-        Next →
-      </button>
+    <div *ngIf="totalPages > 1" class="flex flex-col gap-4 mt-8">
+      <!-- Pagination Stats -->
+      <div class="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
+        <span>Showing {{ ((currentPage - 1) * pageSize) + 1 }} to {{ Math.min(currentPage * pageSize, getFilteredIssues().length) }} of {{ getFilteredIssues().length }} issues</span>
+      </div>
+      
+      <!-- Pagination Controls -->
+      <div class="flex justify-center items-center gap-2 flex-wrap">
+        <button 
+          [disabled]="currentPage === 1" 
+          (click)="currentPage = 1"
+          class="px-3 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 rounded-lg transition-colors font-semibold text-sm"
+          title="First Page"
+        >
+          ⏮️ First
+        </button>
+        
+        <button 
+          [disabled]="currentPage === 1" 
+          (click)="currentPage = currentPage - 1" 
+          class="px-3 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 rounded-lg transition-colors font-semibold text-sm"
+        >
+          ← Previous
+        </button>
+        
+        <!-- Page Numbers -->
+        <div class="flex gap-1">
+          <ng-container *ngFor="let i of [].constructor(Math.max(0, totalPages)); let idx = index">
+            <button 
+              *ngIf="(idx + 1) >= currentPage - 2 && (idx + 1) <= currentPage + 2"
+              [ngClass]="{'bg-blue-500 text-white dark:bg-blue-600': (idx + 1) === currentPage, 'bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600': (idx + 1) !== currentPage}"
+              (click)="currentPage = idx + 1"
+              class="px-3 py-2 text-gray-800 dark:text-gray-200 rounded-lg transition-colors font-semibold text-sm"
+            >
+              {{ idx + 1 }}
+            </button>
+          </ng-container>
+        </div>
+        
+        <button 
+          [disabled]="currentPage === totalPages" 
+          (click)="currentPage = currentPage + 1" 
+          class="px-3 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 rounded-lg transition-colors font-semibold text-sm"
+        >
+          Next →
+        </button>
+        
+        <button 
+          [disabled]="currentPage === totalPages" 
+          (click)="currentPage = totalPages"
+          class="px-3 py-2 bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 rounded-lg transition-colors font-semibold text-sm"
+          title="Last Page"
+        >
+          Last ⏭️
+        </button>
+      </div>
     </div>
   </div>
 
@@ -119,4 +177,17 @@
       </app-realtimereport-form>
     </div>
   </div>
+
+  <!-- Delete Confirmation Dialog -->
+  <app-confirm-dialog
+    [isVisible]="showDeleteConfirm"
+    title="Delete Issue"
+    message="Are you sure you want to permanently delete this issue? This action cannot be undone."
+    confirmText="Delete Permanently"
+    cancelText="Cancel"
+    [isDangerous]="true"
+    [isLoading]="isDeleting"
+    (confirm)="onDeleteConfirmed()"
+    (cancel)="onDeleteCancelled()"
+  ></app-confirm-dialog>
 </div>

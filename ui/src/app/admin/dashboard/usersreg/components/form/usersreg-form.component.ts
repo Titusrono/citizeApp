@@ -38,13 +38,24 @@ export class UsersregFormComponent {
   touched: { [key: string]: boolean } = {};
 
   subCounties: string[] = [
-    'Tetu',
-    'Kieni',
-    'Mathira East',
-    'Mathira West',
-    'Othaya',
-    'Mukurweini'
+    'Kajiado North',
+    'Kajiado South',
+    'Kajiado East',
+    'Kajiado West',
+    'Kajiado Central'
   ];
+
+  wardsBySubCounty: { [key: string]: string[] } = {
+    'Kajiado North': ['Loitokitok', 'Noonkopir', 'Imaroro'],
+    'Kajiado South': ['Magadi', 'Olooseos', 'Kejitan'],
+    'Kajiado East': ['Kajiado', 'Naisuara', 'Isinya'],
+    'Kajiado West': ['Kitengela', 'Ngong', 'Katani'],
+    'Kajiado Central': ['Kajiado Central', 'Matapato', 'Enosaen']
+  };
+
+  get availableWards(): string[] {
+    return this.wardsBySubCounty[this.data.subCounty] || [];
+  }
 
   validateField(fieldName: string): boolean {
     const value = this.data[fieldName]?.toString().trim();
@@ -86,8 +97,6 @@ export class UsersregFormComponent {
       case 'ward':
         if (!value) {
           this.errors.ward = 'Ward is required';
-        } else if (value.length < 2) {
-          this.errors.ward = 'Ward name must be at least 2 characters';
         }
         break;
     }
