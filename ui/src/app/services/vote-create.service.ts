@@ -3,12 +3,22 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+// Voting levels enum
+export enum VoteLevel {
+  GENERAL = 'general',
+  SUB_COUNTY = 'sub_county',
+  WARD = 'ward',
+}
+
 // DTO for creating or updating a proposal
 export interface CreateVoteCreateDto {
   title: string;
   description: string;
   endDate: string;
   eligibility?: string;
+  voteLevel?: VoteLevel;
+  selectedSubCounties?: string[];
+  selectedWards?: string[];
 }
 
 // DTO for casting a vote

@@ -25,12 +25,11 @@ export class RegisterComponent implements OnInit {
   wards: string[] = [];
 
   subCounties = [
-    { name: 'Tetu', wards: ['Dedan Kimathi', 'Wamagana', 'Aguthi-Gaaki'] },
-    { name: 'Kieni', wards: ['Gatarakwa', 'Naromoru Kiamathaga', 'Mweiga', 'Mugunda', 'Kabaru', 'Thegu River', 'Konyu'] },
-    { name: 'Mathira East', wards: ['Magutu', 'Mutithi', 'Karatina Town', 'Kirimukuyu'] },
-    { name: 'Mathira West', wards: ['Ruguru', 'Mbiriri', 'Iria-Ini'] },
-    { name: 'Othaya', wards: ['Karima', 'Irigithathi', 'Mahiga', 'Chinga', 'Mugunda'] },
-    { name: 'Mukurweini', wards: ['Rugi', 'Gikondi', 'Mukurwe-Ini West', 'Mukurwe-Ini Central'] },
+    { name: 'Kajiado North', wards: ['Oloolua', 'Enkarasha', 'Illoodokilani', 'Inkisanjani'] },
+    { name: 'Kajiado Central', wards: ['Kitengela', 'Magadi', 'Ngong', 'Isinya', 'Oibor'] },
+    { name: 'Kajiado East', wards: ['Imaroro', 'Oloolua', 'Oltepesi', 'Ongata Rongai'] },
+    { name: 'Kajiado South', wards: ['Loitokitok', 'Kimana', 'Amboseli', 'Entonet'] },
+    { name: 'Kajiado West', wards: ['Kajiado', 'Daraja Mbili', 'Oloosirkon', 'Shompole'] },
   ];
 
   showPassword = false;

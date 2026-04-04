@@ -14,14 +14,23 @@
       No proposals available.
     </div>
 
-    <div *ngIf="proposals.length > 0" class="proposals-grid">
-      <div *ngFor="let item of proposals" class="proposal-card">
+    <div *ngIf="proposals.length > 0 && filteredProposals.length === 0" class="no-data">
+      No proposals available for your location ({{ userSubCounty || 'N/A' }} / {{ userWard || 'N/A' }}).
+    </div>
+
+    <div *ngIf="filteredProposals.length > 0" class="proposals-grid">
+      <div *ngFor="let item of filteredProposals" class="proposal-card">
         <!-- Card Header -->
         <div class="proposal-card-header">
           <h2 class="proposal-title">{{ item.title }}</h2>
-          <span class="proposal-status" [ngClass]="voteStatus[item._id || item.id] ? 'voted' : 'pending'">
-            {{ voteStatus[item._id || item.id] ? '✓ You voted: ' + (voteStatus[item._id || item.id] | uppercase) : 'Pending your vote' }}
-          </span>
+          <div class="header-badges">
+            <span class="proposal-status" [ngClass]="voteStatus[item._id || item.id] ? 'voted' : 'pending'">
+              {{ voteStatus[item._id || item.id] ? '✓ You voted: ' + (voteStatus[item._id || item.id] | uppercase) : 'Pending your vote' }}
+            </span>
+            <span class="vote-level-badge" [ngClass]="item.voteLevel?.toLowerCase() || 'general'">
+              {{ getVoteLevelLabel(item.voteLevel) }}
+            </span>
+          </div>
         </div>
 
         <!-- Card Body -->

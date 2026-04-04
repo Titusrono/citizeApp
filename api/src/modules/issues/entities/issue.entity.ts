@@ -25,6 +25,9 @@ export class Issue {
   @Column({ type: 'enum', enum: ['open', 'in_progress', 'resolved'], default: 'open' })
   status: string;
 
+  @Column({ type: 'boolean', default: false })
+  approved: boolean;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 }

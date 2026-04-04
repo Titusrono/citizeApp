@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { VoteCreateService, CastVoteDto } from '../../../../../services/vote-create.service';
+import { VoteCreateService, CastVoteDto, VoteLevel } from '../../../../../services/vote-create.service';
 import { AuthService } from '../../../../../core/auth/auth.service';
 import { ProposalViewComponent } from '../view/proposal-view.component';
 
@@ -15,6 +15,7 @@ import { ProposalViewComponent } from '../view/proposal-view.component';
 })
 export class ProposalListComponent implements OnInit {
   proposals: any[] = [];
+  filteredProposals: any[] = [];
   successMessage = '';
   errorMessage = '';
 
@@ -28,7 +29,11 @@ export class ProposalListComponent implements OnInit {
   reasons: { [key: string]: string } = {};
   userEmail: string = '';
   userId: string = '';
+  userSubCounty: string = '';
+  userWard: string = '';
   submittingVoteId: string | null = null;
+
+  VoteLevel = VoteLevel;
 
   constructor(
     private voteService: VoteCreateService,
@@ -38,6 +43,8 @@ export class ProposalListComponent implements OnInit {
   ngOnInit(): void {
     this.userEmail = localStorage.getItem('user_email') || this.authService.getUserEmail() || '';
     this.userId = localStorage.getItem('user_id') || this.authService.getUserId() || this.userEmail;
+    this.userSubCounty = localStorage.getItem('user_subcounty') || '';
+    this.userWard = localStorage.getItem('user_ward') || '';
     
     if (!this.userId) {
       console.warn('No user ID found. Votes may not be properly tracked.');
@@ -82,12 +89,56 @@ export class ProposalListComponent implements OnInit {
     this.voteService.getAllVotes().subscribe({
       next: (data: any[]) => {
         this.proposals = data;
+        this.filterProposalsByUserLevel();
       },
       error: (err: any) => {
         this.errorMessage = 'Failed to load proposals.';
         console.error('Error fetching proposals:', err);
       }
     });
+  }
+
+  filterProposalsByUserLevel(): void {
+    this.filteredProposals = this.proposals.filter(proposal => {
+      const voteLevel = proposal.voteLevel || VoteLevel.GENERAL;
+      
+      if (voteLevel === VoteLevel.GENERAL) {
+        return true; // All users can see general votes
+      }
+      
+      if (voteLevel === VoteLevel.SUB_COUNTY) {
+        return proposal.selectedSubCounties?.includes(this.userSubCounty);
+      }
+      
+      if (voteLevel === VoteLevel.WARD) {
+        return proposal.selectedWards?.includes(this.userWard);
+      }
+      
+      return false;
+    });
+  }
+
+  isVoteAccessible(proposal: any): boolean {
+    const voteLevel = proposal.voteLevel || VoteLevel.GENERAL;
+    
+    if (voteLevel === VoteLevel.GENERAL) return true;
+    if (voteLevel === VoteLevel.SUB_COUNTY) return proposal.selectedSubCounties?.includes(this.userSubCounty);
+    if (voteLevel === VoteLevel.WARD) return proposal.selectedWards?.includes(this.userWard);
+    
+    return false;
+  }
+
+  getVoteLevelLabel(voteLevel: string): string {
+    switch (voteLevel) {
+      case VoteLevel.GENERAL:
+        return 'All Users';
+      case VoteLevel.SUB_COUNTY:
+        return 'Sub-County Level';
+      case VoteLevel.WARD:
+        return 'Ward Level';
+      default:
+        return 'General';
+    }
   }
 
   submitVote(id: string): void {

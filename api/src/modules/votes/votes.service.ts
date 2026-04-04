@@ -1,7 +1,7 @@
-import { Injectable, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Vote } from './entities/vote.entity';
+import { Vote, VoteLevel } from './entities/vote.entity';
 import { UserVote } from './entities/user-vote.entity';
 import { CreateVoteDto } from './dto/create-vote.dto';
 import { UpdateVoteDto } from './dto/update-vote.dto';
@@ -30,11 +30,24 @@ export class VotesService {
   }
 
   async create(createVoteDto: CreateVoteDto, user: User) {
+    const voteLevel = createVoteDto.voteLevel || VoteLevel.GENERAL;
+    
+    // Validate level-specific selections
+    if (voteLevel === VoteLevel.SUB_COUNTY && (!createVoteDto.selectedSubCounties || createVoteDto.selectedSubCounties.length === 0)) {
+      throw new BadRequestException('selectedSubCounties is required for sub-county level votes');
+    }
+    if (voteLevel === VoteLevel.WARD && (!createVoteDto.selectedWards || createVoteDto.selectedWards.length === 0)) {
+      throw new BadRequestException('selectedWards is required for ward level votes');
+    }
+
     const vote = this.votesRepository.create({
       title: createVoteDto.title,
       description: createVoteDto.description,
       eligibility: createVoteDto.eligibility || '',
       end_date: new Date(createVoteDto.endDate),
+      voteLevel,
+      selectedSubCounties: createVoteDto.selectedSubCounties || [],
+      selectedWards: createVoteDto.selectedWards || [],
       user,
     });
     return this.votesRepository.save(vote);
@@ -49,7 +62,40 @@ export class VotesService {
       description: vote.description,
       eligibility: vote.eligibility,
       endDate: vote.end_date,
+      voteLevel: vote.voteLevel,
+      selectedSubCounties: vote.selectedSubCounties,
+      selectedWards: vote.selectedWards,
     }));
+  }
+
+  async findAllForUser(user: User) {
+    const allVotes = await this.votesRepository.find({ relations: ['user'] });
+    
+    // Filter votes based on user's eligibility
+    return allVotes
+      .filter(vote => {
+        if (vote.voteLevel === VoteLevel.GENERAL) {
+          return true; // All users can see general votes
+        }
+        if (vote.voteLevel === VoteLevel.SUB_COUNTY) {
+          return vote.selectedSubCounties?.includes(user.subCounty);
+        }
+        if (vote.voteLevel === VoteLevel.WARD) {
+          return vote.selectedWards?.includes(user.ward);
+        }
+        return false;
+      })
+      .map(vote => ({
+        _id: vote.id?.toString(),
+        id: vote.id?.toString(),
+        title: vote.title,
+        description: vote.description,
+        eligibility: vote.eligibility,
+        endDate: vote.end_date,
+        voteLevel: vote.voteLevel,
+        selectedSubCounties: vote.selectedSubCounties,
+        selectedWards: vote.selectedWards,
+      }));
   }
 
   async findOne(id: string) {
@@ -65,7 +111,7 @@ export class VotesService {
     return this.votesRepository.delete(this.convertToObjectId(id));
   }
 
-  async castVote(voteId: string, castVoteDto: CastVoteDto) {
+  async castVote(voteId: string, castVoteDto: CastVoteDto, user: User) {
     // Get all votes and find matching one
     const votes = await this.votesRepository.find();
     const vote = votes.find(v => v.id?.toString() === voteId || v.id?.equals(new ObjectId(voteId)));
@@ -75,6 +121,9 @@ export class VotesService {
       console.error(`Available votes:`, votes.map(v => v.id?.toString()));
       throw new NotFoundException(`Vote/Proposal with ID ${voteId} not found`);
     }
+
+    // Check if user is eligible to vote based on vote level
+    this.checkVoteEligibility(vote, user);
 
     // Check if user has already voted on this proposal
     const existingVote = await this.userVoteRepository.findOne({
@@ -97,5 +146,29 @@ export class VotesService {
     });
 
     return this.userVoteRepository.save(userVote);
+  }
+
+  private checkVoteEligibility(vote: Vote, user: User): void {
+    if (vote.voteLevel === VoteLevel.GENERAL) {
+      return; // All users can vote
+    }
+    
+    if (vote.voteLevel === VoteLevel.SUB_COUNTY) {
+      if (!vote.selectedSubCounties?.includes(user.subCounty)) {
+        throw new ForbiddenException(
+          `You are not eligible to vote on this proposal. This vote is only for sub-counties: ${vote.selectedSubCounties?.join(', ')}`
+        );
+      }
+      return;
+    }
+    
+    if (vote.voteLevel === VoteLevel.WARD) {
+      if (!vote.selectedWards?.includes(user.ward)) {
+        throw new ForbiddenException(
+          `You are not eligible to vote on this proposal. This vote is only for wards: ${vote.selectedWards?.join(', ')}`
+        );
+      }
+      return;
+    }
   }
 }

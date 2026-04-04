@@ -1,28 +1,33 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CreateVoteCreateDto } from '../../services/vote-create.service';
+import { CreateVoteCreateDto, VoteLevel } from '../../../../../services/vote-create.service';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 interface FormErrors {
   title?: string;
   description?: string;
   eligibility?: string;
   endDate?: string;
+  voteLevel?: string;
 }
 
 @Component({
   selector: 'app-vote-create-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NgSelectModule],
   templateUrl: './vote-create-form.component.html',
   styleUrls: ['./vote-create-form.component.scss']
 })
-export class VoteCreateFormComponent {
+export class VoteCreateFormComponent implements OnInit {
   @Input() proposal: CreateVoteCreateDto = {
     title: '',
     description: '',
     eligibility: '',
-    endDate: ''
+    endDate: '',
+    voteLevel: VoteLevel.GENERAL,
+    selectedSubCounties: [],
+    selectedWards: []
   };
   @Input() isEditing = false;
   @Input() successMessage = '';
@@ -35,6 +40,43 @@ export class VoteCreateFormComponent {
 
   errors: FormErrors = {};
   touched: { [key: string]: boolean } = {};
+  selectedWardSubCounty: string = ''; // Track single sub-county selection for Ward level
+
+  VoteLevel = VoteLevel;
+
+  // County data - Only Kajiado
+  subCounties = [
+    { name: 'Kajiado North', wards: ['Oloolua', 'Enkarasha', 'Illoodokilani', 'Inkisanjani'] },
+    { name: 'Kajiado Central', wards: ['Kitengela', 'Magadi', 'Ngong', 'Isinya', 'Oibor'] },
+    { name: 'Kajiado East', wards: ['Imaroro', 'Oloolua', 'Oltepesi', 'Ongata Rongai'] },
+    { name: 'Kajiado South', wards: ['Loitokitok', 'Kimana', 'Amboseli', 'Entonet'] },
+    { name: 'Kajiado West', wards: ['Kajiado', 'Daraja Mbili', 'Oloosirkon', 'Shompole'] },
+  ];
+  currentSubCounties: string[] = [];
+  currentWards: string[] = [];
+
+  getFilteredWards(): string[] {
+    if (!this.selectedWardSubCounty) {
+      return [];
+    }
+    const subCounty = this.subCounties.find(sc => sc.name === this.selectedWardSubCounty);
+    return subCounty ? subCounty.wards : [];
+  }
+  
+  onWardSubCountyChange(subCounty: string): void {
+    this.selectedWardSubCounty = subCounty;
+    // Clear previously selected wards when sub-county changes
+    this.proposal.selectedWards = [];
+  }
+
+  initializeSubCounties(): void {
+    // Initialize sub-counties on component load or when vote level changes
+    this.currentSubCounties = this.subCounties.map(sc => sc.name);
+  }
+
+  ngOnInit(): void {
+    this.initializeSubCounties();
+  }
 
   validateField(fieldName: string): boolean {
     const value = this.proposal[fieldName as keyof CreateVoteCreateDto]?.toString().trim();
@@ -73,19 +115,42 @@ export class VoteCreateFormComponent {
           }
         }
         break;
+
+      case 'voteLevel':
+        // No validation needed, all levels are valid
+        break;
     }
 
     return !this.errors[fieldName as keyof FormErrors];
   }
 
   validateForm(): boolean {
-    const fields = ['title', 'description', 'endDate'];
+    const fields = ['title', 'description', 'endDate', 'voteLevel'];
     let isValid = true;
     fields.forEach(field => {
       if (!this.validateField(field)) {
         isValid = false;
       }
     });
+    
+    // Additional validation for level-specific selections
+    if (this.proposal.voteLevel === VoteLevel.SUB_COUNTY) {
+      if (!this.proposal.selectedSubCounties || this.proposal.selectedSubCounties.length === 0) {
+        this.errors.voteLevel = 'Please select at least one sub-county';
+        isValid = false;
+      }
+    }
+    
+    if (this.proposal.voteLevel === VoteLevel.WARD) {
+      if (!this.selectedWardSubCounty) {
+        this.errors.voteLevel = 'Please select a sub-county';
+        isValid = false;
+      } else if (!this.proposal.selectedWards || this.proposal.selectedWards.length === 0) {
+        this.errors.voteLevel = 'Please select at least one ward';
+        isValid = false;
+      }
+    }
+    
     return isValid;
   }
 
@@ -117,13 +182,62 @@ export class VoteCreateFormComponent {
       title: '',
       description: '',
       eligibility: '',
-      endDate: ''
+      endDate: '',
+      voteLevel: VoteLevel.GENERAL,
+      selectedSubCounties: [],
+      selectedWards: []
     };
+    this.selectedWardSubCounty = '';
+
+    this.currentSubCounties = [];
+    this.currentWards = [];
     this.errors = {};
     this.touched = {};
   }
 
   onClose() {
     this.close.emit();
+  }
+
+  toggleSubCounty(subCounty: string) {
+    if (!this.proposal.selectedSubCounties) {
+      this.proposal.selectedSubCounties = [];
+    }
+    const index = this.proposal.selectedSubCounties.indexOf(subCounty);
+    if (index > -1) {
+      this.proposal.selectedSubCounties.splice(index, 1);
+      // Remove wards that belong only to this sub-county
+      const subCountyObj = this.subCounties.find(sc => sc.name === subCounty);
+      const wardsForSubCounty = subCountyObj?.wards || [];
+      this.proposal.selectedWards = this.proposal.selectedWards?.filter(ward => {
+        // Keep ward if it exists in other selected sub-counties
+        return this.proposal.selectedSubCounties!.some(sc => {
+          const scObj = this.subCounties.find(s => s.name === sc);
+          return scObj?.wards.includes(ward);
+        });
+      }) || [];
+    } else {
+      this.proposal.selectedSubCounties.push(subCounty);
+    }
+  }
+
+  toggleWard(ward: string) {
+    if (!this.proposal.selectedWards) {
+      this.proposal.selectedWards = [];
+    }
+    const index = this.proposal.selectedWards.indexOf(ward);
+    if (index > -1) {
+      this.proposal.selectedWards.splice(index, 1);
+    } else {
+      this.proposal.selectedWards.push(ward);
+    }
+  }
+
+  isSubCountySelected(subCounty: string): boolean {
+    return this.proposal.selectedSubCounties?.includes(subCounty) || false;
+  }
+
+  isWardSelected(ward: string): boolean {
+    return this.proposal.selectedWards?.includes(ward) || false;
   }
 }

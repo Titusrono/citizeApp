@@ -52,4 +52,14 @@ export class ReportService {
 
     return this.http.patch(`${this.apiUrl}/${reportId}`, updatedData, { headers });
   }
+
+  // ✅ Approve a report
+  approveReport(reportId: string): Observable<any> {
+    const token = localStorage.getItem('access_token');
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+
+    return this.http.patch(`${this.apiUrl}/${reportId}/approve`, {}, { headers });
+  }
 }

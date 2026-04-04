@@ -90,6 +90,12 @@
     }
   }
 
+  .header-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
   .proposal-status {
     display: inline-block;
     padding: 4px 12px;
@@ -114,6 +120,46 @@
       .dark & {
         background-color: rgba(16, 185, 129, 0.2);
         color: #6ee7b7;
+      }
+    }
+  }
+
+  .vote-level-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    &.general {
+      background-color: #dbeafe;
+      color: #1e40af;
+
+      .dark & {
+        background-color: rgba(30, 64, 175, 0.2);
+        color: #93c5fd;
+      }
+    }
+
+    &.sub_county {
+      background-color: #fce7f3;
+      color: #831843;
+
+      .dark & {
+        background-color: rgba(131, 24, 67, 0.2);
+        color: #fbcfe8;
+      }
+    }
+
+    &.ward {
+      background-color: #fed7aa;
+      color: #92400e;
+
+      .dark & {
+        background-color: rgba(146, 64, 14, 0.2);
+        color: #fed7aa;
       }
     }
   }

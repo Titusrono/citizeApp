@@ -44,7 +44,8 @@ export class VotesController {
   }
 
   @Post(':id/vote')
-  async castVote(@Param('id') id: string, @Body() castVoteDto: CastVoteDto) {
-    return this.votesService.castVote(id, castVoteDto);
+  @UseGuards(JwtAuthGuard)
+  async castVote(@Param('id') id: string, @Body() castVoteDto: CastVoteDto, @Req() req) {
+    return this.votesService.castVote(id, castVoteDto, req.user);
   }
 }

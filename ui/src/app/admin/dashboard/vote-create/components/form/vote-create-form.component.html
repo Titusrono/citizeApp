@@ -1,6 +1,6 @@
 <div class="modal-form-body flex flex-col h-full">
   <!-- Scrollable Form Content -->
-  <div class="overflow-y-auto flex-1">
+  <div class="overflow-y-auto flex-1 pb-4">
     <!-- Alert Messages -->
     <div class="px-6 py-4 space-y-3">
       <div *ngIf="successMessage" class="bg-green-100 text-green-800 border-l-4 border-green-500 px-4 py-3 rounded dark:bg-green-900/20 dark:text-green-300 dark:border-green-600">
@@ -12,99 +12,196 @@
     </div>
 
     <!-- Form -->
-    <form class="px-6 pb-4 space-y-4" id="vote-create-form" (ngSubmit)="onSubmit()">
-      <!-- Title -->
-      <div>
-        <label for="title" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-          Proposal Title <span class="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          id="title"
-          name="title"
-          [(ngModel)]="proposal.title"
-          placeholder="Enter proposal title"
-          required
-          maxlength="200"
-          (blur)="markFieldTouched('title')"
-          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('title'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('title')}"
-          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
-        />
-        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('title')">
-          {{ errors.title }}
-        </p>
-        <p class="text-xs text-gray-500 mt-1" *ngIf="!hasError('title')">
-          {{ proposal.title.length || 0 }}/200 characters
-        </p>
-      </div>
+    <form class="px-6 space-y-5" id="vote-create-form" (ngSubmit)="onSubmit()">
+      
+        <!-- Title -->
+        <div class="mb-4">
+          <label for="title" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+            Proposal Title <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="title"
+            name="title"
+            [(ngModel)]="proposal.title"
+            placeholder="Enter proposal title"
+            required
+            maxlength="200"
+            (blur)="markFieldTouched('title')"
+            [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('title'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('title')}"
+            class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+          />
+          <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('title')">
+            {{ errors.title }}
+          </p>
+          <p class="text-xs text-gray-500 mt-1" *ngIf="!hasError('title')">
+            {{ proposal.title.length || 0 }}/200 characters
+          </p>
+        </div>
 
-      <!-- Description -->
-      <div>
-        <label for="description" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-          Description <span class="text-red-500">*</span>
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          [(ngModel)]="proposal.description"
-          placeholder="Enter proposal description"
+        <!-- Description -->
+        <div class="mb-4">
+          <label for="description" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+            Description <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            [(ngModel)]="proposal.description"
+            placeholder="Enter proposal description"
           rows="4"
           maxlength="2000"
           required
           (blur)="markFieldTouched('description')"
           [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('description'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('description')}"
-          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all resize-none"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-900 transition-all resize-none"
         ></textarea>
-        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('description')">
-          {{ errors.description }}
-        </p>
-        <p class="text-xs text-gray-500 mt-1" *ngIf="!hasError('description')">
-          {{ getDescriptionCharCount() }}/2000 characters
-        </p>
+          <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('description')">
+            {{ errors.description }}
+          </p>
+          <p class="text-xs text-gray-500 mt-1" *ngIf="!hasError('description')">
+            {{ getDescriptionCharCount() }}/2000 characters
+          </p>
+        </div>
+
+        <!-- Eligibility (Optional) -->
+        <div class="mb-4">
+          <label for="eligibility" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+            Eligibility Criteria
+          </label>
+          <input
+            type="text"
+            id="eligibility"
+            name="eligibility"
+            [(ngModel)]="proposal.eligibility"
+            placeholder="Enter eligibility criteria (optional)"
+            maxlength="300"
+            (blur)="markFieldTouched('eligibility')"
+            class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+          />
+          <p class="text-xs text-gray-500 mt-1">
+            {{ proposal.eligibility?.length || 0 }}/300 characters
+          </p>
+        </div>
+        
+        <!-- End Date -->
+        <div class="mb-4">
+          <label for="endDate" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+            End Date <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            id="endDate"
+            name="endDate"
+            [(ngModel)]="proposal.endDate"
+            required
+            (blur)="markFieldTouched('endDate')"
+            [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('endDate'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('endDate')}"
+            class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+          />
+          <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('endDate')">
+            {{ errors.endDate }}
+          </p>
+        </div>
+
+        <!-- Voting Level -->
+        <div class="mb-4">
+          <label for="voteLevel" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+            Voting Level <span class="text-red-500">*</span>
+          </label>
+          <select
+            id="voteLevel"
+            name="voteLevel"
+            [(ngModel)]="proposal.voteLevel"
+            (blur)="markFieldTouched('voteLevel')"
+            class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+          >
+            <option [value]="VoteLevel.GENERAL">General (All Users)</option>
+            <option [value]="VoteLevel.SUB_COUNTY">Sub-County Level</option>
+            <option [value]="VoteLevel.WARD">Ward Level</option>
+          </select>
+          <p class="text-xs text-gray-500 mt-1">Select who can participate in this vote</p>
+        </div>
+
+      <!-- VOTING SCOPE -->
+      <div *ngIf="proposal.voteLevel !== VoteLevel.GENERAL">
+
+        <!-- Sub-County Selection (for SUB_COUNTY level) -->
+        <div *ngIf="proposal.voteLevel === VoteLevel.SUB_COUNTY">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">
+            Select Sub-Counties <span class="text-red-500">*</span>
+          </label>
+          <div class="space-y-2">
+            <label *ngFor="let subCounty of currentSubCounties" class="flex items-center p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-all cursor-pointer">
+              <input
+                type="checkbox"
+                [checked]="isSubCountySelected(subCounty)"
+                (change)="toggleSubCounty(subCounty)"
+                class="w-4 h-4 text-blue-500 rounded cursor-pointer"
+              />
+              <span class="ml-3 text-sm text-gray-700 dark:text-gray-300">{{ subCounty }}</span>
+            </label>
+          </div>
+          <p class="text-xs text-gray-500 mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
+            Selected: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ proposal.selectedSubCounties?.length || 0 }}</span> sub-counties
+          </p>
+        </div>
+
+        <!-- Ward Level: Sub-County Dropdown + Wards Selection -->
+        <div *ngIf="proposal.voteLevel === VoteLevel.WARD">
+          <div class="mb-4">
+            <label for="wardSubCounty" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+              Select Sub-County <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="wardSubCounty"
+              name="wardSubCounty"
+              [(ngModel)]="selectedWardSubCounty"
+              (change)="onWardSubCountyChange(selectedWardSubCounty)"
+              class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+            >
+              <option value="">-- Select a Sub-County --</option>
+              <option *ngFor="let subCounty of currentSubCounties" [value]="subCounty">
+                {{ subCounty }}
+              </option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Choose a sub-county to see its wards</p>
+          </div>
+
+          <!-- Ward Selection -->
+          <div *ngIf="selectedWardSubCounty">
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+              Select Ward <span class="text-red-500">*</span>
+            </label>
+            <div *ngIf="getFilteredWards().length === 0" class="bg-blue-50 border-l-4 border-blue-500 px-4 py-3 rounded dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-600">
+              <p class="text-sm">No wards available for this sub-county</p>
+            </div>
+            <ng-select
+              *ngIf="getFilteredWards().length > 0"
+              [items]="getFilteredWards()"
+              bindLabel="name"
+              placeholder="Select ward"
+              [(ngModel)]="proposal.selectedWards"
+              [multiple]="false"
+              [searchable]="true"
+              name="ward"
+              id="ward"
+            >
+            </ng-select>
+            <p class="text-xs text-gray-500 mt-2">
+              Selected: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ proposal.selectedWards?.length || 0 }}</span> wards
+            </p>
+          </div>
+        </div>
       </div>
 
-      <!-- Eligibility (Optional) -->
-      <div>
-        <label for="eligibility" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-          Eligibility Criteria
-        </label>
-        <input
-          type="text"
-          id="eligibility"
-          name="eligibility"
-          [(ngModel)]="proposal.eligibility"
-          placeholder="Enter eligibility criteria (optional)"
-          maxlength="300"
-          (blur)="markFieldTouched('eligibility')"
-          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
-        />
-        <p class="text-xs text-gray-500 mt-1">
-          {{ proposal.eligibility?.length || 0 }}/300 characters
-        </p>
-      </div>
-
-      <!-- End Date -->
-      <div>
-        <label for="endDate" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-          End Date <span class="text-red-500">*</span>
-        </label>
-        <input
-          type="date"
-          id="endDate"
-          name="endDate"
-          [(ngModel)]="proposal.endDate"
-          required
-          (blur)="markFieldTouched('endDate')"
-          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('endDate'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('endDate')}"
-          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
-        />
-        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('endDate')">
-          {{ errors.endDate }}
-        </p>
+      <!-- Vote Level Errors -->
+      <div *ngIf="errors.voteLevel" class="bg-yellow-100 text-yellow-800 border-l-4 border-yellow-500 px-4 py-3 rounded dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-600">
+        <p class="text-sm">{{ errors.voteLevel }}</p>
       </div>
 
       <!-- Form Actions -->
-      <div class="flex gap-3 justify-end pt-3 border-t border-gray-200 dark:border-gray-700">
+      <div class="flex gap-3 justify-end">
         <button
           type="button"
           (click)="onClose()"
@@ -124,10 +221,9 @@
         <button
           type="submit"
           [disabled]="isSubmitting"
-          class="px-6 py-2 bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-md text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:shadow-md"
+          class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all dark:bg-blue-700 dark:hover:bg-blue-800"
         >
-          <span *ngIf="!isSubmitting">{{ isEditing ? 'Update Proposal' : 'Create Proposal' }}</span>
-          <span *ngIf="isSubmitting">Processing...</span>
+          {{ isSubmitting ? 'Creating...' : 'Create Proposal' }}
         </button>
       </div>
     </form>

@@ -35,6 +35,13 @@ export class IssuesController {
     return this.issuesService.update(id, updateIssueDto);
   }
 
+  @Patch(':id/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  async approve(@Param('id') id: string) {
+    return this.issuesService.approve(id);
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)

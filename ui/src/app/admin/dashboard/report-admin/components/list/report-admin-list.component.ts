@@ -55,6 +55,8 @@ export class ReportAdminListComponent implements OnInit {
   fetchReports(): void {
     this.reportService.getReports().subscribe({
       next: (data: any[]) => {
+        console.log('Fetched reports:', data);
+        console.log('First report structure:', data[0]);
         this.items = data;
         this.availableCategories = [...new Set(data.map(report => report.category).filter(Boolean))];
         this.computeCategoryStats();
@@ -136,13 +138,36 @@ export class ReportAdminListComponent implements OnInit {
     this.showModal = true;
   }
 
-  onDelete(id: string) {
-    this.reportToDelete = { id };
+  onApprove(item: any) {
+    console.log('onApprove - Item:', item);
+    console.log('onApprove - Item keys:', Object.keys(item));
+    console.log('onApprove - Item._id:', item._id);
+    console.log('onApprove - Item.id:', item.id);
+    const id = item._id || item.id;
+    console.log('onApprove - Using ID:', id);
+    
+    this.reportService.approveReport(id).subscribe({
+      next: () => {
+        this.successMessage = 'Report approved successfully!';
+        this.errorMessage = '';
+        this.fetchReports();
+      },
+      error: () => {
+        this.errorMessage = 'Failed to approve report.';
+        this.successMessage = '';
+      }
+    });
+  }
+
+  onDelete(item: any) {
+    console.log('onDelete - Item:', item);
+    this.reportToDelete = item;
     this.showDeleteConfirm = true;
   }
 
   onDeleteConfirmed() {
-    const id = this.reportToDelete.id;
+    const id = this.reportToDelete._id || this.reportToDelete.id;
+    console.log('onDeleteConfirmed - Using ID:', id);
     this.isDeleting = true;
 
     this.reportService.deleteReport(id).subscribe({

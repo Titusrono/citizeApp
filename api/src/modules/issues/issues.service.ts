@@ -46,6 +46,23 @@ export class IssuesService {
     return this.findOne(id);
   }
 
+  async approve(id: string) {
+    const objectId = this.convertToObjectId(id);
+    
+    // Update the issue to mark it as approved
+    const result = await this.issuesRepository.update(
+      { id: objectId },
+      { approved: true }
+    );
+    
+    if (result.affected === 0) {
+      throw new BadRequestException(`Issue with ID ${id} not found`);
+    }
+    
+    // Return the updated issue with relations
+    return this.issuesRepository.findOne({ where: { id: objectId }, relations: ['user'] });
+  }
+
   async remove(id: string) {
     return this.issuesRepository.delete(this.convertToObjectId(id));
   }
