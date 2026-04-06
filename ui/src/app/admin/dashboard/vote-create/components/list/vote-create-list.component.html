@@ -34,6 +34,7 @@
           <td>{{ proposal.endDate | date:'short' }}</td>
           <td>{{ proposal.eligibility || '-' }}</td>
           <td>
+            <button class="btn-sm btn-view" (click)="viewResults(proposal.id)">View Results</button>
             <button class="btn-sm btn-edit" (click)="onEdit(proposal)">Edit</button>
             <button class="btn-sm btn-delete" (click)="onDelete(proposal.id)">Delete</button>
           </td>

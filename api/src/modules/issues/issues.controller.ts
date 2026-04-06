@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
 import { IssuesService } from './issues.service';
 import { CreateIssueDto } from './dto/create-issue.dto';
 import { UpdateIssueDto } from './dto/update-issue.dto';
@@ -19,8 +19,14 @@ export class IssuesController {
   }
 
   @Get()
-  async findAll() {
-    return this.issuesService.findAll();
+  async findAll(@Query('userId') userId?: string, @Query('approved') approved?: string) {
+    console.log('Issues Controller - GET - userId query:', userId);
+    console.log('Issues Controller - GET - approved query:', approved);
+    
+    const isApproved = approved === 'true' ? true : approved === 'false' ? false : undefined;
+    const results = await this.issuesService.findByFilters(userId, isApproved);
+    console.log('Issues Controller - GET - results returned:', results.length);
+    return results;
   }
 
   @Get(':id')

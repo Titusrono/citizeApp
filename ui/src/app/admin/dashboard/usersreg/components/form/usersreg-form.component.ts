@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { LocationService } from '../../../../../shared/services/location.service';
 
 interface FormErrors {
   email?: string;
@@ -14,10 +15,11 @@ interface FormErrors {
   selector: 'app-usersreg-form',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  providers: [LocationService],
   templateUrl: './usersreg-form.component.html',
   styleUrls: ['./usersreg-form.component.scss']
 })
-export class UsersregFormComponent {
+export class UsersregFormComponent implements OnInit {
   @Input() data: any = {
     email: '',
     username: '',
@@ -37,21 +39,25 @@ export class UsersregFormComponent {
   errors: FormErrors = {};
   touched: { [key: string]: boolean } = {};
 
-  subCounties: string[] = [
-    'Kajiado North',
-    'Kajiado South',
-    'Kajiado East',
-    'Kajiado West',
-    'Kajiado Central'
-  ];
+  subCounties: string[] = [];
+  wardsBySubCounty: { [key: string]: string[] } = {};
 
-  wardsBySubCounty: { [key: string]: string[] } = {
-    'Kajiado North': ['Loitokitok', 'Noonkopir', 'Imaroro'],
-    'Kajiado South': ['Magadi', 'Olooseos', 'Kejitan'],
-    'Kajiado East': ['Kajiado', 'Naisuara', 'Isinya'],
-    'Kajiado West': ['Kitengela', 'Ngong', 'Katani'],
-    'Kajiado Central': ['Kajiado Central', 'Matapato', 'Enosaen']
-  };
+  constructor(private locationService: LocationService) {}
+
+  ngOnInit(): void {
+    this.initializeLocations();
+  }
+
+  private initializeLocations(): void {
+    // Get subcounties and build wards map using LocationService for consistency
+    const subCountiesData = this.locationService.getSubCounties();
+    this.subCounties = this.locationService.getSubCountyNames();
+    
+    // Build wards mapping using exact names from LocationService
+    subCountiesData.forEach((subCounty: any) => {
+      this.wardsBySubCounty[subCounty.name] = subCounty.wards;
+    });
+  }
 
   get availableWards(): string[] {
     return this.wardsBySubCounty[this.data.subCounty] || [];

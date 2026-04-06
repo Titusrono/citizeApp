@@ -30,6 +30,9 @@ export class VotesService {
   }
 
   async create(createVoteDto: CreateVoteDto, user: User) {
+    console.log('[VotesService.create] Creating vote with DTO:', createVoteDto);
+    console.log('[VotesService.create] Created by user:', user?.id, user?.email);
+    
     const voteLevel = createVoteDto.voteLevel || VoteLevel.GENERAL;
     
     // Validate level-specific selections
@@ -50,38 +53,66 @@ export class VotesService {
       selectedWards: createVoteDto.selectedWards || [],
       user,
     });
-    return this.votesRepository.save(vote);
+    
+    const saved = await this.votesRepository.save(vote);
+    console.log('[VotesService.create] Vote saved successfully with ID:', saved.id);
+    return saved;
   }
 
   async findAll() {
+    console.log('[VotesService.findAll] Fetching all votes');
     const votes = await this.votesRepository.find({ relations: ['user'] });
-    return votes.map(vote => ({
-      _id: vote.id?.toString(),
-      id: vote.id?.toString(),
-      title: vote.title,
-      description: vote.description,
-      eligibility: vote.eligibility,
-      endDate: vote.end_date,
-      voteLevel: vote.voteLevel,
-      selectedSubCounties: vote.selectedSubCounties,
-      selectedWards: vote.selectedWards,
-    }));
+    console.log('[VotesService.findAll] Found', votes.length, 'votes');
+    
+    const result = votes.map(vote => {
+      const normalized = this.normalizeVote(vote);
+      return {
+        _id: normalized.id?.toString(),
+        id: normalized.id?.toString(),
+        title: normalized.title,
+        description: normalized.description,
+        eligibility: normalized.eligibility,
+        endDate: normalized.end_date,
+        voteLevel: normalized.voteLevel,
+        selectedSubCounties: normalized.selectedSubCounties,
+        selectedWards: normalized.selectedWards,
+      };
+    });
+    
+    console.log('[VotesService.findAll] Returning', result.length, 'normalized votes');
+    return result;
   }
 
   async findAllForUser(user: User) {
+    console.log('[VotesService.findAllForUser] Filtering votes for user:', {
+      userId: user?.id,
+      email: user?.email,
+      subCounty: user?.subCounty,
+      ward: user?.ward,
+    });
+
     const allVotes = await this.votesRepository.find({ relations: ['user'] });
+    console.log('[VotesService.findAllForUser] Found', allVotes.length, 'total votes');
     
     // Filter votes based on user's eligibility
-    return allVotes
+    const eligibleVotes = allVotes
+      .map(vote => this.normalizeVote(vote))
       .filter(vote => {
         if (vote.voteLevel === VoteLevel.GENERAL) {
+          console.log('[VotesService.findAllForUser] Including GENERAL vote:', vote.id);
           return true; // All users can see general votes
         }
         if (vote.voteLevel === VoteLevel.SUB_COUNTY) {
-          return vote.selectedSubCounties?.includes(user.subCounty);
+          const subCounties = this.ensureArray(vote.selectedSubCounties);
+          const isEligible = subCounties.includes(user.subCounty);
+          console.log('[VotesService.findAllForUser] SUB_COUNTY vote:', vote.id, '- User subCounty:', user.subCounty, '- Vote subCounties:', subCounties, '- Eligible:', isEligible);
+          return isEligible;
         }
         if (vote.voteLevel === VoteLevel.WARD) {
-          return vote.selectedWards?.includes(user.ward);
+          const wards = this.ensureArray(vote.selectedWards);
+          const isEligible = wards.includes(user.ward);
+          console.log('[VotesService.findAllForUser] WARD vote:', vote.id, '- User ward:', user.ward, '- Vote wards:', wards, '- Eligible:', isEligible);
+          return isEligible;
         }
         return false;
       })
@@ -96,10 +127,14 @@ export class VotesService {
         selectedSubCounties: vote.selectedSubCounties,
         selectedWards: vote.selectedWards,
       }));
+
+    console.log('[VotesService.findAllForUser] Returning', eligibleVotes.length, 'eligible votes for user');
+    return eligibleVotes;
   }
 
   async findOne(id: string) {
-    return this.votesRepository.findOne({ where: { id: this.convertToObjectId(id) }, relations: ['user'] });
+    const vote = await this.votesRepository.findOne({ where: { id: this.convertToObjectId(id) }, relations: ['user'] });
+    return vote ? this.normalizeVote(vote) : null;
   }
 
   async update(id: string, updateVoteDto: UpdateVoteDto) {
@@ -114,13 +149,16 @@ export class VotesService {
   async castVote(voteId: string, castVoteDto: CastVoteDto, user: User) {
     // Get all votes and find matching one
     const votes = await this.votesRepository.find();
-    const vote = votes.find(v => v.id?.toString() === voteId || v.id?.equals(new ObjectId(voteId)));
+    let vote = votes.find(v => v.id?.toString() === voteId || v.id?.equals(new ObjectId(voteId)));
     
     if (!vote) {
       console.error(`Vote not found. Looking for ID: ${voteId}`);
       console.error(`Available votes:`, votes.map(v => v.id?.toString()));
       throw new NotFoundException(`Vote/Proposal with ID ${voteId} not found`);
     }
+
+    // Normalize the vote to ensure arrays are properly formatted
+    vote = this.normalizeVote(vote);
 
     // Check if user is eligible to vote based on vote level
     this.checkVoteEligibility(vote, user);
@@ -148,27 +186,116 @@ export class VotesService {
     return this.userVoteRepository.save(userVote);
   }
 
+  private normalizeVote(vote: Vote): Vote {
+    // Convert string arrays (from old simple-array storage) to actual arrays
+    if (vote.selectedSubCounties && typeof vote.selectedSubCounties === 'string') {
+      vote.selectedSubCounties = (vote.selectedSubCounties as any)
+        .split(',')
+        .map((item: string) => item.trim())
+        .filter((item: string) => item.length > 0);
+    }
+    if (vote.selectedWards && typeof vote.selectedWards === 'string') {
+      vote.selectedWards = (vote.selectedWards as any)
+        .split(',')
+        .map((item: string) => item.trim())
+        .filter((item: string) => item.length > 0);
+    }
+    return vote;
+  }
+
+  private ensureArray(value: any): string[] {
+    if (!value) {
+      return [];
+    }
+    // If it's already an array, return it
+    if (Array.isArray(value)) {
+      return value;
+    }
+    // If it's a string (from old simple-array storage), split it
+    if (typeof value === 'string') {
+      return value.split(',').map((item: string) => item.trim()).filter((item: string) => item.length > 0);
+    }
+    return [];
+  }
+
   private checkVoteEligibility(vote: Vote, user: User): void {
     if (vote.voteLevel === VoteLevel.GENERAL) {
       return; // All users can vote
     }
     
     if (vote.voteLevel === VoteLevel.SUB_COUNTY) {
-      if (!vote.selectedSubCounties?.includes(user.subCounty)) {
+      const subCounties = this.ensureArray(vote.selectedSubCounties);
+      if (!subCounties.includes(user.subCounty)) {
         throw new ForbiddenException(
-          `You are not eligible to vote on this proposal. This vote is only for sub-counties: ${vote.selectedSubCounties?.join(', ')}`
+          `You are not eligible to vote on this proposal. This vote is only for sub-counties: ${subCounties.join(', ')}`
         );
       }
       return;
     }
     
     if (vote.voteLevel === VoteLevel.WARD) {
-      if (!vote.selectedWards?.includes(user.ward)) {
+      const wards = this.ensureArray(vote.selectedWards);
+      if (!wards.includes(user.ward)) {
         throw new ForbiddenException(
-          `You are not eligible to vote on this proposal. This vote is only for wards: ${vote.selectedWards?.join(', ')}`
+          `You are not eligible to vote on this proposal. This vote is only for wards: ${wards.join(', ')}`
         );
       }
       return;
     }
   }
+
+  async getVoteResults(id: string) {
+    // Get the vote with all associated user votes for accountability tracking
+    const vote = await this.votesRepository.findOne({
+      where: { id: this.convertToObjectId(id) },
+      relations: ['user']
+    });
+
+    if (!vote) {
+      throw new NotFoundException(`Vote with ID ${id} not found`);
+    }
+
+    // Get all user votes for this vote
+    const userVotes = await this.userVoteRepository.find({
+      where: { vote: { id: vote.id } },
+      relations: ['user'],
+      order: { createdAt: 'DESC' }
+    });
+
+    // Count votes
+    const yesCount = userVotes.filter(uv => uv.voteValue === 'yes').length;
+    const noCount = userVotes.filter(uv => uv.voteValue === 'no').length;
+    const totalVotes = userVotes.length;
+
+    // Return comprehensive vote results with audit trail
+    return {
+      _id: vote.id?.toString(),
+      id: vote.id?.toString(),
+      title: vote.title,
+      description: vote.description,
+      eligibility: vote.eligibility,
+      endDate: vote.end_date,
+      voteLevel: vote.voteLevel,
+      selectedSubCounties: vote.selectedSubCounties || [],
+      selectedWards: vote.selectedWards || [],
+      results: {
+        yesCount,
+        noCount,
+        totalVotes,
+        yesPercentage: totalVotes > 0 ? ((yesCount / totalVotes) * 100).toFixed(2) : 0,
+        noPercentage: totalVotes > 0 ? ((noCount / totalVotes) * 100).toFixed(2) : 0
+      },
+      auditTrail: userVotes.map(uv => ({
+        userId: uv.user.id?.toString(),
+        username: uv.user.username,
+        email: uv.user.email,
+        ward: uv.user.ward,
+        subCounty: uv.user.subCounty,
+        voteValue: uv.voteValue,
+        reason: uv.reason || null,
+        timestamp: uv.createdAt
+      }))
+    };
+  }
 }
+

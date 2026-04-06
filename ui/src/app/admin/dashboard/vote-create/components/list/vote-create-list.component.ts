@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminVoteCreateService, CreateVoteCreateDto } from '../../services/vote-create.service';
+import { Router } from '@angular/router';
+import { AdminVoteCreateService, CreateVoteCreateDto, VoteLevel } from '../../services/vote-create.service';
 import { VoteCreateFormComponent } from '../form/vote-create-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components';
 
@@ -17,7 +18,10 @@ export class VoteCreateListComponent implements OnInit {
     title: '',
     description: '',
     eligibility: '',
-    endDate: ''
+    endDate: '',
+    voteLevel: VoteLevel.GENERAL,
+    selectedSubCounties: [],
+    selectedWards: []
   };
 
   proposals: any[] = [];
@@ -32,7 +36,10 @@ export class VoteCreateListComponent implements OnInit {
   proposalToDelete: any = null;
   isDeleting = false;
 
-  constructor(private voteService: AdminVoteCreateService) {}
+  constructor(
+    private voteService: AdminVoteCreateService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.fetchProposals();
@@ -48,12 +55,18 @@ export class VoteCreateListComponent implements OnInit {
     this.resetForm();
   }
 
+  viewResults(proposalId: string): void {
+    this.router.navigate(['/dashboard/votes', proposalId]);
+    this.resetForm();
+  }
+
   fetchProposals() {
     this.voteService.getAllVotes().subscribe({
-      next: (data) => {
-        this.proposals = data;
+      next: (data: any[]) => {
+        console.log('Proposals fetched:', data);
+        this.proposals = data || [];
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error fetching proposals:', err);
         this.errorMessage = 'Could not fetch proposals.';
       }
@@ -61,6 +74,10 @@ export class VoteCreateListComponent implements OnInit {
   }
 
   onFormSubmit(proposal: CreateVoteCreateDto) {
+    console.log('Form submitted with proposal:', proposal);
+    // Create a fresh copy to prevent reference issues
+    this.proposal = JSON.parse(JSON.stringify(proposal));
+    
     if (this.isEditing && this.editingProposal) {
       this.updateProposal();
     } else {
@@ -69,14 +86,27 @@ export class VoteCreateListComponent implements OnInit {
   }
 
   createProposal() {
+    console.log('Creating proposal with data:', this.proposal);
+    
+    // Ensure no empty objects are being submitted
+    if (!this.proposal.title?.trim() || !this.proposal.description?.trim() || !this.proposal.endDate) {
+      this.errorMessage = 'Please fill in all required fields (title, description, and end date)';
+      this.successMessage = '';
+      return;
+    }
+
     this.voteService.createVote(this.proposal).subscribe({
-      next: () => {
+      next: (response: any) => {
+        console.log('Proposal created successfully:', response);
         this.successMessage = 'Proposal created successfully!';
         this.errorMessage = '';
         this.closeModal();
-        this.fetchProposals();
+        // Add a small delay to ensure database consistency
+        setTimeout(() => {
+          this.fetchProposals();
+        }, 500);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error creating proposal:', err);
         this.errorMessage = err?.error?.message || 'Failed to create proposal.';
         this.successMessage = '';
@@ -151,7 +181,10 @@ export class VoteCreateListComponent implements OnInit {
       title: '',
       description: '',
       eligibility: '',
-      endDate: ''
+      endDate: '',
+      voteLevel: VoteLevel.GENERAL,
+      selectedSubCounties: [],
+      selectedWards: []
     };
     this.isEditing = false;
     this.editingProposal = null;

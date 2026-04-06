@@ -46,6 +46,91 @@ form {
   animation: slideDown 0.3s ease-out;
 }
 
+// ng-select floating dropdown styling
+::ng-deep {
+  .ward-selector {
+    &.ng-select {
+      border: 2px solid rgb(209, 213, 219);
+      border-radius: 0.375rem;
+      background-color: rgb(255, 255, 255);
+      min-height: 38px;
+
+      &.ng-select-focused {
+        border-color: rgb(59, 130, 246);
+        box-shadow: 0 0 0 2px rgb(219, 234, 254);
+      }
+
+      &.ng-select-error {
+        border-color: rgb(239, 68, 68);
+        background-color: rgb(254, 242, 242);
+      }
+
+      .dark & {
+        border-color: rgb(75, 85, 99);
+        background-color: rgb(31, 41, 55);
+      }
+
+      .dark &.ng-select-error {
+        border-color: rgb(239, 68, 68);
+        background-color: rgba(127, 29, 29, 0.1);
+      }
+    }
+
+    .ng-select-container {
+      padding: 0.5rem 0.75rem;
+    }
+
+    // Dropdown panel with proper z-index and positioning
+    .ng-dropdown-menu {
+      z-index: 1050 !important;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      border: 2px solid rgb(209, 213, 219);
+      border-radius: 0.375rem;
+      background-color: rgb(255, 255, 255);
+      max-height: 280px;
+
+      .dark & {
+        border-color: rgb(75, 85, 99);
+        background-color: rgb(31, 41, 55);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3),
+          0 4px 6px -2px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    .ng-dropdown-menu .ng-dropdown-menu-item {
+      padding: 0.75rem;
+      color: rgb(31, 41, 55);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+
+      &:hover {
+        background-color: rgb(243, 244, 246);
+      }
+
+      .dark & {
+        color: rgb(209, 213, 219);
+
+        &:hover {
+          background-color: rgb(55, 65, 81);
+        }
+      }
+    }
+
+    .ng-dropdown-menu .ng-dropdown-menu-item.selected {
+      background-color: rgb(219, 234, 254);
+      color: rgb(30, 58, 138);
+      font-weight: 500;
+
+      .dark & {
+        background-color: rgb(30, 58, 138);
+        color: rgb(191, 219, 254);
+      }
+    }
+  }
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;

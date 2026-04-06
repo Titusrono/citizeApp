@@ -86,6 +86,24 @@ export class ProposalListComponent implements OnInit {
   }
 
   fetchProposals(): void {
+    // Use the backend-filtered endpoint that returns only votes the user is eligible for
+    this.voteService.getEligibleVotes().subscribe({
+      next: (data: any[]) => {
+        // Backend already filters based on user's location, so just use directly
+        this.proposals = data || [];
+        this.filteredProposals = this.proposals;
+        console.log(`[ProposalList] Loaded ${this.proposals.length} eligible votes for user`);
+      },
+      error: (err: any) => {
+        console.error('Error fetching eligible proposals:', err);
+        // Fallback to getAllVotes if authenticated call fails
+        this.fallbackToAllVotes();
+      }
+    });
+  }
+
+  fallbackToAllVotes(): void {
+    console.warn('[ProposalList] Falling back to getAllVotes with client-side filtering');
     this.voteService.getAllVotes().subscribe({
       next: (data: any[]) => {
         this.proposals = data;
@@ -99,6 +117,8 @@ export class ProposalListComponent implements OnInit {
   }
 
   filterProposalsByUserLevel(): void {
+    // This is now mainly a client-side backup since server does the filtering
+    // But keep it for the fallback scenario
     this.filteredProposals = this.proposals.filter(proposal => {
       const voteLevel = proposal.voteLevel || VoteLevel.GENERAL;
       
@@ -116,6 +136,7 @@ export class ProposalListComponent implements OnInit {
       
       return false;
     });
+    console.log(`[ProposalList] Filtered to ${this.filteredProposals.length} proposals for user location`);
   }
 
   isVoteAccessible(proposal: any): boolean {

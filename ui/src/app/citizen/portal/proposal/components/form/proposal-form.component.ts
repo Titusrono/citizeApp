@@ -1,18 +1,23 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { NgSelectComponent } from '@ng-select/ng-select';
+import { LocationService } from '../../../../../shared/services/location.service';
 
 interface FormErrors {
   title?: string;
   description?: string;
   topic?: string;
   deadline?: string;
+  subcounty?: string;
+  ward?: string;
 }
 
 @Component({
   selector: 'app-proposal-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, NgSelectComponent],
+  providers: [LocationService],
   templateUrl: './proposal-form.component.html',
   styleUrls: ['./proposal-form.component.scss']
 })
@@ -21,7 +26,9 @@ export class ProposalFormComponent {
     title: '',
     description: '',
     topic: '',
-    deadline: ''
+    deadline: '',
+    subcounty: '',
+    ward: ''
   };
   @Input() isEditing = false;
   @Input() successMessage = '';
@@ -43,6 +50,31 @@ export class ProposalFormComponent {
     { value: 'public-safety', label: '🚓 Public Safety' },
     { value: 'other', label: '📌 Other' }
   ];
+
+  // Get subcounties from LocationService for consistency
+  subcounties: any[] = [];
+  wardsBySubcounty: { [key: string]: any[] } = {};
+
+  constructor(private locationService: LocationService) {
+    this.initializeLocations();
+  }
+
+  private initializeLocations(): void {
+    // Get subcounties and build wards map using exact names from LocationService
+    const subCounties = this.locationService.getSubCounties();
+    this.subcounties = subCounties.map((sc: any) => ({ 
+      value: sc.name,  // Use exact name for consistency
+      label: sc.name 
+    }));
+    
+    // Build wards mapping using exact names
+    subCounties.forEach((subCounty: any) => {
+      this.wardsBySubcounty[subCounty.name] = subCounty.wards.map((ward: string) => ({
+        value: ward,  // Use exact ward name for consistency
+        label: ward
+      }));
+    });
+  }
 
   validateField(fieldName: string): boolean {
     const value = this.data[fieldName]?.toString().trim();
@@ -75,6 +107,18 @@ export class ProposalFormComponent {
         }
         break;
 
+      case 'subcounty':
+        if (!value) {
+          this.errors.subcounty = 'Please select a subcounty';
+        }
+        break;
+
+      case 'ward':
+        if (!value) {
+          this.errors.ward = 'Please select a ward';
+        }
+        break;
+
       case 'deadline':
         if (!value) {
           this.errors.deadline = 'Deadline date is required';
@@ -93,7 +137,7 @@ export class ProposalFormComponent {
   }
 
   validateForm(): boolean {
-    const fields = ['title', 'description', 'topic', 'deadline'];
+    const fields = ['title', 'description', 'topic', 'subcounty', 'ward', 'deadline'];
     let isValid = true;
     fields.forEach(field => {
       if (!this.validateField(field)) {
@@ -101,6 +145,21 @@ export class ProposalFormComponent {
       }
     });
     return isValid;
+  }
+
+  getAvailableWards(): any[] {
+    if (!this.data['subcounty']) {
+      return [];
+    }
+    return this.wardsBySubcounty[this.data['subcounty']] || [];
+  }
+
+  onSubcountyChange() {
+    // Clear ward selection and errors when subcounty changes
+    this.data['ward'] = '';
+    this.errors['ward'] = '';
+    this.touched['ward'] = false;
+    this.markFieldTouched('subcounty');
   }
 
   markFieldTouched(fieldName: string) {
@@ -117,7 +176,7 @@ export class ProposalFormComponent {
   }
 
   getDescriptionCharCount(): string {
-    return (this.data.description?.length || 0).toString();
+    return (this.data['description']?.length || 0).toString();
   }
 
   onSubmit() {
@@ -131,6 +190,8 @@ export class ProposalFormComponent {
       title: '',
       description: '',
       topic: '',
+      subcounty: '',
+      ward: '',
       deadline: ''
     };
     this.errors = {};

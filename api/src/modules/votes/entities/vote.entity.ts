@@ -26,17 +26,13 @@ export class Vote {
   @Column()
   end_date!: Date;
 
-  @Column({
-    type: 'enum',
-    enum: VoteLevel,
-    default: VoteLevel.GENERAL,
-  })
+  @Column({ type: 'enum', enum: VoteLevel, default: VoteLevel.GENERAL })
   voteLevel!: VoteLevel;
 
-  @Column({ type: 'simple-array', nullable: true })
+  @Column({ nullable: true })
   selectedSubCounties?: string[];
 
-  @Column({ type: 'simple-array', nullable: true })
+  @Column({ nullable: true })
   selectedWards?: string[];
 
   @ManyToOne(() => Policy, (policy: Policy) => policy.votes, { onDelete: 'CASCADE' })

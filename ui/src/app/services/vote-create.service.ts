@@ -46,9 +46,19 @@ export class VoteCreateService {
     return this.http.get(this.apiUrl);
   }
 
+  // ✅ Get voting proposals eligible for the current logged-in user
+  getEligibleVotes(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me/eligible`);
+  }
+
   // ✅ Get a single voting proposal by ID
   getVoteById(id: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/${id}`);
+  }
+
+  // ✅ Get vote results and audit trail (admin only)
+  getVoteResults(id: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${id}/results`);
   }
 
   // ✅ Update a voting proposal by ID

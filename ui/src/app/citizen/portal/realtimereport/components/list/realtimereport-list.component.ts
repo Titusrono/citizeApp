@@ -23,7 +23,13 @@ export class RealtimereportListComponent implements OnInit {
     images: []
   };
 
+  // User's own issues
+  userIssuesList: any[] = [];
+  // Approved issues from other users
+  approvedIssuesList: any[] = [];
+  // Combined list for backwards compatibility
   itemsList: any[] = [];
+  
   successMessage = '';
   errorMessage = '';
   editingIssue: any = null;
@@ -41,10 +47,13 @@ export class RealtimereportListComponent implements OnInit {
   currentPage: number = 1;
   pageSize: number = 10;
   pageSizeOptions: number[] = [10, 25, 50, 100];
+  currentUserId: string | null = null;
 
   constructor(private issueService: IssueService) {}
 
   ngOnInit(): void {
+    // Get current user ID from localStorage
+    this.currentUserId = localStorage.getItem('user_id');
     this.fetchIssues();
   }
 
@@ -61,21 +70,58 @@ export class RealtimereportListComponent implements OnInit {
   fetchIssues(): void {
     this.isLoading = true;
     this.errorMessage = '';
-    this.issueService.getAllIssues().subscribe({
-      next: (data: any[]) => {
+
+    if (!this.currentUserId) {
+      this.errorMessage = 'Unable to identify user. Please log in again.';
+      this.isLoading = false;
+      console.log('No currentUserId found');
+      return;
+    }
+
+    console.log('Fetching issues for userId:', this.currentUserId);
+
+    // Fetch ALL user's issues (both pending and approved)
+    this.issueService.getUserIssues(this.currentUserId).subscribe({
+      next: (userIssues: any[]) => {
+        console.log('User issues received:', userIssues);
         // Sort by createdAt descending (newest first)
-        this.itemsList = data.sort((a, b) => {
+        this.userIssuesList = userIssues.sort((a, b) => {
           const dateA = new Date(a.createdAt || 0).getTime();
           const dateB = new Date(b.createdAt || 0).getTime();
           return dateB - dateA;
         });
-        this.currentPage = 1; // Reset to first page
-        this.isLoading = false;
+        console.log('User issues after sort:', this.userIssuesList);
+
+        // Fetch approved issues from OTHER users only
+        this.issueService.getApprovedIssues().subscribe({
+          next: (approvedIssues: any[]) => {
+            console.log('Approved issues received:', approvedIssues);
+            // Filter to show only approved issues from OTHER users (not current user)
+            this.approvedIssuesList = approvedIssues
+              .filter(issue => issue.user?._id !== this.currentUserId && issue.user?.id !== this.currentUserId)
+              .sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0).getTime();
+                const dateB = new Date(b.createdAt || 0).getTime();
+                return dateB - dateA;
+              });
+            console.log('Approved issues from others:', this.approvedIssuesList);
+
+            // Combine for backwards compatibility 
+            this.itemsList = [...this.userIssuesList, ...this.approvedIssuesList];
+            this.currentPage = 1; // Reset to first page
+            this.isLoading = false;
+          },
+          error: (error: ErrorResponse) => {
+            console.error('Error fetching approved issues:', error);
+            this.errorMessage = 'Failed to load approved issues. Please try again.';
+            this.isLoading = false;
+          }
+        });
       },
       error: (error: ErrorResponse) => {
-        this.errorMessage = 'Failed to load issues. Please try again.';
+        console.error('Error fetching user issues:', error);
+        this.errorMessage = 'Failed to load your issues. Please try again.';
         this.isLoading = false;
-        console.error('Error fetching issues:', error);
       }
     });
   }

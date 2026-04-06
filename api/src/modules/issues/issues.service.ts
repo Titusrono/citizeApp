@@ -26,15 +26,47 @@ export class IssuesService {
   }
 
   async create(createIssueDto: CreateIssueDto, user: User) {
+    const userIdString = user.id instanceof ObjectId ? user.id.toString() : String(user.id);
     const issue = this.issuesRepository.create({
       ...createIssueDto,
       user,
+      userId: userIdString // Store userId as string for easier querying
     });
     return this.issuesRepository.save(issue);
   }
 
   async findAll() {
     return this.issuesRepository.find({ relations: ['user'] });
+  }
+
+  // Find issues by filters (userId and/or approved status)
+  async findByFilters(userId?: string, approved?: boolean) {
+    console.log('findByFilters called with userId:', userId, 'approved:', approved);
+    
+    const filter: any = {};
+    
+    if (userId) {
+      console.log('Filtering by userId (string):', userId);
+      filter.userId = userId;
+    }
+    
+    if (approved !== undefined) {
+      console.log('Filtering by approved:', approved);
+      filter.approved = approved;
+    }
+    
+    console.log('MongoDB filter:', filter);
+    const results = await this.issuesRepository.find({ 
+      where: filter,
+      relations: ['user']
+    });
+    
+    console.log('findByFilters - results count:', results.length);
+    if (results.length > 0) {
+      console.log('findByFilters - first result userId:', results[0].userId);
+    }
+    
+    return results;
   }
 
   async findOne(id: string) {

@@ -1,0 +1,189 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header with Back Button -->
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <button
+          (click)="goBack()"
+          class="text-blue-500 hover:text-blue-600 font-semibold mb-4 flex items-center gap-2"
+        >
+          ← Back to Votes
+        </button>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          📊 Vote Results & Audit Trail
+        </h1>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+      <div class="text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Loading vote results...</p>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage && !isLoading" class="bg-red-100 text-red-800 border-l-4 border-red-500 px-4 py-3 rounded dark:bg-red-900/20 dark:text-red-300 dark:border-red-600 mb-6">
+      <strong>Error:</strong> {{ errorMessage }}
+    </div>
+
+    <!-- Vote Results Content -->
+    <div *ngIf="!isLoading && voteResults" class="space-y-6">
+      <!-- Vote Info Card -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              {{ voteResults.title }}
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 text-sm">
+              {{ voteResults.description }}
+            </p>
+          </div>
+          <div class="flex gap-2 flex-wrap items-start">
+            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+              {{ getLevelDisplayName(voteResults.voteLevel) }}
+            </span>
+            <span class="px-3 py-1 rounded-full text-sm font-semibold bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300">
+              End Date: {{ voteResults.endDate | date: 'short' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vote Statistics -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Yes Votes -->
+        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-6 border-l-4 border-green-500">
+          <p class="text-green-800 dark:text-green-300 text-sm font-semibold mb-2">YES VOTES</p>
+          <p class="text-4xl font-bold text-green-600 dark:text-green-400 mb-1">
+            {{ voteResults.results.yesCount }}
+          </p>
+          <p class="text-green-700 dark:text-green-300 text-sm">
+            {{ voteResults.results.yesPercentage }}% of votes
+          </p>
+        </div>
+
+        <!-- No Votes -->
+        <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-6 border-l-4 border-red-500">
+          <p class="text-red-800 dark:text-red-300 text-sm font-semibold mb-2">NO VOTES</p>
+          <p class="text-4xl font-bold text-red-600 dark:text-red-400 mb-1">
+            {{ voteResults.results.noCount }}
+          </p>
+          <p class="text-red-700 dark:text-red-300 text-sm">
+            {{ voteResults.results.noPercentage }}% of votes
+          </p>
+        </div>
+
+        <!-- Total Votes -->
+        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 border-l-4 border-blue-500">
+          <p class="text-blue-800 dark:text-blue-300 text-sm font-semibold mb-2">TOTAL VOTES</p>
+          <p class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+            {{ voteResults.results.totalVotes }}
+          </p>
+          <p class="text-blue-700 dark:text-blue-300 text-sm">
+            Votes recorded
+          </p>
+        </div>
+      </div>
+
+      <!-- Progress Bars -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Vote Distribution</h3>
+        <div class="space-y-4">
+          <!-- Yes Bar -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Yes Votes</span>
+              <span class="text-sm font-semibold text-green-600 dark:text-green-400">{{ voteResults.results.yesPercentage }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                class="bg-green-500 h-3 rounded-full transition-all"
+                [style.width.%]="voteResults.results.yesPercentage"
+              ></div>
+            </div>
+          </div>
+
+          <!-- No Bar -->
+          <div>
+            <div class="flex justify-between mb-1">
+              <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">No Votes</span>
+              <span class="text-sm font-semibold text-red-600 dark:text-red-400">{{ voteResults.results.noPercentage }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                class="bg-red-500 h-3 rounded-full transition-all"
+                [style.width.%]="voteResults.results.noPercentage"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audit Trail -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
+            📋 Complete Audit Trail
+          </h3>
+          <button
+            (click)="downloadAuditTrail()"
+            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-sm"
+          >
+            ⬇️ Download CSV
+          </button>
+        </div>
+
+        <!-- Audit Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-100 dark:bg-gray-700 border-b-2 border-gray-300 dark:border-gray-600">
+              <tr>
+                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Timestamp</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">User</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Email</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Location</th>
+                <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300">Vote</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Reason</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              <tr
+                *ngFor="let entry of voteResults.auditTrail"
+                class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                <td class="px-4 py-3 text-gray-600 dark:text-gray-400 whitespace-nowrap text-xs">
+                  {{ entry.timestamp | date: 'short' }}
+                </td>
+                <td class="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">
+                  {{ entry.username }}
+                </td>
+                <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
+                  {{ entry.email }}
+                </td>
+                <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
+                  {{ entry.ward }}, {{ entry.subCounty }}
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <span
+                    [ngClass]="entry.voteValue === 'yes'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'"
+                    class="px-3 py-1 rounded-full font-semibold text-sm"
+                  >
+                    {{ entry.voteValue.toUpperCase() }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-xs max-w-xs truncate">
+                  {{ entry.reason || '-' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

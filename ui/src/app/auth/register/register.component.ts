@@ -11,6 +11,7 @@ import {
 import { AuthService } from '../../core/auth/auth.service';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { LocationService } from '../../shared/services/location.service';
 
 @Component({
   selector: 'app-register',
@@ -23,14 +24,9 @@ export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   errorMessage: string | null = null;
   wards: string[] = [];
-
-  subCounties = [
-    { name: 'Kajiado North', wards: ['Oloolua', 'Enkarasha', 'Illoodokilani', 'Inkisanjani'] },
-    { name: 'Kajiado Central', wards: ['Kitengela', 'Magadi', 'Ngong', 'Isinya', 'Oibor'] },
-    { name: 'Kajiado East', wards: ['Imaroro', 'Oloolua', 'Oltepesi', 'Ongata Rongai'] },
-    { name: 'Kajiado South', wards: ['Loitokitok', 'Kimana', 'Amboseli', 'Entonet'] },
-    { name: 'Kajiado West', wards: ['Kajiado', 'Daraja Mbili', 'Oloosirkon', 'Shompole'] },
-  ];
+  
+  // Get subcounties from LocationService for consistency
+  subCounties: any[] = [];
 
   showPassword = false;
   showConfirmPassword = false;
@@ -38,10 +34,14 @@ export class RegisterComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private locationService: LocationService
   ) {}
 
   ngOnInit(): void {
+    // Load subcounties from LocationService for consistency
+    this.subCounties = this.locationService.getSubCounties();
+    
     this.registerForm = this.fb.group({
       username: [
         '',

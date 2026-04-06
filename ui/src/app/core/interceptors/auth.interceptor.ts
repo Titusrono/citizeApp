@@ -5,17 +5,16 @@ import { Observable } from 'rxjs';
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Skip adding auth for certain endpoints
+    // Skip adding auth for certain endpoints (public endpoints only)
     const skipAuth = req.url.includes('/auth/login') || 
                     req.url.includes('/auth/register') || 
                     req.url.includes('/assets/') ||
-                    req.method === 'GET' && (
-                      req.url.includes('/votes') ||
+                    (req.method === 'GET' && (
                       req.url.includes('/petitions') ||
                       req.url.includes('/issues') ||
                       req.url.includes('/policies') ||
                       req.url.includes('/townhalls')
-                    );
+                    ));
 
     if (skipAuth) {
       return next.handle(req);

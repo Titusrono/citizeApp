@@ -16,17 +16,39 @@ export class VotesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.CITIZEN, UserRole.ADMIN, UserRole.SUPER_ADMIN)
   async create(@Body() createVoteDto: CreateVoteDto, @Req() req) {
-    return this.votesService.create(createVoteDto, req.user);
+    console.log('[VotesController.create] POST /votes called');
+    const result = await this.votesService.create(createVoteDto, req.user);
+    console.log('[VotesController.create] Vote created, returning:', result?.id);
+    return result;
   }
 
   @Get()
   async findAll() {
-    return this.votesService.findAll();
+    console.log('[VotesController.findAll] GET /votes called');
+    const result = await this.votesService.findAll();
+    console.log('[VotesController.findAll] Returning', result?.length, 'votes');
+    return result;
+  }
+
+  @Get('me/eligible')
+  @UseGuards(JwtAuthGuard)
+  async findAllForUser(@Req() req) {
+    console.log('[VotesController.findAllForUser] GET /votes/me/eligible called for user:', req.user?.email);
+    const result = await this.votesService.findAllForUser(req.user);
+    console.log('[VotesController.findAllForUser] Returning', result?.length, 'eligible votes');
+    return result;
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.votesService.findOne(id);
+  }
+
+  @Get(':id/results')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  async getVoteResults(@Param('id') id: string) {
+    return this.votesService.getVoteResults(id);
   }
 
   @Patch(':id')
@@ -49,3 +71,4 @@ export class VotesController {
     return this.votesService.castVote(id, castVoteDto, req.user);
   }
 }
+

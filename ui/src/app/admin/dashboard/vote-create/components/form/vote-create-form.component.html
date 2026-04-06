@@ -64,44 +64,47 @@
           </p>
         </div>
 
-        <!-- Eligibility (Optional) -->
-        <div class="mb-4">
-          <label for="eligibility" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-            Eligibility Criteria
-          </label>
-          <input
-            type="text"
-            id="eligibility"
-            name="eligibility"
-            [(ngModel)]="proposal.eligibility"
-            placeholder="Enter eligibility criteria (optional)"
-            maxlength="300"
-            (blur)="markFieldTouched('eligibility')"
-            class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
-          />
-          <p class="text-xs text-gray-500 mt-1">
-            {{ proposal.eligibility?.length || 0 }}/300 characters
-          </p>
-        </div>
-        
-        <!-- End Date -->
-        <div class="mb-4">
-          <label for="endDate" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-            End Date <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            id="endDate"
-            name="endDate"
-            [(ngModel)]="proposal.endDate"
-            required
-            (blur)="markFieldTouched('endDate')"
-            [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('endDate'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('endDate')}"
-            class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
-          />
-          <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('endDate')">
-            {{ errors.endDate }}
-          </p>
+        <!-- Eligibility and End Date Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Eligibility (Optional) -->
+          <div>
+            <label for="eligibility" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+              Eligibility Criteria
+            </label>
+            <input
+              type="text"
+              id="eligibility"
+              name="eligibility"
+              [(ngModel)]="proposal.eligibility"
+              placeholder="Enter eligibility criteria (optional)"
+              maxlength="300"
+              (blur)="markFieldTouched('eligibility')"
+              class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+            />
+            <p class="text-xs text-gray-500 mt-1">
+              {{ proposal.eligibility?.length || 0 }}/300 characters
+            </p>
+          </div>
+          
+          <!-- End Date -->
+          <div>
+            <label for="endDate" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+              End Date <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              id="endDate"
+              name="endDate"
+              [(ngModel)]="proposal.endDate"
+              required
+              (blur)="markFieldTouched('endDate')"
+              [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('endDate'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('endDate')}"
+              class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+            />
+            <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('endDate')">
+              {{ errors.endDate }}
+            </p>
+          </div>
         </div>
 
         <!-- Voting Level -->
@@ -180,12 +183,17 @@
               *ngIf="getFilteredWards().length > 0"
               [items]="getFilteredWards()"
               bindLabel="name"
-              placeholder="Select ward"
+              bindValue="value"
+              placeholder="Select ward(s)"
               [(ngModel)]="proposal.selectedWards"
-              [multiple]="false"
+              [multiple]="true"
               [searchable]="true"
+              [virtualScroll]="true"
+              [dropdownPosition]="'auto'"
+              [compareWith]="compareWards"
               name="ward"
               id="ward"
+              class="ward-selector"
             >
             </ng-select>
             <p class="text-xs text-gray-500 mt-2">

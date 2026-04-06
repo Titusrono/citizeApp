@@ -3,12 +3,22 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
+// Voting levels enum
+export enum VoteLevel {
+  GENERAL = 'general',
+  SUB_COUNTY = 'sub_county',
+  WARD = 'ward',
+}
+
 // DTO for creating or updating a proposal
 export interface CreateVoteCreateDto {
   title: string;
   description: string;
   endDate: string;
   eligibility?: string;
+  voteLevel?: VoteLevel;
+  selectedSubCounties?: string[];
+  selectedWards?: string[];
 }
 
 // DTO for casting a vote
@@ -41,6 +51,11 @@ export class AdminVoteCreateService {
     return this.http.get(`${this.apiUrl}/${id}`);
   }
 
+  // ✅ Get vote results and audit trail
+  getVoteResults(id: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${id}/results`);
+  }
+
   // ✅ Update a voting proposal by ID
   updateVote(id: string, updateVotecreateDto: CreateVoteCreateDto): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}`, updateVotecreateDto);
@@ -49,6 +64,11 @@ export class AdminVoteCreateService {
   // ✅ Delete a voting proposal by ID
   deleteVote(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+  // ✅ Get eligible votes for current user (filtered by user's location)
+  getEligibleVotes(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me/eligible`);
   }
 
   // ✅ Cast a vote on a proposal by ID

@@ -51,6 +51,11 @@ export class VoteCreateService {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
+  // ✅ Get eligible votes for current user (filtered by user's location)
+  getEligibleVotes(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me/eligible`);
+  }
+
   // ✅ Cast a vote on a proposal by ID
   castVote(id: string, votePayload: CastVoteDto): Observable<any> {
     return this.http.post(`${this.apiUrl}/${id}/vote`, votePayload);

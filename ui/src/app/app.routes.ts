@@ -20,6 +20,7 @@ import { VirtualCreateListComponent } from "./admin/dashboard/virtual-create/com
 import { RoleGuard } from "./core/auth/role.guard";
 import { AuthGuard } from "./core/auth/auth.guard";
 import { AdminPetitionListComponent } from "./admin/dashboard/adminpetition/components/list/adminpetition-list.component";
+import { VoteResultsComponent } from "./admin/dashboard/vote-create/components/results/vote-results.component";
 
 export const routes: Routes = [
   // Root route - redirect to login or dashboard based on auth state
@@ -60,6 +61,7 @@ export const routes: Routes = [
       { path: 'moderator', title: 'Moderator', component: ModeratorListComponent },
       { path: 'report-admin', title: 'Reports Admin', component: ReportAdminListComponent },
       { path: 'vote-create', title: 'Vote Create', component: VoteCreateListComponent },
+      { path: 'votes/:id', title: 'Vote Results', component: VoteResultsComponent },
       { path: 'virtual-create', title: 'Virtual Meet', component: VirtualCreateListComponent },
       { path: 'adminpetition', title: 'Admin Petition', component: AdminPetitionListComponent },
       { path: 'usersreg', title: 'Users Register', component: UsersregListComponent },

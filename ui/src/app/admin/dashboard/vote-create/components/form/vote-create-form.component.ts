@@ -1,8 +1,9 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CreateVoteCreateDto, VoteLevel } from '../../../../../services/vote-create.service';
-import { NgSelectModule } from '@ng-select/ng-select';
+import { CreateVoteCreateDto, VoteLevel } from '../../services/vote-create.service';
+import { NgSelectComponent } from '@ng-select/ng-select';
+import { LocationService } from '../../../../../shared/services/location.service';
 
 interface FormErrors {
   title?: string;
@@ -15,11 +16,12 @@ interface FormErrors {
 @Component({
   selector: 'app-vote-create-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgSelectModule],
+  imports: [CommonModule, FormsModule, NgSelectComponent],
+  providers: [LocationService],
   templateUrl: './vote-create-form.component.html',
   styleUrls: ['./vote-create-form.component.scss']
 })
-export class VoteCreateFormComponent implements OnInit {
+export class VoteCreateFormComponent implements OnInit, OnChanges {
   @Input() proposal: CreateVoteCreateDto = {
     title: '',
     description: '',
@@ -41,41 +43,77 @@ export class VoteCreateFormComponent implements OnInit {
   errors: FormErrors = {};
   touched: { [key: string]: boolean } = {};
   selectedWardSubCounty: string = ''; // Track single sub-county selection for Ward level
+  isSubmittingLocal = false; // Local flag to prevent double submission
+  isInitializing = true; // Track if we're in initialization phase
 
   VoteLevel = VoteLevel;
 
-  // County data - Only Kajiado
-  subCounties = [
-    { name: 'Kajiado North', wards: ['Oloolua', 'Enkarasha', 'Illoodokilani', 'Inkisanjani'] },
-    { name: 'Kajiado Central', wards: ['Kitengela', 'Magadi', 'Ngong', 'Isinya', 'Oibor'] },
-    { name: 'Kajiado East', wards: ['Imaroro', 'Oloolua', 'Oltepesi', 'Ongata Rongai'] },
-    { name: 'Kajiado South', wards: ['Loitokitok', 'Kimana', 'Amboseli', 'Entonet'] },
-    { name: 'Kajiado West', wards: ['Kajiado', 'Daraja Mbili', 'Oloosirkon', 'Shompole'] },
-  ];
+  // Use LocationService for subcounties and wards
+  subCounties: any[] = [];
   currentSubCounties: string[] = [];
-  currentWards: string[] = [];
+  filteredWards: any[] = []; // Cache filtered wards to prevent infinite loops
 
-  getFilteredWards(): string[] {
-    if (!this.selectedWardSubCounty) {
-      return [];
-    }
-    const subCounty = this.subCounties.find(sc => sc.name === this.selectedWardSubCounty);
-    return subCounty ? subCounty.wards : [];
+  constructor(private locationService: LocationService) {}
+
+  getFilteredWards(): any[] {
+    return this.filteredWards;
+  }
+
+  compareWards(c1: any, c2: any): boolean {
+    return c1 && c2 ? c1 === c2 : c1 === c2;
   }
   
   onWardSubCountyChange(subCounty: string): void {
     this.selectedWardSubCounty = subCounty;
-    // Clear previously selected wards when sub-county changes
-    this.proposal.selectedWards = [];
+    // Only clear selected wards when user manually changes subcounty (not during initialization)
+    if (!this.isInitializing) {
+      this.proposal.selectedWards = [];
+    }
+    
+    // Update cached filtered wards
+    if (subCounty) {
+      const wards = this.locationService.getWardsForSubCounty(subCounty);
+      // Convert string array to objects with name property for ng-select
+      this.filteredWards = wards.map(ward => ({ name: ward, value: ward }));
+    } else {
+      this.filteredWards = [];
+    }
   }
 
   initializeSubCounties(): void {
-    // Initialize sub-counties on component load or when vote level changes
-    this.currentSubCounties = this.subCounties.map(sc => sc.name);
+    // Get subcounties from LocationService for consistency
+    this.subCounties = this.locationService.getSubCounties();
+    this.currentSubCounties = this.locationService.getSubCountyNames();
   }
 
   ngOnInit(): void {
     this.initializeSubCounties();
+    this.isSubmittingLocal = false;
+    // Mark initialization complete after ngOnInit, so ngOnChanges after this knows we're in a user action
+    setTimeout(() => {
+      this.isInitializing = false;
+    }, 0);
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Handle changes to proposal for edit mode
+    if (changes['proposal'] && changes['proposal'].currentValue) {
+      const proposal = changes['proposal'].currentValue;
+      
+      // If this is a ward-level vote, pre-populate the selectedWardSubCounty
+      if (proposal.voteLevel === VoteLevel.WARD && proposal.selectedWards && proposal.selectedWards.length > 0) {
+        // Get the first selected ward and find its sub-county
+        const firstWard = proposal.selectedWards[0];
+        const subCountyForWard = this.locationService.getSubCountyForWard(firstWard);
+        if (subCountyForWard) {
+          this.selectedWardSubCounty = subCountyForWard;
+          // Trigger the change to populate filtered wards (don't clear wards during initialization)
+          this.isInitializing = true;
+          this.onWardSubCountyChange(subCountyForWard);
+          this.isInitializing = false;
+        }
+      }
+    }
   }
 
   validateField(fieldName: string): boolean {
@@ -171,9 +209,63 @@ export class VoteCreateFormComponent implements OnInit {
     return (this.proposal.description?.length || 0).toString();
   }
 
+  /**
+   * For ward-level votes, derive the subcounties from the selected wards
+   */
+  private getSubCountiesFromWards(wards: string[]): string[] {
+    if (!wards || wards.length === 0) {
+      return [];
+    }
+    
+    const subCounties = new Set<string>();
+    for (const ward of wards) {
+      const subCounty = this.locationService.getSubCountyForWard(ward);
+      if (subCounty) {
+        subCounties.add(subCounty);
+      }
+    }
+    
+    return Array.from(subCounties);
+  }
+
   onSubmit() {
+    // Prevent double submission
+    if (this.isSubmittingLocal || this.isSubmitting) {
+      return;
+    }
+
     if (this.validateForm()) {
-      this.submit.emit(this.proposal);
+      // Create a deep copy to ensure data is properly captured
+      let selectedSubCounties = this.proposal.selectedSubCounties || [];
+      let selectedWards = this.proposal.selectedWards || [];
+
+      // Deduplicate arrays
+      selectedSubCounties = Array.from(new Set(selectedSubCounties));
+      selectedWards = Array.from(new Set(selectedWards));
+
+      // For WARD-level votes, derive subcounties from selected wards
+      if (this.proposal.voteLevel === VoteLevel.WARD && selectedWards.length > 0) {
+        selectedSubCounties = this.getSubCountiesFromWards(selectedWards);
+      }
+
+      const submissionData: CreateVoteCreateDto = {
+        title: this.proposal.title?.trim() || '',
+        description: this.proposal.description?.trim() || '',
+        eligibility: this.proposal.eligibility?.trim() || '',
+        endDate: this.proposal.endDate || '',
+        voteLevel: this.proposal.voteLevel || VoteLevel.GENERAL,
+        selectedSubCounties: selectedSubCounties,
+        selectedWards: selectedWards
+      };
+
+      console.log('[VoteCreateForm.onSubmit] Submitting vote:', {
+        voteLevel: submissionData.voteLevel,
+        selectedSubCounties: submissionData.selectedSubCounties,
+        selectedWards: submissionData.selectedWards
+      });
+
+      this.isSubmittingLocal = true;
+      this.submit.emit(submissionData);
     }
   }
 
@@ -188,14 +280,15 @@ export class VoteCreateFormComponent implements OnInit {
       selectedWards: []
     };
     this.selectedWardSubCounty = '';
-
-    this.currentSubCounties = [];
-    this.currentWards = [];
+    this.filteredWards = [];
     this.errors = {};
     this.touched = {};
+    this.isSubmittingLocal = false;
+    this.isInitializing = true;
   }
 
   onClose() {
+    this.isSubmittingLocal = false;
     this.close.emit();
   }
 

@@ -1,6 +1,6 @@
 <div class="modal-form-body flex flex-col h-full">
   <!-- Scrollable Form Content -->
-  <div class="overflow-y-auto flex-1">
+  <div class="overflow-y-auto flex-1 relative">
     <!-- Alert Messages -->
     <div class="px-6 py-4 space-y-3">
       <div *ngIf="successMessage" class="bg-green-100 text-green-800 border-l-4 border-green-500 px-4 py-3 rounded dark:bg-green-900/20 dark:text-green-300 dark:border-green-600">
@@ -59,6 +59,65 @@
         </select>
         <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('topic')">
           {{ errors.topic }}
+        </p>
+      </div>
+
+      <!-- Subcounty Selection -->
+      <div>
+        <label for="subcounty" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Select Sub-County <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="subcounty"
+          name="subcounty"
+          [(ngModel)]="data.subcounty"
+          required
+          (change)="onSubcountyChange()"
+          (blur)="markFieldTouched('subcounty')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('subcounty'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('subcounty')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+        >
+          <option value="">Select sub-county</option>
+          <option *ngFor="let s of subcounties" [value]="s.value">
+            {{ s.label }}
+          </option>
+        </select>
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('subcounty')">
+          {{ errors.subcounty }}
+        </p>
+      </div>
+
+      <!-- Ward Selection -->
+      <div>
+        <label for="ward" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Select Ward <span class="text-red-500">*</span>
+        </label>
+        
+        <div *ngIf="!data['subcounty']" class="bg-blue-50 border-l-4 border-blue-500 px-4 py-3 rounded dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-600">
+          <p class="text-sm">Please select a sub-county first</p>
+        </div>
+
+        <ng-select
+          *ngIf="data['subcounty']"
+          id="ward"
+          name="ward"
+          [items]="getAvailableWards()"
+          bindLabel="label"
+          bindValue="value"
+          placeholder="Select a ward"
+          [(ngModel)]="data.ward"
+          (blur)="markFieldTouched('ward')"
+          [clearable]="true"
+          [searchable]="true"
+          [virtualScroll]="true"
+          [dropdownPosition]="'auto'"
+          class="ward-selector"
+          [ngClass]="{'ng-select-error': hasError('ward')}"
+        >
+        </ng-select>
+
+        <p class="text-xs text-red-500 mt-2 dark:text-red-400" *ngIf="hasError('ward')">
+          {{ errors.ward }}
         </p>
       </div>
 
@@ -130,7 +189,7 @@
           [disabled]="isSubmitting"
           class="px-6 py-2 bg-linear-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-md text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:shadow-md"
         >
-          <span *ngIf="!isSubmitting">{{ isEditing ? 'Update Proposal' : 'Submit Proposal' }}</span>
+          <span *ngIf="!isSubmitting">{{ isEditing ? 'Update Proposal' : 'Create Proposal' }}</span>
           <span *ngIf="isSubmitting">Processing...</span>
         </button>
       </div>

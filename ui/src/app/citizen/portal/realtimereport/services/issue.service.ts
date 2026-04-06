@@ -12,6 +12,8 @@ export interface Issue {
   images?: string[];
   createdAt?: string;
   updatedAt?: string;
+  approved?: boolean;
+  user?: any;
 }
 
 @Injectable({
@@ -25,6 +27,16 @@ export class IssueService {
   // Get all issues
   getAllIssues(): Observable<Issue[]> {
     return this.http.get<Issue[]>(this.API_URL);
+  }
+
+  // Get user's own issues (all statuses)
+  getUserIssues(userId: string): Observable<Issue[]> {
+    return this.http.get<Issue[]>(`${this.API_URL}?userId=${userId}`);
+  }
+
+  // Get approved issues from all users
+  getApprovedIssues(): Observable<Issue[]> {
+    return this.http.get<Issue[]>(`${this.API_URL}?approved=true`);
   }
 
   // Create a new issue

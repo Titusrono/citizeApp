@@ -1,0 +1,268 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+        🗳️ Active Votes
+      </h1>
+      <p class="text-gray-600 dark:text-gray-400">
+        View and participate in votes relevant to your location
+      </p>
+    </div>
+
+    <!-- Alert Messages -->
+    <div class="mb-6 space-y-3">
+      <div *ngIf="successMessage" class="bg-green-100 text-green-800 border-l-4 border-green-500 px-4 py-3 rounded dark:bg-green-900/20 dark:text-green-300 dark:border-green-600">
+        <strong>Success:</strong> {{ successMessage }}
+      </div>
+      <div *ngIf="errorMessage" class="bg-red-100 text-red-800 border-l-4 border-red-500 px-4 py-3 rounded dark:bg-red-900/20 dark:text-red-300 dark:border-red-600">
+        <strong>Error:</strong> {{ errorMessage }}
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="flex justify-center items-center py-12">
+      <div class="text-center">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Loading eligible votes...</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div *ngIf="!isLoading" class="mb-6">
+      <div class="flex gap-2 flex-wrap">
+        <button
+          (click)="statusFilter = 'all'; onStatusFilterChange()"
+          [ngClass]="{'bg-blue-500 text-white': statusFilter === 'all', 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200': statusFilter !== 'all'}"
+          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+        >
+          All Votes
+        </button>
+        <button
+          (click)="statusFilter = 'active'; onStatusFilterChange()"
+          [ngClass]="{'bg-blue-500 text-white': statusFilter === 'active', 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200': statusFilter !== 'active'}"
+          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+        >
+          Active Only
+        </button>
+        <button
+          (click)="statusFilter = 'ended'; onStatusFilterChange()"
+          [ngClass]="{'bg-blue-500 text-white': statusFilter === 'ended', 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200': statusFilter !== 'ended'}"
+          class="px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+        >
+          Ended
+        </button>
+      </div>
+    </div>
+
+    <!-- No Votes Message -->
+    <div *ngIf="!isLoading && filteredVotes.length === 0" class="text-center py-12">
+      <div class="text-gray-400 text-5xl mb-4">📭</div>
+      <p class="text-gray-600 dark:text-gray-400 text-lg">
+        No eligible votes found for your location at this time.
+      </p>
+    </div>
+
+    <!-- Votes Grid -->
+    <div *ngIf="!isLoading && filteredVotes.length > 0" class="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+      <div
+        *ngFor="let vote of filteredVotes"
+        class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden"
+      >
+        <!-- Vote Card Header -->
+        <div class="bg-linear-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex justify-between items-start gap-4">
+            <div class="flex-1">
+              <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-2">
+                {{ vote.title }}
+              </h3>
+              <div class="flex gap-2 flex-wrap">
+                <span [ngClass]="getLevelColor(vote.voteLevel)" class="px-3 py-1 rounded-full text-xs font-semibold">
+                  {{ getLevelDisplayName(vote.voteLevel) }}
+                </span>
+                <span
+                  [ngClass]="isVoteActive(vote) ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300'"
+                  class="px-3 py-1 rounded-full text-xs font-semibold"
+                >
+                  {{ isVoteActive(vote) ? '✓ Active' : '✗ Ended' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vote Card Body -->
+        <div class="px-6 py-4">
+          <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
+            {{ vote.description }}
+          </p>
+
+          <!-- Eligibility Info -->
+          <div *ngIf="vote.eligibility" class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 p-3 mb-4 text-xs text-blue-800 dark:text-blue-300">
+            <strong>Eligibility:</strong> {{ vote.eligibility }}
+          </div>
+
+          <!-- Vote Level Details -->
+          <div class="space-y-2 text-sm mb-4">
+            <div *ngIf="vote.voteLevel === 'sub_county' && vote.selectedSubCounties" class="text-gray-600 dark:text-gray-400">
+              <strong>Sub-Counties:</strong> {{ vote.selectedSubCounties.join(', ') }}
+            </div>
+            <div *ngIf="vote.voteLevel === 'ward' && vote.selectedWards" class="text-gray-600 dark:text-gray-400">
+              <strong>Wards:</strong> {{ vote.selectedWards.join(', ') }}
+            </div>
+          </div>
+
+          <!-- Countdown -->
+          <div class="flex items-center gap-2 text-sm font-semibold py-3 px-3 bg-gray-100 dark:bg-gray-700 rounded-lg mb-4">
+            <span *ngIf="isVoteActive(vote)" class="text-blue-600 dark:text-blue-400">⏱️</span>
+            <span *ngIf="!isVoteActive(vote)" class="text-gray-600 dark:text-gray-400">✓</span>
+            <span [ngClass]="isVoteActive(vote) ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'">
+              {{ getTimeRemaining(vote.endDate) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Vote Card Footer -->
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
+          <button
+            *ngIf="isVoteActive(vote)"
+            (click)="openCastModal(vote)"
+            class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg transition-colors"
+          >
+            Cast Your Vote
+          </button>
+          <button
+            *ngIf="!isVoteActive(vote)"
+            disabled
+            class="w-full bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400 font-semibold py-2 rounded-lg cursor-not-allowed"
+          >
+            Voting Period Ended
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Vote Cast Modal -->
+<div *ngIf="showCastModal && selectedVote" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-screen overflow-y-auto">
+    <!-- Modal Header -->
+    <div class="bg-linear-to-r from-blue-500 to-purple-600 px-6 py-4">
+      <div class="flex justify-between items-start gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-white mb-1">Cast Your Vote</h2>
+          <p class="text-blue-100 text-sm">{{ selectedVote?.title }}</p>
+        </div>
+        <button
+          (click)="closeCastModal()"
+          class="text-white hover:text-blue-100 transition-colors"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6 space-y-6">
+      <!-- Alert Messages -->
+      <div *ngIf="errorMessage" class="bg-red-100 text-red-800 border-l-4 border-red-500 px-4 py-3 rounded dark:bg-red-900/20 dark:text-red-300 dark:border-red-600">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Vote Options -->
+      <div class="space-y-3">
+        <p class="font-semibold text-gray-800 dark:text-gray-100">How do you vote?</p>
+        
+        <!-- Yes Option -->
+        <button
+          (click)="selectVote('yes')"
+          [ngClass]="{
+            'ring-2 ring-green-500 bg-green-50 dark:bg-green-900/20': voteValue === 'yes',
+            'bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600': voteValue !== 'yes'
+          }"
+          class="w-full p-4 rounded-lg text-left transition-all font-semibold text-lg"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center" 
+                 [ngClass]="voteValue === 'yes' ? 'bg-green-500 text-white' : 'bg-gray-300 dark:bg-gray-600'">
+              <span *ngIf="voteValue === 'yes'">✓</span>
+            </div>
+            <span [ngClass]="voteValue === 'yes' ? 'text-green-700 dark:text-green-300' : 'text-gray-700 dark:text-gray-300'">
+              Yes - I support this
+            </span>
+          </div>
+        </button>
+
+        <!-- No Option -->
+        <button
+          (click)="selectVote('no')"
+          [ngClass]="{
+            'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/20': voteValue === 'no',
+            'bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600': voteValue !== 'no'
+          }"
+          class="w-full p-4 rounded-lg text-left transition-all font-semibold text-lg"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 rounded-full flex items-center justify-center" 
+                 [ngClass]="voteValue === 'no' ? 'bg-red-500 text-white' : 'bg-gray-300 dark:bg-gray-600'">
+              <span *ngIf="voteValue === 'no'">✓</span>
+            </div>
+            <span [ngClass]="voteValue === 'no' ? 'text-red-700 dark:text-red-300' : 'text-gray-700 dark:text-gray-300'">
+              No - I do not support this
+            </span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Reason (Optional) -->
+      <div>
+        <label for="reason" class="block text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2">
+          Reason for your vote (optional)
+        </label>
+        <textarea
+          id="reason"
+          [(ngModel)]="reason"
+          placeholder="Share your thoughts about this vote..."
+          maxlength="500"
+          rows="4"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:focus:ring-blue-900 resize-none"
+        ></textarea>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          {{ reason.length }}/500 characters
+        </p>
+      </div>
+
+      <!-- User Info Confirmation -->
+      <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg text-sm">
+        <p class="text-gray-700 dark:text-gray-300 mb-2">
+          <strong>You are voting as:</strong>
+        </p>
+        <div class="space-y-1 text-gray-600 dark:text-gray-400">
+          <p>📧 {{ currentUser?.email }}</p>
+          <p>👤 {{ currentUser?.username }}</p>
+          <p>📍 {{ currentUser?.ward }}, {{ currentUser?.subCounty }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 flex gap-3 justify-end">
+      <button
+        (click)="closeCastModal()"
+        [disabled]="isSubmitting"
+        class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 font-semibold rounded-lg border border-gray-300 disabled:opacity-60 disabled:cursor-not-allowed transition-all dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 dark:border-gray-600"
+      >
+        Cancel
+      </button>
+      <button
+        (click)="submitVote()"
+        [disabled]="isSubmitting || !voteValue"
+        class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+      >
+        <span *ngIf="!isSubmitting">Submit Vote</span>
+        <span *ngIf="isSubmitting">Processing...</span>
+      </button>
+    </div>
+  </div>
+</div>
