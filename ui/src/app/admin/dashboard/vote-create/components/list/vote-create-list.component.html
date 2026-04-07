@@ -21,26 +21,152 @@
       <thead>
         <tr>
           <th>Title</th>
-          <th>Description</th>
+          <!-- <th>Description</th> -->
           <th>End Date</th>
-          <th>Eligibility</th>
+          <th>Vote Level</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let proposal of proposals">
-          <td>{{ proposal.title }}</td>
-          <td>{{ proposal.description | slice:0:50 }}...</td>
+          <td class="title-cell">
+            <div class="title-wrapper">
+              <span class="title-text" [title]="proposal.title">{{ proposal.title }}</span>
+            </div>
+          </td>
+          <!-- <td>{{ proposal.description | slice:0:50 }}...</td> -->
           <td>{{ proposal.endDate | date:'short' }}</td>
-          <td>{{ proposal.eligibility || '-' }}</td>
           <td>
-            <button class="btn-sm btn-view" (click)="viewResults(proposal.id)">View Results</button>
-            <button class="btn-sm btn-edit" (click)="onEdit(proposal)">Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(proposal.id)">Delete</button>
+            <span class="vote-level-badge" [ngClass]="proposal.voteLevel?.toLowerCase() || 'general'">
+              {{ getVoteLevelLabel(proposal.voteLevel) }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <div class="action-buttons">
+              <button class="btn-sm btn-view" (click)="onView(proposal)" title="View Proposal Details">
+                <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.134 13.134 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>
+                View
+              </button>
+              <button class="btn-sm btn-results" (click)="viewResults(proposal)" title="View Vote Results">
+                <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.71l-5.223 2.206A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/></svg>
+                Results
+              </button>
+              <button class="btn-sm btn-edit" (click)="onEdit(proposal)" title="Edit Proposal">
+                <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><path d="M12.146.865a.5.5 0 0 1 .708 0l2.281 2.281a.5.5 0 0 1 0 .708l-10.584 10.584a.5.5 0 0 1-.242.131l-4.008.998a.5.5 0 0 1-.615-.614l.998-4.009a.5.5 0 0 1 .131-.242l10.584-10.584zM12.207 1.5 14.854 4.146 5.5 13.5H2.646L12.207 1.5z"/></svg>
+                Edit
+              </button>
+              <button class="btn-sm btn-delete" (click)="onDelete(proposal)" title="Delete Proposal">
+                <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/><path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 1a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-11z"/></svg>
+                Delete
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- View Modal -->
+  <div *ngIf="showViewModal" class="modal-overlay" (click)="closeViewModal()">
+    <div class="modal-content modal-lg modal-details" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="header-content">
+          <div class="header-title">
+            <svg class="header-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-11A1.5 1.5 0 0 0 13.5 1h-11zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5v11a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11z"/><path d="M4 5.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5z"/></svg>
+            <h2>Proposal Details</h2>
+          </div>
+          <span class="vote-level-badge" [ngClass]="viewModalData?.voteLevel?.toLowerCase() || 'general'">
+            {{ getVoteLevelLabel(viewModalData?.voteLevel) }}
+          </span>
+        </div>
+        <button class="btn-close" (click)="closeViewModal()">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="viewModalData">
+        <!-- Title Section -->
+        <div class="info-group title-group">
+          <h3 class="group-title">{{ viewModalData.title }}</h3>
+        </div>
+
+        <!-- Description Section -->
+        <div class="info-group description-group">
+          <div class="group-header">
+            <svg class="section-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v3A1.5 1.5 0 0 0 2.5 7h11A1.5 1.5 0 0 0 15 5.5v-3A1.5 1.5 0 0 0 13.5 1h-11zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-3z"/><path d="M.5 9a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-5a.5.5 0 0 1 .5-.5h1z"/></svg>
+            <h4>Description</h4>
+          </div>
+          <p class="detail-value description-text">{{ viewModalData.description }}</p>
+        </div>
+
+        <!-- Vote Configuration Section -->
+        <div class="info-group config-group">
+          <div class="group-header">
+            <svg class="section-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>
+            <h4>Vote Configuration</h4>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Vote Level</span>
+              <span class="info-value vote-level">{{ getVoteLevelLabel(viewModalData.voteLevel) }}</span>
+            </div>
+            <div class="info-item" *ngIf="viewModalData.eligibility">
+              <span class="info-label">Eligibility</span>
+              <span class="info-value">{{ viewModalData.eligibility }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Targeting Section -->
+        <div class="info-group targeting-group" *ngIf="viewModalData.voteLevel !== 'general'">
+          <div class="group-header">
+            <svg class="section-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10zm0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12z"/><circle cx="8" cy="8" r="3"/></svg>
+            <h4>Targeting</h4>
+          </div>
+          <div class="targeting-content">
+            <div class="target-item" *ngIf="viewModalData.selectedSubCounties?.length > 0">
+              <span class="target-label">Sub-Counties:</span>
+              <div class="target-tags">
+                <span *ngFor="let sc of viewModalData.selectedSubCounties" class="tag tag-subcounty">
+                  {{ sc }}
+                </span>
+              </div>
+            </div>
+            <div class="target-item" *ngIf="viewModalData.selectedWards?.length > 0">
+              <span class="target-label">Wards:</span>
+              <div class="target-tags">
+                <span *ngFor="let ward of viewModalData.selectedWards" class="tag tag-ward">
+                  {{ ward }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline Section -->
+        <div class="info-group timeline-group">
+          <div class="group-header">
+            <svg class="section-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 7-7z"/></svg>
+            <h4>Timeline</h4>
+          </div>
+          <div class="info-item full-width">
+            <span class="info-label">End Date</span>
+            <span class="info-value">{{ viewModalData.endDate | date:'full' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeViewModal()">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>
+          Close
+        </button>
+        <button class="btn btn-primary" (click)="onEdit(viewModalData); closeViewModal()">
+          <svg class="btn-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M12.146.865a.5.5 0 0 1 .708 0l2.281 2.281a.5.5 0 0 1 0 .708l-10.584 10.584a.5.5 0 0 1-.242.131l-4.008.998a.5.5 0 0 1-.615-.614l.998-4.009a.5.5 0 0 1 .131-.242l10.584-10.584zM12.207 1.5 14.854 4.146 5.5 13.5H2.646L12.207 1.5z"/></svg>
+          Edit
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Modal Form -->

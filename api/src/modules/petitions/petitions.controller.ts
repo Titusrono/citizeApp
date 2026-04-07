@@ -29,8 +29,10 @@ export class PetitionsController {
   }
 
   @Get()
-  async findAll() {
-    return this.petitionsService.findAll();
+  @UseGuards(JwtAuthGuard)
+  async findAll(@Req() req: any) {
+    // Pass user so service can filter based on role
+    return this.petitionsService.findAll(req.user);
   }
 
   @Get(':id')
@@ -50,5 +52,21 @@ export class PetitionsController {
   @Roles(UserRole.CITIZEN, UserRole.ADMIN, UserRole.SUPER_ADMIN)
   async remove(@Param('id') id: string, @Req() req: any) {
     return this.petitionsService.remove(id, req.user);
+  }
+
+  @Post(':id/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  async approvePetition(@Param('id') id: string, @Req() req: any) {
+    console.log('[PetitionsController] Approving petition:', id);
+    return this.petitionsService.approvePetition(id, req.user);
+  }
+
+  @Post(':id/reject')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  async rejectPetition(@Param('id') id: string, @Req() req: any) {
+    console.log('[PetitionsController] Rejecting petition:', id);
+    return this.petitionsService.rejectPetition(id, req.user);
   }
 }

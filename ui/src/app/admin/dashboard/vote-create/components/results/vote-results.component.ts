@@ -24,22 +24,32 @@ export class VoteResultsComponent implements OnInit {
 
   ngOnInit(): void {
     this.voteId = this.route.snapshot.paramMap.get('id') || '';
-    if (this.voteId) {
-      this.loadVoteResults();
+    
+    if (!this.voteId) {
+      console.error('[VoteResultsComponent] No vote ID found in route!');
+      this.errorMessage = 'Vote ID is missing from URL';
+      this.isLoading = false;
+      return;
     }
+    
+    console.log('[VoteResultsComponent] Loading results for vote:', this.voteId);
+    this.loadVoteResults();
   }
 
   loadVoteResults(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
+    console.log('[VoteResultsComponent] Loading results for vote ID:', this.voteId);
+
     this.voteService.getVoteResults(this.voteId).subscribe({
       next: (results) => {
+        console.log('[VoteResultsComponent] ✅ Results loaded:', results?.title);
         this.voteResults = results;
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Error loading vote results:', err);
+        console.error('[VoteResultsComponent] ❌ Error loading results:', err?.error?.message);
         this.errorMessage = err?.error?.message || 'Failed to load vote results.';
         this.isLoading = false;
       }

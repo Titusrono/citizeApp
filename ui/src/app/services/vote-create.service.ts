@@ -23,7 +23,6 @@ export interface CreateVoteCreateDto {
 
 // DTO for casting a vote
 export interface CastVoteDto {
-  userId: string;
   vote: 'yes' | 'no';
   reason?: string;
 }

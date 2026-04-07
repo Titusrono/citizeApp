@@ -184,17 +184,28 @@ export class AdminPetitionListComponent implements OnInit {
     this.isDeleting = true;
     const id = this.pendingDeleteId;
 
-    this.petitionService.deletePetition(id).subscribe({
+    // Check if this is a reject operation (we'll use reject for pending petitions)
+    const petition = this.items.find(p => p._id === id);
+    const isReject = petition && !petition.isApproved && this.confirmDialogTitle === 'Reject Petition';
+
+    const operation = isReject 
+      ? this.petitionService.rejectPetition(id)
+      : this.petitionService.deletePetition(id);
+
+    operation.subscribe({
       next: () => {
-        this.successMessage = 'Petition deleted successfully!';
+        const message = isReject 
+          ? 'Petition rejected successfully!'
+          : 'Petition deleted successfully!';
+        this.successMessage = message;
         this.errorMessage = '';
         this.showConfirmDialog = false;
         this.pendingDeleteId = null;
         this.isDeleting = false;
         this.fetchPetitions();
       },
-      error: () => {
-        this.errorMessage = 'Failed to delete petition.';
+      error: (err: ErrorResponse) => {
+        this.errorMessage = err?.error?.message || 'Failed to process petition';
         this.successMessage = '';
         this.isDeleting = false;
       }
@@ -204,6 +215,46 @@ export class AdminPetitionListComponent implements OnInit {
   onCancelDelete(): void {
     this.showConfirmDialog = false;
     this.pendingDeleteId = null;
+  }
+
+  approvePetition(petition: any): void {
+    const petitionId = petition.id || petition._id;
+    if (!petitionId) {
+      console.error('[AdminPetitionList] Cannot approve petition - missing id/_id:', petition);
+      this.errorMessage = 'Cannot approve - petition ID missing';
+      return;
+    }
+    
+    console.log('[AdminPetitionList] Approving petition:', petitionId, petition.title);
+    
+    this.petitionService.approvePetition(petitionId).subscribe({
+      next: (response: any) => {
+        console.log('[AdminPetitionList] Petition approved successfully:', response);
+        this.successMessage = `Petition "${petition.title}" has been approved and is now visible to citizens!`;
+        this.errorMessage = '';
+        this.fetchPetitions();
+      },
+      error: (err: ErrorResponse) => {
+        console.error('[AdminPetitionList] Failed to approve petition:', err);
+        this.errorMessage = err?.error?.message || 'Failed to approve petition';
+        this.successMessage = '';
+      }
+    });
+  }
+
+  rejectPetition(petition: any): void {
+    const petitionId = petition.id || petition._id;
+    if (!petitionId) {
+      console.error('[AdminPetitionList] Cannot reject petition - missing id/_id:', petition);
+      this.errorMessage = 'Cannot reject - petition ID missing';
+      return;
+    }
+
+    console.log('[AdminPetitionList] Opening reject confirmation for petition:', petitionId, petition.title);
+    this.confirmDialogTitle = 'Reject Petition';
+    this.confirmDialogMessage = `Are you sure you want to reject "${petition.title}"? This will permanently delete it.`;
+    this.pendingDeleteId = petitionId;
+    this.showConfirmDialog = true;
   }
 
   onView(petition: any): void {

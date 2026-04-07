@@ -106,10 +106,30 @@ export class AuthService {
   /** Log out user and reset state */
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
+      // Get the current user ID before clearing it
+      const userIdBeforeLogout = localStorage.getItem('user_id');
+      
+      // Remove standard auth tokens
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem('userRole');
       localStorage.removeItem('user_email');
       localStorage.removeItem('user_id');
+      localStorage.removeItem('user_subcounty');
+      localStorage.removeItem('user_ward');
+      
+      // IMPORTANT: Clean up any vote-related localStorage entries for this user
+      // This prevents vote status from leaking to the next logged-in user
+      if (userIdBeforeLogout) {
+        const userVotePrefix = `votes_${userIdBeforeLogout}_`;
+        console.log('[AuthService] Clearing vote history for user:', userIdBeforeLogout);
+        
+        Object.keys(localStorage)
+          .filter(key => key.startsWith(userVotePrefix))
+          .forEach(key => {
+            console.log('[AuthService] Removing vote storage:', key);
+            localStorage.removeItem(key);
+          });
+      }
     }
 
     this.currentUserRole$.next(null);

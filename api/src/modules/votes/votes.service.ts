@@ -30,9 +30,6 @@ export class VotesService {
   }
 
   async create(createVoteDto: CreateVoteDto, user: User) {
-    console.log('[VotesService.create] Creating vote with DTO:', createVoteDto);
-    console.log('[VotesService.create] Created by user:', user?.id, user?.email);
-    
     const voteLevel = createVoteDto.voteLevel || VoteLevel.GENERAL;
     
     // Validate level-specific selections
@@ -54,9 +51,29 @@ export class VotesService {
       user,
     });
     
-    const saved = await this.votesRepository.save(vote);
-    console.log('[VotesService.create] Vote saved successfully with ID:', saved.id);
-    return saved;
+    let saved;
+    try {
+      saved = await this.votesRepository.save(vote);
+      console.log('[VotesService.create] ✅ Vote created with ID:', saved.id?.toString());
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error('[VotesService.create] ❌ ERROR saving vote:', error.message);
+      throw error;
+    }
+    
+    // Return normalized response matching findAll format
+    const normalized = this.normalizeVote(saved);
+    return {
+      _id: normalized.id?.toString(),
+      id: normalized.id?.toString(),
+      title: normalized.title,
+      description: normalized.description,
+      eligibility: normalized.eligibility,
+      endDate: normalized.end_date,
+      voteLevel: normalized.voteLevel,
+      selectedSubCounties: normalized.selectedSubCounties,
+      selectedWards: normalized.selectedWards,
+    };
   }
 
   async findAll() {
@@ -83,6 +100,13 @@ export class VotesService {
     return result;
   }
 
+  async getAllVotesRaw() {
+    console.log('[VotesService.getAllVotesRaw] Fetching raw votes directly');
+    const votes = await this.votesRepository.find({ relations: ['user'] });
+    console.log('[VotesService.getAllVotesRaw] Found', votes.length, 'votes in database');
+    return votes;
+  }
+
   async findAllForUser(user: User) {
     console.log('[VotesService.findAllForUser] Filtering votes for user:', {
       userId: user?.id,
@@ -93,6 +117,19 @@ export class VotesService {
 
     const allVotes = await this.votesRepository.find({ relations: ['user'] });
     console.log('[VotesService.findAllForUser] Found', allVotes.length, 'total votes');
+    
+    // Get all user votes to check which votes this user has already voted on
+    const userVotes = await this.userVoteRepository.find({
+      relations: ['user', 'vote']
+    });
+    
+    const userVotedVoteIds = new Set(
+      userVotes
+        .filter(uv => uv.user?.id?.toString() === user.id?.toString())
+        .map(uv => uv.vote?.id?.toString())
+    );
+    
+    console.log('[VotesService.findAllForUser] User has already voted on', userVotedVoteIds.size, 'votes');
     
     // Filter votes based on user's eligibility
     const eligibleVotes = allVotes
@@ -126,6 +163,7 @@ export class VotesService {
         voteLevel: vote.voteLevel,
         selectedSubCounties: vote.selectedSubCounties,
         selectedWards: vote.selectedWards,
+        hasVoted: userVotedVoteIds.has(vote.id?.toString()),
       }));
 
     console.log('[VotesService.findAllForUser] Returning', eligibleVotes.length, 'eligible votes for user');
@@ -134,7 +172,21 @@ export class VotesService {
 
   async findOne(id: string) {
     const vote = await this.votesRepository.findOne({ where: { id: this.convertToObjectId(id) }, relations: ['user'] });
-    return vote ? this.normalizeVote(vote) : null;
+    if (!vote) return null;
+    
+    // Return normalized response with string IDs
+    const normalized = this.normalizeVote(vote);
+    return {
+      _id: normalized.id?.toString(),
+      id: normalized.id?.toString(),
+      title: normalized.title,
+      description: normalized.description,
+      eligibility: normalized.eligibility,
+      endDate: normalized.end_date,
+      voteLevel: normalized.voteLevel,
+      selectedSubCounties: normalized.selectedSubCounties,
+      selectedWards: normalized.selectedWards,
+    };
   }
 
   async update(id: string, updateVoteDto: UpdateVoteDto) {
@@ -147,43 +199,87 @@ export class VotesService {
   }
 
   async castVote(voteId: string, castVoteDto: CastVoteDto, user: User) {
-    // Get all votes and find matching one
-    const votes = await this.votesRepository.find();
-    let vote = votes.find(v => v.id?.toString() === voteId || v.id?.equals(new ObjectId(voteId)));
+    console.log('[VotesService.castVote] Starting vote cast for voteId:', voteId, 'user:', user.id?.toString());
     
-    if (!vote) {
-      console.error(`Vote not found. Looking for ID: ${voteId}`);
-      console.error(`Available votes:`, votes.map(v => v.id?.toString()));
-      throw new NotFoundException(`Vote/Proposal with ID ${voteId} not found`);
+    // Validate vote ID format
+    let objectId: ObjectId;
+    try {
+      if (!this.isValidObjectId(voteId)) {
+        throw new BadRequestException(`Invalid vote ID format: ${voteId}`);
+      }
+      objectId = this.convertToObjectId(voteId);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error('[VotesService.castVote] ERROR converting ID:', error.message);
+      throw error;
     }
 
-    // Normalize the vote to ensure arrays are properly formatted
-    vote = this.normalizeVote(vote);
+    // Try to find vote by ObjectId, with fallback to string comparison
+    let vote: Vote | null | undefined = await this.votesRepository.findOne({
+      where: { id: objectId }
+    });
 
+    if (!vote) {
+      const allVotes = await this.votesRepository.find();
+      vote = allVotes.find(v => v.id?.toString() === voteId);
+      
+      if (!vote) {
+        throw new NotFoundException(`Vote/Proposal with ID ${voteId} not found`);
+      }
+    }
+
+    console.log('[VotesService.castVote] Found vote:', vote.id?.toString(), 'Title:', vote.title);
+
+    vote = this.normalizeVote(vote);
+    
     // Check if user is eligible to vote based on vote level
     this.checkVoteEligibility(vote, user);
 
-    // Check if user has already voted on this proposal
-    const existingVote = await this.userVoteRepository.findOne({
-      where: {
-        vote: { id: vote.id },
-        user: { id: new ObjectId(castVoteDto.userId) }
-      }
+    // Check if user has already voted on this proposal (double-check before saving)
+    const userVotesList = await this.userVoteRepository.find({
+      relations: ['user', 'vote']
     });
+    
+    const existingVote = userVotesList.find(
+      uv => uv.vote?.id?.toString() === vote.id?.toString() && 
+            uv.user?.id?.toString() === user.id?.toString()
+    );
 
     if (existingVote) {
+      console.log('[VotesService.castVote] User already voted on this proposal');
       throw new ConflictException('You have already voted on this proposal. One vote per proposal per user is allowed.');
     }
+    
+    console.log('[VotesService.castVote] User eligible and no prior vote found, proceeding...');
 
-    // Create and save the vote
-    const userVote = this.userVoteRepository.create({
-      vote,
-      user: { id: new ObjectId(castVoteDto.userId) } as User,
-      voteValue: castVoteDto.vote,
-      ...(castVoteDto.reason && { reason: castVoteDto.reason }),
-    });
+    try {
+      // Create and save the vote with full entity objects for MongoDB relationships
+      console.log('[VotesService.castVote] Creating userVote record with vote ID:', vote.id?.toString(), 'user ID:', user.id?.toString());
+      
+      // For MongoDB relationships with TypeORM, we pass full entity objects
+      const userVote = this.userVoteRepository.create({
+        vote, // Pass full vote object
+        user, // Pass full user object
+        voteValue: castVoteDto.vote,
+        ...(castVoteDto.reason && { reason: castVoteDto.reason }),
+      });
 
-    return this.userVoteRepository.save(userVote);
+      console.log('[VotesService.castVote] UserVote created, saving to database...');
+      const saved = await this.userVoteRepository.save(userVote);
+      console.log('[VotesService.castVote] ✅ Vote cast successfully for proposal:', voteId, 'User:', user.id?.toString());
+      
+      return saved;
+    } catch (err: any) {
+      // Catch duplicate key errors from database (in case of race condition)
+      if (err?.code === 11000 || err?.message?.includes('duplicate')) {
+        console.log('[VotesService.castVote] ⚠️ Duplicate vote detected (race condition):', err.message);
+        throw new ConflictException('You have already voted on this proposal. One vote per proposal per user is allowed.');
+      }
+      
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error('[VotesService.castVote] ❌ ERROR saving vote:', error.message, error.stack);
+      throw error;
+    }
   }
 
   private normalizeVote(vote: Vote): Vote {
@@ -245,27 +341,53 @@ export class VotesService {
   }
 
   async getVoteResults(id: string) {
-    // Get the vote with all associated user votes for accountability tracking
-    const vote = await this.votesRepository.findOne({
-      where: { id: this.convertToObjectId(id) },
-      relations: ['user']
-    });
-
-    if (!vote) {
-      throw new NotFoundException(`Vote with ID ${id} not found`);
+    // Validate and convert ID
+    let objectId: ObjectId;
+    try {
+      if (!this.isValidObjectId(id)) {
+        throw new BadRequestException(`Invalid vote ID format: ${id}`);
+      }
+      objectId = this.convertToObjectId(id);
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error('[VotesService.getVoteResults] ERROR converting ID:', error.message);
+      throw error;
     }
 
-    // Get all user votes for this vote
-    const userVotes = await this.userVoteRepository.find({
-      where: { vote: { id: vote.id } },
+    // Try to find vote by ObjectId
+    let vote: Vote | null | undefined = await this.votesRepository.findOne({
+      where: { id: objectId },
+      relations: ['user'],
+    });
+
+    // If ObjectId query fails, fallback to string comparison
+    if (!vote) {
+      const allVotes = await this.votesRepository.find({ relations: ['user'] });
+      const searchIdStr = id;
+      vote = allVotes.find(v => v.id?.toString() === searchIdStr);
+      
+      if (!vote) {
+        throw new NotFoundException(`Vote with ID ${id} not found. Database contains ${allVotes.length} votes.`);
+      }
+    }
+
+    // Fetch user votes and calculate results
+    // TypeORM MongoDB may have issues with nested ID queries, so we fetch all and filter
+    let userVotes = await this.userVoteRepository.find({
       relations: ['user'],
       order: { createdAt: 'DESC' }
     });
+    
+    // Filter to only votes for this proposal
+    userVotes = userVotes.filter(uv => uv.vote?.id?.toString() === vote.id?.toString());
+    
+    console.log('[VotesService.getVoteResults] Found', userVotes.length, 'votes for proposal:', vote.id?.toString());
 
-    // Count votes
     const yesCount = userVotes.filter(uv => uv.voteValue === 'yes').length;
     const noCount = userVotes.filter(uv => uv.voteValue === 'no').length;
     const totalVotes = userVotes.length;
+
+    console.log('[VotesService.getVoteResults] Vote counts - Yes:', yesCount, 'No:', noCount, 'Total:', totalVotes);
 
     // Return comprehensive vote results with audit trail
     return {
@@ -285,16 +407,18 @@ export class VotesService {
         yesPercentage: totalVotes > 0 ? ((yesCount / totalVotes) * 100).toFixed(2) : 0,
         noPercentage: totalVotes > 0 ? ((noCount / totalVotes) * 100).toFixed(2) : 0
       },
-      auditTrail: userVotes.map(uv => ({
-        userId: uv.user.id?.toString(),
-        username: uv.user.username,
-        email: uv.user.email,
-        ward: uv.user.ward,
-        subCounty: uv.user.subCounty,
-        voteValue: uv.voteValue,
-        reason: uv.reason || null,
-        timestamp: uv.createdAt
-      }))
+      auditTrail: userVotes
+        .filter(uv => uv.user) // Only include votes where user relation loaded
+        .map(uv => ({
+          userId: uv.user.id?.toString(),
+          username: uv.user.username,
+          email: uv.user.email,
+          ward: uv.user.ward,
+          subCounty: uv.user.subCounty,
+          voteValue: uv.voteValue,
+          reason: uv.reason || null,
+          timestamp: uv.createdAt
+        }))
     };
   }
 }

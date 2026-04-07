@@ -42,11 +42,55 @@
         <tr *ngFor="let item of items">
           <td>{{ item.title }}</td>
           <td>{{ item.targetAuthority }}</td>
-          <td><span class="status-badge" [ngClass]="'status-' + item.status">{{ item.status }}</span></td>
           <td>
-            <button class="btn-sm btn-view" (click)="onView(item)">View</button>
-            <button class="btn-sm btn-edit" (click)="onEdit(item)">Edit</button>
-            <button class="btn-sm btn-delete" [disabled]="!item.id" (click)="onDelete(item.id)">Delete</button>
+            <div class="flex flex-col gap-1">
+              <span class="status-badge" [ngClass]="'status-' + item.status">{{ item.status }}</span>
+              <span 
+                *ngIf="item.isApproved" 
+                class="text-xs px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded font-semibold"
+              >
+                ✓ Approved
+              </span>
+              <span 
+                *ngIf="!item.isApproved" 
+                class="text-xs px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 rounded font-semibold"
+              >
+                ⏳ Pending
+              </span>
+            </div>
+          </td>
+          <td class="actions-cell">
+            <div class="flex flex-wrap gap-1">
+              <button class="btn-sm btn-view" (click)="onView(item)">View</button>
+              <button 
+                *ngIf="!item.isApproved"
+                class="btn-sm btn-success" 
+                (click)="approvePetition(item)"
+              >
+                Approve
+              </button>
+              <button 
+                *ngIf="!item.isApproved"
+                class="btn-sm btn-reject" 
+                (click)="rejectPetition(item)"
+              >
+                Reject
+              </button>
+              <button 
+                *ngIf="item.isApproved"
+                class="btn-sm btn-edit" 
+                (click)="onEdit(item)"
+              >
+                Edit
+              </button>
+              <button 
+                class="btn-sm btn-delete" 
+                [disabled]="!(item.id || item._id)" 
+                (click)="onDelete(item.id || item._id)"
+              >
+                Delete
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>

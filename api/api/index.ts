@@ -10,7 +10,7 @@ async function bootstrap() {
   if (!app) {
     const nestApp = await NestFactory.create(
       AppModule,
-      new ExpressAdapter(server),
+      new ExpressAdapter(server) as any,
     );
     nestApp.enableCors({
       origin: process.env.FRONTEND_URL || '*',

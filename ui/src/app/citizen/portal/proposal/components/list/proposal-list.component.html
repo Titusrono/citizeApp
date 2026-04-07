@@ -49,10 +49,50 @@
           </div>
         </div>
 
-        <!-- Card Footer - Voting Section -->
+        <!-- Card Footer - Results & Voting Section -->
         <div class="proposal-card-footer">
+          <!-- Vote Results Section - Always visible -->
+          <div class="vote-results-section" *ngIf="voteResults[item._id || item.id]?.results">
+            <div class="results-header">
+              <h3>📊 Current Results</h3>
+              <span class="total-votes">{{ voteResults[item._id || item.id]?.results?.totalVotes || 0 }} votes</span>
+            </div>
+
+            <div class="results-grid">
+              <!-- Yes Results -->
+              <div class="result-item yes">
+                <div class="result-label">
+                  <span class="result-text">Yes</span>
+                  <span class="result-count">{{ voteResults[item._id || item.id]?.results?.yesCount || 0 }}</span>
+                </div>
+                <div class="result-bar-container">
+                  <div 
+                    class="result-bar yes" 
+                    [style.width.%]="voteResults[item._id || item.id]?.results?.yesPercentage || 0"
+                  ></div>
+                </div>
+                <div class="result-percentage">{{ voteResults[item._id || item.id]?.results?.yesPercentage || 0 }}%</div>
+              </div>
+
+              <!-- No Results -->
+              <div class="result-item no">
+                <div class="result-label">
+                  <span class="result-text">No</span>
+                  <span class="result-count">{{ voteResults[item._id || item.id]?.results?.noCount || 0 }}</span>
+                </div>
+                <div class="result-bar-container">
+                  <div 
+                    class="result-bar no" 
+                    [style.width.%]="voteResults[item._id || item.id]?.results?.noPercentage || 0"
+                  ></div>
+                </div>
+                <div class="result-percentage">{{ voteResults[item._id || item.id]?.results?.noPercentage || 0 }}%</div>
+              </div>
+            </div>
+          </div>
+
           <!-- If user hasn't voted yet -->
-          <div *ngIf="!voteStatus[item._id || item.id]" class="voting-section">
+          <div *ngIf="!voteStatus[item._id || item.id] && !item.hasVoted" class="voting-section">
             <div class="vote-buttons">
               <button 
                 class="btn-vote btn-yes"
@@ -93,7 +133,7 @@
           </div>
 
           <!-- If user has already voted -->
-          <div *ngIf="voteStatus[item._id || item.id]" class="voted-section">
+          <div *ngIf="(voteStatus[item._id || item.id] || item.hasVoted)" class="voted-section">
             <p class="voted-message">✓ Thank you for voting!</p>
           </div>
 

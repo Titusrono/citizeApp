@@ -25,8 +25,26 @@ export class TownhallsService {
   }
 
   async create(createTownhallDto: CreateTownhallDto) {
-    const townhall = this.townhallsRepository.create(createTownhallDto);
-    return this.townhallsRepository.save(townhall);
+    console.log('[TownhallsService.create] ============ CREATE START ============');
+    console.log('[TownhallsService.create] Received DTO:', JSON.stringify(createTownhallDto, null, 2));
+    console.log('[TownhallsService.create] DTO keys:', Object.keys(createTownhallDto));
+    
+    try {
+      const townhall = this.townhallsRepository.create(createTownhallDto);
+      console.log('[TownhallsService.create] Created entity:', JSON.stringify(townhall, null, 2));
+      
+      const saved = await this.townhallsRepository.save(townhall);
+      console.log('[TownhallsService.create] ✅ Saved successfully:', JSON.stringify(saved, null, 2));
+      console.log('[TownhallsService.create] Saved keys:', Object.keys(saved));
+      console.log('[TownhallsService.create] ============ CREATE END ============\n');
+      
+      return saved;
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error('[TownhallsService.create] ❌ ERROR:', error.message);
+      console.error('[TownhallsService.create] Stack:', error.stack);
+      throw err;
+    }
   }
 
   async findAll() {
@@ -38,8 +56,30 @@ export class TownhallsService {
   }
 
   async update(id: string, updateTownhallDto: UpdateTownhallDto) {
-    await this.townhallsRepository.update(this.convertToObjectId(id), updateTownhallDto);
-    return this.findOne(id);
+    console.log('[TownhallsService.update] ============ UPDATE START ============');
+    console.log('[TownhallsService.update] Received ID param:', id, '(type:', typeof id + ')');
+    console.log('[TownhallsService.update] id === undefined:', id === undefined);
+    console.log('[TownhallsService.update] id === "undefined":', id === 'undefined');
+    console.log('[TownhallsService.update] Received DTO:', JSON.stringify(updateTownhallDto, null, 2));
+    console.log('[TownhallsService.update] DTO keys:', Object.keys(updateTownhallDto));
+    
+    try {
+      const objectId = this.convertToObjectId(id);
+      await this.townhallsRepository.update(objectId, updateTownhallDto);
+      console.log('[TownhallsService.update] Update query executed');
+      
+      const updated = await this.findOne(id);
+      console.log('[TownhallsService.update] ✅ Retrieved updated record:', JSON.stringify(updated, null, 2));
+      console.log('[TownhallsService.update] Updated keys:', Object.keys(updated || {}));
+      console.log('[TownhallsService.update] ============ UPDATE END ============\n');
+      
+      return updated;
+    } catch (err: unknown) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      console.error('[TownhallsService.update] ❌ ERROR:', error.message);
+      console.error('[TownhallsService.update] Stack:', error.stack);
+      throw err;
+    }
   }
 
   async remove(id: string) {

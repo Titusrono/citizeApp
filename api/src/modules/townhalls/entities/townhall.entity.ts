@@ -10,5 +10,23 @@ export class Townhall {
   title: string;
 
   @Column({ nullable: true })
-  recording_url: string;
+  agenda: string;
+
+  @Column({ nullable: true })
+  date: string;
+
+  @Column({ nullable: true })
+  meetLink: string;
+
+  @Column({ nullable: true })
+  recordingLink: string;
+
+  @Column({ nullable: true, default: false })
+  isLive: boolean;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
 }

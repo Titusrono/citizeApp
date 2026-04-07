@@ -35,7 +35,7 @@
           <td>{{ item.date | date:'short' }}</td>
           <td>
             <button class="btn-sm btn-edit" (click)="onEdit(item)">✏️ Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(item.id!)">🗑️ Delete</button>
+            <button class="btn-sm btn-delete" (click)="onDelete(item._id || item.id!)">🗑️ Delete</button>
           </td>
         </tr>
       </tbody>

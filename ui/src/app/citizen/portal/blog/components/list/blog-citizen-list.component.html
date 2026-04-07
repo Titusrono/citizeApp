@@ -1,0 +1,60 @@
+<div class="blog-citizen-container">
+  <!-- Header -->
+  <div class="header-section">
+    <h1>Blogs & News</h1>
+    <p class="subtitle">Stay informed about governance and community updates</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loader"></div>
+    <p>Loading blogs...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="alert alert-error">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="blogs.length === 0 && !isLoading && !errorMessage" class="empty-state">
+    <p>No blogs available at the moment.</p>
+  </div>
+
+  <!-- Blogs Grid -->
+  <div *ngIf="blogs.length > 0" class="blogs-grid">
+    <div *ngFor="let blog of blogs" class="blog-card" [class.expanded]="isExpanded(blog._id || blog.id)">
+      <!-- Card Header with Category Badge -->
+      <div class="card-header">
+        <span class="category-badge">{{ blog.category }}</span>
+        <span class="blog-date">{{ blog.date | date:'short' }}</span>
+      </div>
+
+      <!-- Card Body -->
+      <div class="card-body">
+        <!-- Title -->
+        <h3 class="blog-title">{{ blog.title }}</h3>
+
+        <!-- Summary/Preview -->
+        <p class="blog-summary">{{ blog.summary }}</p>
+
+        <!-- Content with Truncation -->
+        <div class="content-section">
+          <p class="blog-content">
+            {{ getDisplayContent(blog.content, blog._id || blog.id) }}
+          </p>
+
+          <!-- Read More Button -->
+          <button
+            *ngIf="shouldShowReadMore(blog.content)"
+            class="btn-read-more"
+            (click)="toggleExpandBlog(blog._id || blog.id)"
+          >
+            {{ isExpanded(blog._id || blog.id) ? '▲ Read Less' : '▼ Read More' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

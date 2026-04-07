@@ -96,7 +96,18 @@ export class BlogAdminListComponent implements OnInit {
     if (!this.editingBlog) return;
     const id = this.editingBlog._id;
 
-    this.blogsService.updateBlog(id, this.currentData).subscribe({
+    // Create clean payload with only valid DTO fields (exclude _id and id)
+    const cleanData = {
+      title: this.currentData.title,
+      date: this.currentData.date,
+      summary: this.currentData.summary,
+      category: this.currentData.category,
+      content: this.currentData.content,
+      author: this.currentData.author,
+      publishDate: this.currentData.publishDate
+    };
+
+    this.blogsService.updateBlog(id, cleanData).subscribe({
       next: () => {
         this.successMessage = 'Blog updated successfully!';
         this.errorMessage = '';

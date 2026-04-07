@@ -32,6 +32,15 @@ export class Petition {
   @Column({ type: 'enum', enum: ['open', 'closed'], default: 'open' })
   status!: string;
 
+  @Column({ default: false })
+  isApproved!: boolean;
+
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
+  approvedBy?: User;
+
+  @Column({ nullable: true })
+  approvedAt?: Date;
+
   @CreateDateColumn()
   createdAt!: Date;
 

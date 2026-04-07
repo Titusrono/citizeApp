@@ -12,6 +12,7 @@ import { PetitionListComponent } from "./citizen/portal/petition/components/list
 import { ProposalListComponent } from "./citizen/portal/proposal/components/list/proposal-list.component";
 import { RealtimereportListComponent } from "./citizen/portal/realtimereport/components/list/realtimereport-list.component";
 import { StreamingLiveListComponent } from "./citizen/portal/streaminglive/components/list/streaminglive-list.component";
+import { BlogCitizenListComponent } from "./citizen/portal/blog/components/list/blog-citizen-list.component";
 import { ProfileComponent } from "./auth/profile/profile.component";
 import { ReportAdminListComponent } from "./admin/dashboard/report-admin/components/list/report-admin-list.component";
 import { UsersregListComponent } from "./admin/dashboard/usersreg/components/list/usersreg-list.component";
@@ -49,6 +50,7 @@ export const routes: Routes = [
       { path: 'petition', title: 'Petitions', component: PetitionListComponent },
       { path: 'proposal', title: 'Vote on Projects', component: ProposalListComponent },
       { path: 'streaminglive', title: 'Virtual Hall', component: StreamingLiveListComponent },
+      { path: 'blog', title: 'Blogs', component: BlogCitizenListComponent },
     ],
   },
   {

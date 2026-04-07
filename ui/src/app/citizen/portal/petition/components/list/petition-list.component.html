@@ -22,6 +22,7 @@
         <tr>
           <th>Title</th>
           <th>Target Authority</th>
+          <th>Status</th>
           <th>Created</th>
           <th>Actions</th>
         </tr>
@@ -30,11 +31,15 @@
         <tr *ngFor="let item of items">
           <td>{{ item.title }}</td>
           <td>{{ item.targetAuthority }}</td>
+          <td>
+            <span *ngIf="item.isApproved" class="badge badge-success">✓ Approved</span>
+            <span *ngIf="!item.isApproved" class="badge badge-pending">⏳ Pending</span>
+          </td>
           <td>{{ item.createdAt | date:'short' }}</td>
           <td>
             <button class="btn-sm btn-view" (click)="onView(item)">View</button>
-            <button class="btn-sm btn-edit" (click)="onEdit(item)">Edit</button>
-            <button class="btn-sm btn-delete" [disabled]="!item.id" (click)="onDelete(item.id)">Delete</button>
+            <button *ngIf="!item.isApproved" class="btn-sm btn-edit" (click)="onEdit(item)">Edit</button>
+            <button *ngIf="!item.isApproved" class="btn-sm btn-delete" (click)="onDelete(item.id || item._id)">Delete</button>
           </td>
         </tr>
       </tbody>

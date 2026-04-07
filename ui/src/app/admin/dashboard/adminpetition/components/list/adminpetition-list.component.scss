@@ -59,3 +59,27 @@
   }
 }
 
+.btn-success {
+  background-color: #10b981;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: #059669;
+  }
+}
+
+.btn-reject {
+  background-color: #f59e0b;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background-color: #d97706;
+  }
+}
+
+.actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+

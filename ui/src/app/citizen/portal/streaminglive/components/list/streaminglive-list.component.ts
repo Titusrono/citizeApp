@@ -1,24 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { VirtualMeet, VirtualService } from '../../services/virtual.service';
-import { StreamingLiveFormComponent } from '../form/streaminglive-form.component';
 
 @Component({
   selector: 'app-streaming-live-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, StreamingLiveFormComponent],
+  imports: [CommonModule],
   templateUrl: './streaminglive-list.component.html',
   styleUrls: ['./streaminglive-list.component.scss']
 })
 export class StreamingLiveListComponent implements OnInit {
   meetings: (VirtualMeet & { isUpcoming: boolean; isPast: boolean; isLive: boolean })[] = [];
   itemsList: typeof this.meetings = [];
-  successMessage = '';
   errorMessage = '';
-  editingMeeting: any = null;
-  isEditing = false;
-  showModal = false;
 
   loading = false;
   filterType: 'all' | 'upcoming' | 'past' | 'live' = 'all';
@@ -28,29 +22,10 @@ export class StreamingLiveListComponent implements OnInit {
   
   Math = Math;
 
-  currentData: VirtualMeet = {
-    title: '',
-    agenda: '',
-    date: '',
-    meetLink: '',
-    recordingLink: '',
-    isLive: false
-  };
-
   constructor(private virtualService: VirtualService) {}
 
   ngOnInit(): void {
     this.fetchMeetings();
-  }
-
-  openModal(): void {
-    this.resetForm();
-    this.showModal = true;
-  }
-
-  closeModal(): void {
-    this.showModal = false;
-    this.resetForm();
   }
 
   fetchMeetings(): void {
@@ -59,10 +34,35 @@ export class StreamingLiveListComponent implements OnInit {
 
     this.virtualService.getAllMeetings().subscribe({
       next: (data: VirtualMeet[]) => {
+        console.log('[StreamingLiveList] ✅ Fetched meetings count:', data.length);
+        console.log('[StreamingLiveList] First meeting data:', data[0]);
+        
         this.meetings = data
           .map(meet => {
-            const meetTime = new Date(meet.date).getTime();
+            let meetTime: number;
+            try {
+              const meetDate = new Date(meet.date);
+              if (isNaN(meetDate.getTime())) {
+                console.warn('[StreamingLiveList] Invalid date for meeting:', meet.title, meet.date);
+                meetTime = 0;
+              } else {
+                meetTime = meetDate.getTime();
+              }
+            } catch (e) {
+              console.error('[StreamingLiveList] Error parsing date:', meet.date, e);
+              meetTime = 0;
+            }
+
             const isLive = !!meet.isLive;
+            
+            console.log('[StreamingLiveList] Processing meeting:', {
+              title: meet.title,
+              date: meet.date,
+              isLive,
+              meetLink: !!meet.meetLink,
+              recordingLink: !!meet.recordingLink,
+              agenda: meet.agenda?.substring(0, 50) + '...'
+            });
 
             return {
               ...meet,
@@ -73,96 +73,40 @@ export class StreamingLiveListComponent implements OnInit {
           })
           .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+        console.log('[StreamingLiveList] 📊 Processed meetings:', this.meetings.length);
         this.applyFilter(this.filterType);
         this.loading = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('[StreamingLiveList] ❌ Error fetching meetings:', err);
         this.errorMessage = 'Failed to load meetings.';
         this.loading = false;
       }
     });
   }
 
-  onFormSubmit(meetingData: VirtualMeet): void {
-    if (this.isEditing && this.editingMeeting) {
-      this.updateMeeting();
-    } else {
-      this.createMeeting();
+  canJoinMeeting(meeting: VirtualMeet & { isUpcoming: boolean; isPast: boolean; isLive: boolean }): boolean {
+    const canJoin = (meeting.isLive || meeting.isUpcoming) && !!meeting.meetLink;
+    console.log('[StreamingLiveList] canJoinMeeting:', meeting.title, '- isLive:', meeting.isLive, 'isUpcoming:', meeting.isUpcoming, 'hasMeetLink:', !!meeting.meetLink, 'result:', canJoin);
+    return canJoin;
+  }
+
+  hasRecording(meeting: VirtualMeet): boolean {
+    return !!meeting.recordingLink && meeting.recordingLink.trim().length > 0;
+  }
+
+  viewRecording(recordingLink: string): void {
+    if (recordingLink) {
+      console.log('[StreamingLiveList] Opening recording:', recordingLink);
+      window.open(recordingLink, '_blank');
     }
   }
 
-  createMeeting(): void {
-    this.virtualService.createMeeting(this.currentData).subscribe({
-      next: () => {
-        this.successMessage = 'Meeting created successfully!';
-        this.errorMessage = '';
-        this.closeModal();
-        this.fetchMeetings();
-      },
-      error: () => {
-        this.errorMessage = 'Failed to create meeting.';
-        this.successMessage = '';
-      }
-    });
-  }
-
-  updateMeeting(): void {
-    if (!this.editingMeeting) return;
-
-    this.virtualService.updateMeeting(this.editingMeeting._id, this.currentData).subscribe({
-      next: () => {
-        this.successMessage = 'Meeting updated successfully!';
-        this.errorMessage = '';
-        this.editingMeeting = null;
-        this.isEditing = false;
-        this.closeModal();
-        this.fetchMeetings();
-      },
-      error: () => {
-        this.errorMessage = 'Failed to update meeting.';
-        this.successMessage = '';
-      }
-    });
-  }
-
-  onEdit(meeting: VirtualMeet & { isUpcoming: boolean; isPast: boolean; isLive: boolean }): void {
-    this.editingMeeting = { ...meeting };
-    this.currentData = { ...meeting };
-    this.isEditing = true;
-    this.successMessage = '';
-    this.errorMessage = '';
-    this.showModal = true;
-  }
-
-  onDelete(id: string): void {
-    if (!confirm('Are you sure you want to delete this meeting?')) return;
-
-    this.virtualService.deleteMeeting(id).subscribe({
-      next: () => {
-        this.successMessage = 'Meeting deleted successfully!';
-        this.errorMessage = '';
-        this.fetchMeetings();
-      },
-      error: () => {
-        this.errorMessage = 'Failed to delete meeting.';
-        this.successMessage = '';
-      }
-    });
-  }
-
-  resetForm(): void {
-    const now = new Date().toISOString().slice(0, 16);
-    this.currentData = {
-      title: '',
-      agenda: '',
-      date: now,
-      meetLink: '',
-      recordingLink: '',
-      isLive: false
-    };
-    this.isEditing = false;
-    this.editingMeeting = null;
-    this.errorMessage = '';
+  joinMeeting(meetLink: string): void {
+    if (meetLink) {
+      console.log('[StreamingLiveList] Opening meeting:', meetLink);
+      window.open(meetLink, '_blank');
+    }
   }
 
   applyFilter(type: 'all' | 'upcoming' | 'past' | 'live'): void {
@@ -193,17 +137,53 @@ export class StreamingLiveListComponent implements OnInit {
   }
 
   getCountdown(meeting: VirtualMeet): string {
-    const now = new Date().getTime();
-    const meetTime = new Date(meeting.date).getTime();
-    const diff = meetTime - now;
+    if (!meeting.date) return '';
+    
+    try {
+      const now = new Date().getTime();
+      const meetDate = new Date(meeting.date);
+      
+      // Check if date is valid
+      if (isNaN(meetDate.getTime())) {
+        return '';
+      }
+      
+      const meetTime = meetDate.getTime();
+      const diff = meetTime - now;
 
-    if (diff <= 0) return '';
+      if (diff <= 0) return '';
 
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
 
-    return `${days}d ${hours}h ${minutes}m left`;
+      if (days === 0 && hours === 0 && minutes === 0) return '';
+
+      return `${days}d ${hours}h ${minutes}m left`;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  getFormattedDate(date: any): string {
+    if (!date) return 'Date not available';
+    
+    try {
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) {
+        return 'Invalid date';
+      }
+      return parsedDate.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (e) {
+      return 'Date not available';
+    }
   }
 
   paginatedMeetings() {

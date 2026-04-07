@@ -31,10 +31,16 @@ export class VoteCreateListComponent implements OnInit {
   isEditing = false;
   showModal = false;
 
+  // View modal state
+  showViewModal = false;
+  viewModalData: any = null;
+
   // Delete confirmation dialog state
   showDeleteConfirm = false;
   proposalToDelete: any = null;
   isDeleting = false;
+
+  VoteLevel = VoteLevel;
 
   constructor(
     private voteService: AdminVoteCreateService,
@@ -55,19 +61,37 @@ export class VoteCreateListComponent implements OnInit {
     this.resetForm();
   }
 
-  viewResults(proposalId: string): void {
-    this.router.navigate(['/dashboard/votes', proposalId]);
+  viewResults(proposal: any): void {
+    // Extract the vote ID from the proposal object safely
+    const proposalId = proposal?._id || proposal?.id;
+    
+    if (!proposalId) {
+      console.error('[VoteCreateList] Proposal ID is missing!');
+      this.errorMessage = 'Vote ID is missing. Please try again.';
+      return;
+    }
+
+    const idStr = String(proposalId).trim();
+    
+    if (!idStr) {
+      console.error('[VoteCreateList] Proposal ID converts to empty string!');
+      this.errorMessage = 'Vote ID is missing. Please try again.';
+      return;
+    }
+
+    console.log('[VoteCreateList] Navigating to results for proposal:', idStr);
+    this.router.navigate(['/dashboard/votes', idStr]);
     this.resetForm();
   }
 
   fetchProposals() {
     this.voteService.getAllVotes().subscribe({
       next: (data: any[]) => {
-        console.log('Proposals fetched:', data);
+        console.log('[VoteCreateList] Proposals loaded:', data.length);
         this.proposals = data || [];
       },
       error: (err: any) => {
-        console.error('Error fetching proposals:', err);
+        console.error('[VoteCreateList] Error fetching proposals:', err);
         this.errorMessage = 'Could not fetch proposals.';
       }
     });
@@ -86,10 +110,11 @@ export class VoteCreateListComponent implements OnInit {
   }
 
   createProposal() {
-    console.log('Creating proposal with data:', this.proposal);
+    console.log('[VoteCreateList] Creating proposal:', this.proposal.title);
     
     // Ensure no empty objects are being submitted
     if (!this.proposal.title?.trim() || !this.proposal.description?.trim() || !this.proposal.endDate) {
+      console.error('[VoteCreateList] ❌ Validation failed: missing required fields');
       this.errorMessage = 'Please fill in all required fields (title, description, and end date)';
       this.successMessage = '';
       return;
@@ -97,17 +122,18 @@ export class VoteCreateListComponent implements OnInit {
 
     this.voteService.createVote(this.proposal).subscribe({
       next: (response: any) => {
-        console.log('Proposal created successfully:', response);
+        console.log('[VoteCreateList] ✅ Proposal created with ID:', response.id);
+        
         this.successMessage = 'Proposal created successfully!';
         this.errorMessage = '';
         this.closeModal();
-        // Add a small delay to ensure database consistency
+        // Add delay to ensure database consistency and replication
         setTimeout(() => {
           this.fetchProposals();
-        }, 500);
+        }, 1000);
       },
       error: (err: any) => {
-        console.error('Error creating proposal:', err);
+        console.error('[VoteCreateList] ❌ Error creating proposal:', err);
         this.errorMessage = err?.error?.message || 'Failed to create proposal.';
         this.successMessage = '';
       }
@@ -144,8 +170,18 @@ export class VoteCreateListComponent implements OnInit {
     this.showModal = true;
   }
 
-  onDelete(id: string) {
-    this.proposalToDelete = { id };
+  onDelete(proposal: any) {
+    const id = proposal?._id || proposal?.id;
+    
+    if (!id) {
+      console.error('[VoteCreateList] Delete requested but ID is null/undefined!');
+      this.errorMessage = 'Vote ID is missing. Cannot delete.';
+      return;
+    }
+    
+    const idStr = String(id).trim();
+    console.log('[VoteCreateList] Delete requested for ID:', idStr);
+    this.proposalToDelete = { id: idStr };
     this.showDeleteConfirm = true;
   }
 
@@ -174,6 +210,25 @@ export class VoteCreateListComponent implements OnInit {
   onDeleteCancelled() {
     this.showDeleteConfirm = false;
     this.proposalToDelete = null;
+  }
+
+  onView(proposal: any) {
+    this.viewModalData = proposal;
+    this.showViewModal = true;
+  }
+
+  closeViewModal() {
+    this.showViewModal = false;
+    this.viewModalData = null;
+  }
+
+  getVoteLevelLabel(voteLevel: string): string {
+    const levels: { [key: string]: string } = {
+      'general': 'All Users',
+      'sub_county': 'Sub-County Level',
+      'ward': 'Ward Level'
+    };
+    return levels[voteLevel] || voteLevel;
   }
 
   resetForm() {

@@ -8,7 +8,7 @@ const server = express();
 export const createNestServer = async (expressInstance: express.Express) => {
   const app = await NestFactory.create(
     AppModule,
-    new ExpressAdapter(expressInstance),
+    new ExpressAdapter(expressInstance) as any,
   );
   app.enableCors({
     origin: process.env.FRONTEND_URL || '*',

@@ -51,9 +51,9 @@ export class VoteCreateService {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
-  // ✅ Get eligible votes for current user (filtered by user's location)
-  getEligibleVotes(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/me/eligible`);
+  // ✅ Get vote results for a proposal
+  getVoteResults(id: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${id}/results`);
   }
 
   // ✅ Cast a vote on a proposal by ID

@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
@@ -8,8 +9,25 @@ import { environment } from '../../../../../environments/environment';
 })
 export class PetitionService {
   private apiUrl = `${environment.apiUrl}/petitions`;
+  private readonly TOKEN_KEY = 'access_token';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {}
+
+  private getHeaders(): HttpHeaders {
+    let headers = new HttpHeaders();
+
+    if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem(this.TOKEN_KEY);
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+    }
+
+    return headers;
+  }
 
   // ✅ Create a petition (multipart/form-data with optional file)
   createPetition(petitionData: {
@@ -33,31 +51,39 @@ export class PetitionService {
     // ⛔ No need to manually append createdBy here;
     // it's handled by the backend using req.user via JWT
 
-    return this.http.post<any>(this.apiUrl, formData);
+    let headers = new HttpHeaders();
+    if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem(this.TOKEN_KEY);
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+    }
+
+    return this.http.post<any>(this.apiUrl, formData, { headers });
   }
 
   // ✅ Get all petitions (with populated createdBy info)
   getAllPetitions(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+    return this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() });
   }
 
   // ✅ Get a single petition by ID
   getPetitionById(id: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+    return this.http.get<any>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 
   // ✅ Update a petition
   updatePetition(id: string, updateData: any): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/${id}`, updateData);
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, updateData, { headers: this.getHeaders() });
   }
 
   // ✅ Delete a petition
   deletePetition(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+    return this.http.delete<any>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 
   // ✅ Optional: Approve petition endpoint (if exists)
   approvePetition(id: string): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/approve/${id}`, {});
+    return this.http.put<any>(`${this.apiUrl}/approve/${id}`, {}, { headers: this.getHeaders() });
   }
 }

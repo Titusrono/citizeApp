@@ -161,7 +161,6 @@ export class VoteListComponent implements OnInit {
     this.errorMessage = '';
 
     const castVotePayload = {
-      userId: this.currentUser.id,
       vote: this.voteValue,
       ...(this.reason && { reason: this.reason })
     };

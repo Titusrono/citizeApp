@@ -42,7 +42,12 @@ export class VirtualService {
 
   // Update a virtual meeting partially
   updateMeeting(id: string, meeting: Partial<VirtualMeet>): Observable<VirtualMeet> {
-    return this.http.patch<VirtualMeet>(`${this.API_URL}/${id}`, meeting);
+    const url = `${this.API_URL}/${id}`;
+    console.log('[VirtualService.updateMeeting] 📡 PATCH request:');
+    console.log('[VirtualService.updateMeeting]   URL:', url);
+    console.log('[VirtualService.updateMeeting]   ID:', id, '(type:', typeof id + ')');
+    console.log('[VirtualService.updateMeeting]   Payload:', JSON.stringify(meeting, null, 2));
+    return this.http.patch<VirtualMeet>(url, meeting);
   }
 
   // Delete a virtual meeting by ID

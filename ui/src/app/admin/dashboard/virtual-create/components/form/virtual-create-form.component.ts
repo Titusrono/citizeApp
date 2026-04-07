@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 
 interface FormErrors {
   title?: string;
-  description?: string;
+  agenda?: string;
   date?: string;
-  link?: string;
+  meetLink?: string;
+  recordingLink?: string;
 }
 
 @Component({
@@ -19,9 +20,11 @@ interface FormErrors {
 export class VirtualCreateFormComponent {
   @Input() data: any = {
     title: '',
-    description: '',
+    agenda: '',
     date: '',
-    link: ''
+    meetLink: '',
+    recordingLink: '',
+    isLive: false
   };
   @Input() isEditing = false;
   @Input() successMessage = '';
@@ -50,13 +53,13 @@ export class VirtualCreateFormComponent {
         }
         break;
 
-      case 'description':
+      case 'agenda':
         if (!value) {
-          this.errors.description = 'Description is required';
+          this.errors.agenda = 'Agenda/Description is required';
         } else if (value.length < 20) {
-          this.errors.description = 'Description must be at least 20 characters';
+          this.errors.agenda = 'Agenda must be at least 20 characters';
         } else if (value.length > 2000) {
-          this.errors.description = 'Description cannot exceed 2000 characters';
+          this.errors.agenda = 'Agenda cannot exceed 2000 characters';
         }
         break;
 
@@ -73,14 +76,24 @@ export class VirtualCreateFormComponent {
         }
         break;
 
-      case 'link':
+      case 'meetLink':
         if (!value) {
-          this.errors.link = 'Event link is required';
+          this.errors.meetLink = 'Meeting link is required';
         } else {
           try {
             new URL(value);
           } catch {
-            this.errors.link = 'Please enter a valid URL';
+            this.errors.meetLink = 'Please enter a valid URL';
+          }
+        }
+        break;
+
+      case 'recordingLink':
+        if (value) {
+          try {
+            new URL(value);
+          } catch {
+            this.errors.recordingLink = 'Please enter a valid URL';
           }
         }
         break;
@@ -90,7 +103,7 @@ export class VirtualCreateFormComponent {
   }
 
   validateForm(): boolean {
-    const fields = ['title', 'description', 'date', 'link'];
+    const fields = ['title', 'agenda', 'date', 'meetLink', 'recordingLink'];
     let isValid = true;
     fields.forEach(field => {
       if (!this.validateField(field)) {
@@ -114,21 +127,38 @@ export class VirtualCreateFormComponent {
   }
 
   getDescriptionCharCount(): string {
-    return (this.data.description?.length || 0).toString();
+    return (this.data.agenda?.length || 0).toString();
   }
 
   onSubmit() {
+    console.log('[VirtualCreateForm] Form submit button clicked');
+    console.log('[VirtualCreateForm] Form data at submit:', JSON.stringify(this.data, null, 2));
+    console.log('[VirtualCreateForm] isEditing:', this.isEditing);
     if (this.validateForm()) {
+      console.log('[VirtualCreateForm] Form validation passed, emitting data...');
+      console.log('[VirtualCreateForm] Emitting complete data object:', {
+        title: this.data.title,
+        agenda: this.data.agenda,
+        date: this.data.date,
+        meetLink: this.data.meetLink,
+        recordingLink: this.data.recordingLink,
+        isLive: this.data.isLive
+      });
       this.submit.emit(this.data);
+      console.log('[VirtualCreateForm] Data emitted to parent');
+    } else {
+      console.warn('[VirtualCreateForm] Form validation failed');
     }
   }
 
   onReset() {
     this.data = {
       title: '',
-      description: '',
+      agenda: '',
       date: '',
-      link: ''
+      meetLink: '',
+      recordingLink: '',
+      isLive: false
     };
     this.errors = {};
     this.touched = {};

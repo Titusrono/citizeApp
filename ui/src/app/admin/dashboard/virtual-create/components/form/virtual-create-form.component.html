@@ -38,27 +38,27 @@
         </p>
       </div>
 
-      <!-- Description -->
+      <!-- Agenda/Description -->
       <div>
-        <label for="description" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-          Description <span class="text-red-500">*</span>
+        <label for="agenda" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Agenda/Description <span class="text-red-500">*</span>
         </label>
         <textarea
-          id="description"
-          name="description"
-          [(ngModel)]="data.description"
-          placeholder="Enter event description"
+          id="agenda"
+          name="agenda"
+          [(ngModel)]="data.agenda"
+          placeholder="Enter event agenda/description"
           rows="4"
           maxlength="2000"
           required
-          (blur)="markFieldTouched('description')"
-          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('description'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('description')}"
+          (blur)="markFieldTouched('agenda')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('agenda'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('agenda')}"
           class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all resize-none"
         ></textarea>
-        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('description')">
-          {{ errors.description }}
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('agenda')">
+          {{ errors.agenda }}
         </p>
-        <p class="text-xs text-gray-500 mt-1" *ngIf="!hasError('description')">
+        <p class="text-xs text-gray-500 mt-1" *ngIf="!hasError('agenda')">
           {{ getDescriptionCharCount() }}/2000 characters
         </p>
       </div>
@@ -66,10 +66,10 @@
       <!-- Date -->
       <div>
         <label for="date" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-          Event Date <span class="text-red-500">*</span>
+          Event Date & Time <span class="text-red-500">*</span>
         </label>
         <input
-          type="date"
+          type="datetime-local"
           id="date"
           name="date"
           [(ngModel)]="data.date"
@@ -83,24 +83,69 @@
         </p>
       </div>
 
-      <!-- Event Link -->
+      <!-- Meeting Link -->
       <div>
-        <label for="link" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-          Event Link <span class="text-red-500">*</span>
+        <label for="meetLink" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Meeting Link <span class="text-red-500">*</span>
         </label>
         <input
           type="url"
-          id="link"
-          name="link"
-          [(ngModel)]="data.link"
-          placeholder="Enter event URL (e.g., https://...)"
+          id="meetLink"
+          name="meetLink"
+          [(ngModel)]="data.meetLink"
+          placeholder="Enter meeting URL (e.g., https://zoom.us/...)"
           required
-          (blur)="markFieldTouched('link')"
-          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('link'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('link')}"
+          (blur)="markFieldTouched('meetLink')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('meetLink'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('meetLink')}"
           class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
         />
-        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('link')">
-          {{ errors.link }}
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('meetLink')">
+          {{ errors.meetLink }}
+        </p>
+      </div>
+
+      <!-- Recording Link (Optional) -->
+      <div>
+        <label for="recordingLink" class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Recording Link <span class="text-gray-500 text-xs">(Optional)</span>
+        </label>
+        <input
+          type="url"
+          id="recordingLink"
+          name="recordingLink"
+          [(ngModel)]="data.recordingLink"
+          placeholder="Enter recording URL (e.g., https://drive.google.com/...)"
+          (blur)="markFieldTouched('recordingLink')"
+          [ngClass]="{'border-red-500 bg-red-50 dark:bg-red-900/10': hasError('recordingLink'), 'border-green-500 bg-green-50 dark:bg-green-900/10': hasSuccess('recordingLink')}"
+          class="w-full px-3 py-2 border-2 border-gray-300 rounded-md bg-white text-gray-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:focus:ring-blue-900 transition-all"
+        />
+        <p class="text-xs text-red-500 mt-1 dark:text-red-400" *ngIf="hasError('recordingLink')">
+          {{ errors.recordingLink }}
+        </p>
+      </div>
+
+      <!-- Is Live Toggle (Optional) -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+          Meeting Status <span class="text-gray-500 text-xs">(Optional)</span>
+        </label>
+        <div class="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="isLive"
+            name="isLive"
+            [(ngModel)]="data.isLive"
+            class="w-4 h-4 rounded accent-blue-500 cursor-pointer dark:accent-blue-400"
+          />
+          <label for="isLive" class="text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+            Mark as Live Meeting
+          </label>
+        </div>
+        <p class="text-xs text-gray-500 mt-2" *ngIf="data.isLive">
+          <span class="inline-block px-2 py-1 bg-red-100 text-red-700 rounded dark:bg-red-900/30 dark:text-red-400">Live • Displayed as ongoing</span>
+        </p>
+        <p class="text-xs text-gray-500 mt-2" *ngIf="!data.isLive">
+          <span class="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded dark:bg-gray-800 dark:text-gray-400">Upcoming • Displayed by date</span>
         </p>
       </div>
 
