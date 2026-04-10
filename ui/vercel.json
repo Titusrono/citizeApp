@@ -4,7 +4,6 @@
   "outputDirectory": "dist/citizen-connect-frontend/browser",
   "installCommand": "pnpm install",
   "framework": null,
-  "nodeVersion": "20.x",
   "rewrites": [
     {
       "source": "/(.*)",
