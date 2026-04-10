@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "pnpm run build",
+  "buildCommand": "npx pnpm run build",
   "outputDirectory": "dist/citizen-connect-frontend/browser",
-  "installCommand": "pnpm install",
+  "installCommand": "npx pnpm install",
   "framework": null,
   "rewrites": [
     {

@@ -1,0 +1,7 @@
+# Vercel-specific ignore file for monorepo
+# We need to include root-level pnpm files
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!.npmrc
+!../api
+!/api/package.json

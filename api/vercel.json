@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "installCommand": "pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm run build",
+  "installCommand": "npx pnpm install --frozen-lockfile",
+  "buildCommand": "npx pnpm run build",
   "builds": [
     {
       "src": "api/index.ts",
