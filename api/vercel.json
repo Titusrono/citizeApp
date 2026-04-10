@@ -1,6 +1,8 @@
 {
   "version": 2,
-  "installCommand": "npm install --package-lock-only && npm ci",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm run build",
+  "nodeVersion": "20.x",
   "builds": [
     {
       "src": "api/index.ts",

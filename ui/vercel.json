@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "pnpm run build",
   "outputDirectory": "dist/citizen-connect-frontend/browser",
-  "installCommand": "npm install",
+  "installCommand": "pnpm install",
   "framework": null,
+  "nodeVersion": "20.x",
   "rewrites": [
     {
       "source": "/(.*)",
