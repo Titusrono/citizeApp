@@ -57,7 +57,12 @@ export class ReportAdminListComponent implements OnInit {
       next: (data: any[]) => {
         console.log('Fetched reports:', data);
         console.log('First report structure:', data[0]);
-        this.items = data;
+        // Sort by createdAt descending (newest first)
+        this.items = data.sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA;
+        });
         this.availableCategories = [...new Set(data.map(report => report.category).filter(Boolean))];
         this.computeCategoryStats();
       },

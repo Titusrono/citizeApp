@@ -122,9 +122,13 @@ export class RealtimereportFormComponent {
     }
 
     this.isSubmitting = true;
-    // Clean up preview images before sending
-    const submitData = { ...this.data };
-    delete submitData.imagePreview;
+    // Create clean payload with ONLY valid DTO fields
+    const submitData = {
+      description: this.data.description,
+      location: this.data.location,
+      category: this.data.category,
+      images: this.data.imagePreview && this.data.imagePreview.length > 0 ? this.data.imagePreview : []
+    };
 
     setTimeout(() => {
       this.submit.emit(submitData);
@@ -260,10 +264,9 @@ export class RealtimereportFormComponent {
     const files = event.target.files;
     if (!files) return;
 
-    this.data.images = Array.from(files);
     this.data.imagePreview = [];
 
-    // Create preview URLs for images
+    // Create base64 preview URLs for images
     Array.from(files).forEach((file: any) => {
       const reader = new FileReader();
       reader.onload = (e: any) => {
@@ -278,9 +281,6 @@ export class RealtimereportFormComponent {
    */
   removeImage(index: number): void {
     this.data.imagePreview.splice(index, 1);
-    const filesArray = Array.from(this.data.images);
-    filesArray.splice(index, 1);
-    this.data.images = filesArray;
   }
 
   /**

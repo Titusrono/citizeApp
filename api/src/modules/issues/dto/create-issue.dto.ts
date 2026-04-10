@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsArray, ArrayNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, IsOptional } from 'class-validator';
 
 export class CreateIssueDto {
 	@IsString()
@@ -13,8 +13,8 @@ export class CreateIssueDto {
 	@IsNotEmpty()
 	category: string;
 
+	@IsOptional()
 	@IsArray()
-	@ArrayNotEmpty()
 	@IsString({ each: true })
-	images: string[];
+	images?: string[];
 }
