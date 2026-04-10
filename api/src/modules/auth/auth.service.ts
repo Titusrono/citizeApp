@@ -1,4 +1,5 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, Inject } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { UserRole } from '../users/entities/user.entity';
 import * as bcrypt from 'bcryptjs';
@@ -6,7 +7,10 @@ import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    @Inject(ConfigService) private readonly configService: ConfigService
+  ) {}
 
   async register(data: { username: string; phone_no: string; email: string; password: string; subCounty: string; ward: string; role?: string }) {
     // Check if user exists
@@ -43,9 +47,10 @@ export class AuthService {
 
     // Generate JWT
     const userId = user.id.toString();
+    const jwtSecret = this.configService.get<string>('JWT_SECRET') || 'secret-key-change-in-production';
     console.log('Auth Service - Generating token for user ID:', userId);
     const payload = { email: user.email, sub: userId, role: user.role };
-    const token = jwt.sign(payload, 'secret', { expiresIn: '1h' });
+    const token = jwt.sign(payload, jwtSecret, { expiresIn: '1h' });
     console.log('Auth Service - Generated payload:', payload);
 
     return { access_token: token };
