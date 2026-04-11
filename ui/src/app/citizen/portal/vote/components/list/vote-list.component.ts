@@ -2,7 +2,6 @@ import { Component, OnInit, NO_ERRORS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VoteCreateService } from '../../../../../services/vote-create.service';
-import { AuthService } from '../../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-vote-list',
@@ -29,30 +28,16 @@ export class VoteListComponent implements OnInit {
   voteValue: 'yes' | 'no' | null = null;
   reason = '';
   isSubmitting = false;
-  currentUser: any = null;
 
   // Filter options
   statusFilter = 'all'; // all, active, ended
 
   constructor(
-    private voteService: VoteCreateService,
-    private authService: AuthService
+    private voteService: VoteCreateService
   ) {}
 
   ngOnInit(): void {
-    this.getCurrentUser();
     this.loadEligibleVotes();
-  }
-
-  getCurrentUser(): void {
-    this.authService.getCurrentUser().subscribe({
-      next: (user: any) => {
-        this.currentUser = user;
-      },
-      error: (err: any) => {
-        console.error('Error getting current user:', err);
-      }
-    });
   }
 
   loadEligibleVotes(): void {
@@ -60,8 +45,10 @@ export class VoteListComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
+    // Fetch eligible votes from the endpoint that includes 'hasVoted' flag
     this.voteService.getEligibleVotes().subscribe({
       next: (votes: any[]) => {
+        console.log('Loaded eligible votes:', votes);
         this.eligibleVotes = votes;
         this.applyFilters();
         this.isLoading = false;
@@ -149,11 +136,6 @@ export class VoteListComponent implements OnInit {
   submitVote(): void {
     if (!this.voteValue) {
       this.errorMessage = 'Please select Yes or No to cast your vote.';
-      return;
-    }
-
-    if (!this.currentUser?.id) {
-      this.errorMessage = 'Unable to determine your user ID. Please log in again.';
       return;
     }
 

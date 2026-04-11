@@ -1,8 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { VoteCreateService } from '../../../../../services/vote-create.service';
-import { AuthService } from '../../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-vote-cast',
@@ -11,7 +10,7 @@ import { AuthService } from '../../../../../core/auth/auth.service';
   templateUrl: './vote-cast.component.html',
   styleUrls: ['./vote-cast.component.scss']
 })
-export class VoteCastComponent implements OnInit {
+export class VoteCastComponent {
   @Input() vote: any;
   @Output() close = new EventEmitter<void>();
   @Output() voteCast = new EventEmitter<void>();
@@ -21,27 +20,10 @@ export class VoteCastComponent implements OnInit {
   isSubmitting = false;
   errorMessage = '';
   successMessage = '';
-  currentUser: any;
 
   constructor(
-    private voteService: VoteCreateService,
-    private authService: AuthService
+    private voteService: VoteCreateService
   ) {}
-
-  ngOnInit(): void {
-    this.getCurrentUser();
-  }
-
-  getCurrentUser(): void {
-    this.authService.getCurrentUser().subscribe({
-      next: (user: any) => {
-        this.currentUser = user;
-      },
-      error: (err: any) => {
-        console.error('Error getting current user:', err);
-      }
-    });
-  }
 
   selectVote(value: 'yes' | 'no'): void {
     this.voteValue = value;
@@ -54,16 +36,11 @@ export class VoteCastComponent implements OnInit {
       return;
     }
 
-    if (!this.currentUser?.id) {
-      this.errorMessage = 'Unable to determine your user ID. Please log in again.';
-      return;
-    }
-
     this.isSubmitting = true;
     this.errorMessage = '';
 
+    // Create payload without userId - backend extracts user from JWT token
     const castVotePayload = {
-      userId: this.currentUser.id,
       vote: this.voteValue,
       ...(this.reason && { reason: this.reason })
     };

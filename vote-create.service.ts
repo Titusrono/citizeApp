@@ -11,9 +11,8 @@ export interface CreateVoteCreateDto {
   eligibility?: string;
 }
 
-// DTO for casting a vote
+// DTO for casting a vote (userId is handled by backend from authenticated user)
 export interface CastVoteDto {
-  userId: string;
   vote: 'yes' | 'no';
   reason?: string;
 }
@@ -34,6 +33,12 @@ export class VoteCreateService {
   // ✅ Get all voting proposals
   getAllVotes(): Observable<any> {
     return this.http.get(this.apiUrl);
+  }
+
+  // ✅ Get eligible votes for the current authenticated user
+  // Returns votes with 'hasVoted' flag to indicate if user has already voted
+  getEligibleVotes(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/me/eligible`);
   }
 
   // ✅ Get a single voting proposal by ID
@@ -57,6 +62,7 @@ export class VoteCreateService {
   }
 
   // ✅ Cast a vote on a proposal by ID
+  // User ID is automatically extracted from the authenticated user on the backend
   castVote(id: string, votePayload: CastVoteDto): Observable<any> {
     return this.http.post(`${this.apiUrl}/${id}/vote`, votePayload);
   }
