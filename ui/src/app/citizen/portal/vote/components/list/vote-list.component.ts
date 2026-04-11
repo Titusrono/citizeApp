@@ -24,6 +24,11 @@ export class VoteListComponent implements OnInit {
   selectedVote: any = null;
   showCastModal = false;
 
+  // Vote results state
+  showResultsModal = false;
+  voteResults: any = null;
+  resultsLoading = false;
+
   // Vote casting state
   voteValue: 'yes' | 'no' | null = null;
   reason = '';
@@ -168,5 +173,35 @@ export class VoteListComponent implements OnInit {
     this.successMessage = 'Your vote has been recorded successfully!';
     this.closeCastModal();
     this.loadEligibleVotes();
+  }
+
+  viewVoteResults(vote: any): void {
+    const voteId = vote._id || vote.id;
+    if (!voteId) {
+      this.errorMessage = 'Unable to load vote results. Vote ID is missing.';
+      return;
+    }
+
+    this.resultsLoading = true;
+    this.errorMessage = '';
+
+    this.voteService.getVoteResults(voteId).subscribe({
+      next: (results: any) => {
+        console.log('[VoteListComponent] Vote results loaded:', results?.title);
+        this.voteResults = results;
+        this.showResultsModal = true;
+        this.resultsLoading = false;
+      },
+      error: (err: any) => {
+        console.error('[VoteListComponent] Error loading results:', err);
+        this.errorMessage = err?.error?.message || 'Failed to load vote results.';
+        this.resultsLoading = false;
+      }
+    });
+  }
+
+  closeResultsModal(): void {
+    this.showResultsModal = false;
+    this.voteResults = null;
   }
 }

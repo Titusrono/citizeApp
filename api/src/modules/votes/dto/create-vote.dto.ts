@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsDateString, IsEnum, IsArray, ArrayMinSize } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsDateString, IsEnum, IsArray } from 'class-validator';
 import { VoteLevel } from '../entities/vote.entity';
 
 export class CreateVoteDto {
@@ -25,12 +25,10 @@ export class CreateVoteDto {
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  @ArrayMinSize(1)
   selectedSubCounties?: string[];
 
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  @ArrayMinSize(1)
   selectedWards?: string[];
 }

@@ -21,9 +21,8 @@ export interface CreateVoteCreateDto {
   selectedWards?: string[];
 }
 
-// DTO for casting a vote
+// DTO for casting a vote (userId is handled by backend from authenticated user)
 export interface CastVoteDto {
-  userId: string;
   vote: 'yes' | 'no';
   reason?: string;
 }

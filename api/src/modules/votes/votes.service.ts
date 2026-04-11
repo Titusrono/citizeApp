@@ -119,14 +119,12 @@ export class VotesService {
     console.log('[VotesService.findAllForUser] Found', allVotes.length, 'total votes');
     
     // Get all user votes to check which votes this user has already voted on
-    const userVotes = await this.userVoteRepository.find({
-      relations: ['user', 'vote']
-    });
+    const userVotes = await this.userVoteRepository.find();
     
     const userVotedVoteIds = new Set(
       userVotes
-        .filter(uv => uv.user?.id?.toString() === user.id?.toString())
-        .map(uv => uv.vote?.id?.toString())
+        .filter(uv => uv.userId?.toString() === user.id?.toString())
+        .map(uv => uv.voteId?.toString())
     );
     
     console.log('[VotesService.findAllForUser] User has already voted on', userVotedVoteIds.size, 'votes');
@@ -214,65 +212,86 @@ export class VotesService {
       throw error;
     }
 
-    // Try to find vote by ObjectId, with fallback to string comparison
+    // Try to find vote by ObjectId
     let vote: Vote | null | undefined = await this.votesRepository.findOne({
       where: { id: objectId }
     });
 
+    console.log('[VotesService.castVote] Vote search by ObjectId:', vote ? 'FOUND' : 'NOT FOUND');
+
     if (!vote) {
+      // Fallback: Get all votes and search by string ID
       const allVotes = await this.votesRepository.find();
+      console.log('[VotesService.castVote] Total votes in database:', allVotes.length);
+      
+      if (allVotes.length > 0) {
+        console.log('[VotesService.castVote] Sample vote IDs from DB:');
+        allVotes.slice(0, 3).forEach(v => {
+          console.log(`  - ID: ${v.id?.toString()}, Title: ${v.title}`);
+        });
+      }
+      
       vote = allVotes.find(v => v.id?.toString() === voteId);
+      console.log('[VotesService.castVote] Vote search by string ID:', vote ? 'FOUND' : 'NOT FOUND');
       
       if (!vote) {
-        throw new NotFoundException(`Vote/Proposal with ID ${voteId} not found`);
+        console.error(`[VotesService.castVote] ❌ Vote with ID ${voteId} not found in any format. Looking for: "${voteId}"`);
+        throw new NotFoundException(`Vote/Proposal with ID ${voteId} not found. Database contains ${allVotes.length} votes.`);
       }
     }
 
-    console.log('[VotesService.castVote] Found vote:', vote.id?.toString(), 'Title:', vote.title);
+    const freshVote = vote;
+    console.log('[VotesService.castVote] Using vote:', freshVote.id?.toString(), 'Title:', freshVote.title);
 
-    vote = this.normalizeVote(vote);
+    const normalizedVote = this.normalizeVote(freshVote);
     
     // Check if user is eligible to vote based on vote level
-    this.checkVoteEligibility(vote, user);
+    this.checkVoteEligibility(normalizedVote, user);
 
-    // Check if user has already voted on this proposal (double-check before saving)
-    const userVotesList = await this.userVoteRepository.find({
-      relations: ['user', 'vote']
+    // Check if user has already voted on this proposal
+    // Using explicit ID fields for MongoDB reliability
+    const existingVote = await this.userVoteRepository.findOne({
+      where: {
+        voteId: objectId,
+        userId: user.id
+      }
     });
-    
-    const existingVote = userVotesList.find(
-      uv => uv.vote?.id?.toString() === vote.id?.toString() && 
-            uv.user?.id?.toString() === user.id?.toString()
-    );
 
     if (existingVote) {
-      console.log('[VotesService.castVote] User already voted on this proposal');
+      console.log('[VotesService.castVote] ❌ User already voted on this proposal. Existing vote ID:', existingVote.id?.toString());
       throw new ConflictException('You have already voted on this proposal. One vote per proposal per user is allowed.');
     }
     
     console.log('[VotesService.castVote] User eligible and no prior vote found, proceeding...');
 
     try {
-      // Create and save the vote with full entity objects for MongoDB relationships
-      console.log('[VotesService.castVote] Creating userVote record with vote ID:', vote.id?.toString(), 'user ID:', user.id?.toString());
+      // Create and save the vote with full entity objects and explicit IDs for MongoDB
+      console.log('[VotesService.castVote] Creating userVote record with vote ID:', freshVote.id?.toString(), 'user ID:', user.id?.toString());
       
-      // For MongoDB relationships with TypeORM, we pass full entity objects
+      // For MongoDB, we need to explicitly store the IDs in addition to relations
       const userVote = this.userVoteRepository.create({
-        vote, // Pass full vote object
-        user, // Pass full user object
+        vote: freshVote,   // Use the fresh vote instance from database
+        voteId: objectId,  // Explicit ID for query filtering
+        user,        // Pass full user object for relation
+        userId: user.id,   // Explicit ID for query filtering
         voteValue: castVoteDto.vote,
         ...(castVoteDto.reason && { reason: castVoteDto.reason }),
       });
 
       console.log('[VotesService.castVote] UserVote created, saving to database...');
       const saved = await this.userVoteRepository.save(userVote);
-      console.log('[VotesService.castVote] ✅ Vote cast successfully for proposal:', voteId, 'User:', user.id?.toString());
+      console.log('[VotesService.castVote] ✅ Vote cast successfully for proposal:', voteId, 'User:', user.id?.toString(), 'UserVote ID:', saved.id?.toString());
       
       return saved;
     } catch (err: any) {
-      // Catch duplicate key errors from database (in case of race condition)
-      if (err?.code === 11000 || err?.message?.includes('duplicate')) {
-        console.log('[VotesService.castVote] ⚠️ Duplicate vote detected (race condition):', err.message);
+      // Catch duplicate key errors from database
+      const isDuplicateError = err?.code === 11000 || 
+                               err?.code === 'DUPLICATE_KEY' ||
+                               err?.message?.includes('duplicate') ||
+                               err?.message?.includes('E11000');
+      
+      if (isDuplicateError) {
+        console.log('[VotesService.castVote] ⚠️ Duplicate vote detected (DB unique index):', err.message);
         throw new ConflictException('You have already voted on this proposal. One vote per proposal per user is allowed.');
       }
       
@@ -372,16 +391,43 @@ export class VotesService {
     }
 
     // Fetch user votes and calculate results
-    // TypeORM MongoDB may have issues with nested ID queries, so we fetch all and filter
-    let userVotes = await this.userVoteRepository.find({
-      relations: ['user'],
+    // Load all user votes with relations
+    let allUserVotes = await this.userVoteRepository.find({
+      relations: ['user', 'vote'],
       order: { createdAt: 'DESC' }
     });
     
-    // Filter to only votes for this proposal
-    userVotes = userVotes.filter(uv => uv.vote?.id?.toString() === vote.id?.toString());
+    console.log('[VotesService.getVoteResults] Loaded', allUserVotes.length, 'total user votes from database');
     
-    console.log('[VotesService.getVoteResults] Found', userVotes.length, 'votes for proposal:', vote.id?.toString());
+    // Log sample votes for debugging
+    if (allUserVotes.length > 0) {
+      console.log('[VotesService.getVoteResults] Sample user vote:',
+        'voteId:', allUserVotes[0].voteId?.toString(),
+        'vote.id:', allUserVotes[0].vote?.id?.toString(),
+        'userId:', allUserVotes[0].userId?.toString(),
+        'user.id:', allUserVotes[0].user?.id?.toString()
+      );
+    }
+    
+    // Filter to only votes for this proposal using multiple methods
+    const voteIdStr = vote.id?.toString();
+    console.log('[VotesService.getVoteResults] Looking for proposal ID:', voteIdStr);
+    
+    let userVotes = allUserVotes.filter(uv => {
+      // Method 1: Use explicit voteId field (for newly saved votes)
+      if (uv.voteId?.toString() === voteIdStr) {
+        console.log('[VotesService.getVoteResults] ✓ Found vote via voteId field');
+        return true;
+      }
+      // Method 2: Use relation ID (for votes that had relations properly saved)
+      if (uv.vote?.id?.toString() === voteIdStr) {
+        console.log('[VotesService.getVoteResults] ✓ Found vote via vote.id relation');
+        return true;
+      }
+      return false;
+    });
+    
+    console.log('[VotesService.getVoteResults] Filtered to', userVotes.length, 'votes for proposal:', voteIdStr);
 
     const yesCount = userVotes.filter(uv => uv.voteValue === 'yes').length;
     const noCount = userVotes.filter(uv => uv.voteValue === 'no').length;
