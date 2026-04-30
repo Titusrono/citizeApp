@@ -36,42 +36,30 @@ export class UsersService {
   async findOne(id: string) {
     try {
       console.log('UsersService - Finding user with ID:', id);
-      console.log('UsersService - ID type:', typeof id);
-      console.log('UsersService - ID length:', id.length);
       
-      // Debug: Let's see what users exist in the database
-      const allUsers = await this.usersRepository.find();
-      console.log('UsersService - Total users in DB:', allUsers.length);
-      if (allUsers.length > 0) {
-        const firstUser = allUsers[0];
-        console.log('UsersService - First user ID:', firstUser.id);
-        console.log('UsersService - First user ID type:', typeof firstUser.id);
-        console.log('UsersService - First user ID toString():', firstUser.id.toString());
-        console.log('UsersService - Looking for ID matches target:', firstUser.id.toString() === id);
+      // Validate ObjectId format
+      if (!ObjectId.isValid(id)) {
+        console.warn('UsersService - Invalid ObjectId format:', id);
+        return null;
       }
       
-      // Method 1: Find by matching string representation
-      const userByStringMatch = allUsers.find(user => user.id.toString() === id);
-      if (userByStringMatch) {
-        console.log('UsersService - User found by string match');
-        return userByStringMatch;
-      }
+      // Convert string to ObjectId for comparison
+      const objectId = new ObjectId(id);
       
-      // Method 2: Try the traditional ObjectId approach
-      if (ObjectId.isValid(id)) {
-        const user = await this.usersRepository.findOne({
-          where: { id: new ObjectId(id) } as any
-        });
-        if (user) {
-          console.log('UsersService - User found with ObjectId');
-          return user;
-        }
+      // For MongoDB, we need to use find() and filter manually
+      // because findOneBy() doesn't handle ObjectId comparisons properly
+      const users = await this.usersRepository.find();
+      const user = users.find(u => u.id.toString() === id || u.id.equals(objectId));
+      
+      if (user) {
+        console.log('UsersService - User found:', { id: user.id.toString(), email: user.email });
+        return user;
       }
       
       console.log('UsersService - User not found with ID:', id);
       return null;
     } catch (error) {
-      console.error('UsersService - Error finding user:', error);
+      console.error('UsersService - Error finding user by ID:', error.message);
       return null;
     }
   }
@@ -87,8 +75,32 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    await this.usersRepository.update(this.convertToObjectId(id), updateUserDto);
-    return this.findOne(id);
+    console.log(`🔄 [USERS-SERVICE] Updating user with ID:`, id);
+    console.log(`🔄 [USERS-SERVICE] Update data:`, updateUserDto);
+    
+    const updateResult = await this.usersRepository.update(this.convertToObjectId(id), updateUserDto);
+    console.log(`🔄 [USERS-SERVICE] Update result:`, updateResult);
+    
+    const updated = await this.findOne(id);
+    console.log(`🔄 [USERS-SERVICE] User after update:`, {
+      id: updated?.id,
+      email: updated?.email,
+      permissionIds: updated?.permissionIds,
+      permissionCount: updated?.permissionIds?.length || 0
+    });
+    
+    return updated;
+  }
+
+  async updateUserPermissions(id: string | ObjectId, permissionIds: string[]) {
+    console.log(`🔐 [USERS-SERVICE] Updating permissions for user ID:`, id);
+    console.log(`🔐 [USERS-SERVICE] New permissions:`, permissionIds);
+    
+    const objectId = typeof id === 'string' ? this.convertToObjectId(id) : id;
+    const updateResult = await this.usersRepository.update(objectId, { permissionIds });
+    console.log(`🔐 [USERS-SERVICE] Update result:`, updateResult);
+    
+    return updateResult;
   }
 
   async remove(id: string) {

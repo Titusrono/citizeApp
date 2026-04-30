@@ -1,6 +1,9 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { PermissionService } from '../../../../../core/services/permission.service';
+import { AuthService } from '../../../../../core/auth/auth.service';
+import { HasPermissionDirective } from '../../../../../shared/directives/has-permission.directive';
 
 interface FormErrors {
   title?: string;
@@ -11,7 +14,7 @@ interface FormErrors {
 @Component({
   selector: 'app-admin-petition-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './adminpetition-form.component.html',
   styleUrls: ['./adminpetition-form.component.scss']
 })
@@ -43,6 +46,10 @@ export class AdminPetitionFormComponent implements OnChanges {
 
   @Output() submit = new EventEmitter<any>();
   @Output() close = new EventEmitter<void>();
+
+  private authService = inject(AuthService);
+
+  constructor(public permissionService: PermissionService) {}
 
   /**
    * Handle input changes - reset validation when data changes (e.g., during edit)
@@ -121,6 +128,20 @@ export class AdminPetitionFormComponent implements OnChanges {
   onSubmit() {
     if (this.validateForm()) {
       this.submit.emit(this.data);
+    }
+  }
+
+  canSubmit(): boolean {
+    // Admins bypass permission checks
+    const userRole = this.authService.getUserRole();
+    if (userRole === 'admin' || userRole === 'super_admin') {
+      return true;
+    }
+
+    if (this.isEditing) {
+      return this.permissionService.hasPermission('update', 'petitions');
+    } else {
+      return this.permissionService.hasPermission('create', 'petitions');
     }
   }
 

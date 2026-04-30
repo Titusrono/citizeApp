@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { PermissionService } from '../../../../../core/services/permission.service';
 
 interface FormErrors {
   description?: string;
@@ -16,6 +17,8 @@ interface FormErrors {
   styleUrl: './report-admin-form.component.scss'
 })
 export class ReportAdminFormComponent {
+  private permissionService = inject(PermissionService);
+
   @Input() data: any = {
     description: '',
     location: '',
@@ -102,6 +105,14 @@ export class ReportAdminFormComponent {
 
   getDescriptionCharCount(): string {
     return (this.data.description?.length || 0).toString();
+  }
+
+  canSubmit(): boolean {
+    if (this.isEditing) {
+      return this.permissionService.hasPermission('update', 'reports');
+    } else {
+      return this.permissionService.hasPermission('create', 'reports');
+    }
   }
 
   onSubmit() {

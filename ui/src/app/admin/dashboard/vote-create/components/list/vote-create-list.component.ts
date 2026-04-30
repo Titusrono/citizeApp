@@ -5,11 +5,13 @@ import { Router } from '@angular/router';
 import { AdminVoteCreateService, CreateVoteCreateDto, VoteLevel } from '../../services/vote-create.service';
 import { VoteCreateFormComponent } from '../form/vote-create-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components';
+import { PermissionService } from '../../../../../core/services/permission.service';
+import { HasPermissionDirective } from '../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-vote-create-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, VoteCreateFormComponent, ConfirmDialogComponent],
+  imports: [CommonModule, FormsModule, VoteCreateFormComponent, ConfirmDialogComponent, HasPermissionDirective],
   templateUrl: './vote-create-list.component.html',
   styleUrls: ['./vote-create-list.component.scss']
 })
@@ -44,7 +46,8 @@ export class VoteCreateListComponent implements OnInit {
 
   constructor(
     private voteService: AdminVoteCreateService,
-    private router: Router
+    private router: Router,
+    public permissionService: PermissionService
   ) {}
 
   ngOnInit(): void {

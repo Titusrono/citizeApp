@@ -12,6 +12,7 @@ import { TownhallsModule } from './modules/townhalls/townhalls.module';
 import { PetitionsModule } from './modules/petitions/petitions.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BlogsModule } from './modules/blogs/blogs.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { BlogsModule } from './modules/blogs/blogs.module';
         type: 'mongodb',
         url: configService.get<string>('MONGODB_URI'),
         autoLoadEntities: true,
-        synchronize: true, // Set to false in production
+        synchronize: false, // MongoDB doesn't handle synchronize well, manage schema manually
       }),
     }),
     UsersModule,
@@ -35,6 +36,7 @@ import { BlogsModule } from './modules/blogs/blogs.module';
     TownhallsModule,
     PetitionsModule,
     BlogsModule,
+    PermissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,5 +1,4 @@
 import { Routes } from "@angular/router";
-import { ModeratorListComponent } from "./admin/dashboard/moderator/components/list/moderator-list.component";
 import { VoteCreateListComponent } from "./admin/dashboard/vote-create/components/list/vote-create-list.component";
 import { ForgotPasswordComponent } from "./auth/forgot-password/forgot-password.component";
 import { GoogleCallbackComponent } from "./auth/google-callback/google-callback.component";
@@ -22,6 +21,7 @@ import { RoleGuard } from "./core/auth/role.guard";
 import { AuthGuard } from "./core/auth/auth.guard";
 import { AdminPetitionListComponent } from "./admin/dashboard/adminpetition/components/list/adminpetition-list.component";
 import { VoteResultsComponent } from "./admin/dashboard/vote-create/components/results/vote-results.component";
+import { PermissionManagementListComponent } from "./admin/dashboard/permissions-management/components/list/permissions-management-list.component";
 
 export const routes: Routes = [
   // Root route - redirect to login or dashboard based on auth state
@@ -60,7 +60,6 @@ export const routes: Routes = [
     data: { roles: ['admin', 'super_admin'] },
     children: [
       { path: '', redirectTo: 'report-admin', pathMatch: 'full' },
-      { path: 'moderator', title: 'Moderator', component: ModeratorListComponent },
       { path: 'report-admin', title: 'Reports Admin', component: ReportAdminListComponent },
       { path: 'vote-create', title: 'Vote Create', component: VoteCreateListComponent },
       { path: 'votes/:id', title: 'Vote Results', component: VoteResultsComponent },
@@ -68,6 +67,7 @@ export const routes: Routes = [
       { path: 'adminpetition', title: 'Admin Petition', component: AdminPetitionListComponent },
       { path: 'usersreg', title: 'Users Register', component: UsersregListComponent },
       { path: 'blog_admin', title: 'Admin Blog', component: BlogAdminListComponent },
+      { path: 'permissions', title: 'Permissions', component: PermissionManagementListComponent, data: { roles: ['super_admin'] } },
       { path: 'profile', title: 'Profile', component: ProfileComponent },
     ],
   },

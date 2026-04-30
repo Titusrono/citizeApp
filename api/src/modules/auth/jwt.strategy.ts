@@ -19,17 +19,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    console.log('JWT Strategy - Validating payload:', payload);
+    console.log('JWT Strategy - Validating payload:', { sub: payload.sub, email: payload.email, role: payload.role });
     try {
-      const user = await this.usersService.findOne(payload.sub);
-      console.log('JWT Strategy - User found:', !!user);
-      if (!user) {
-        console.log('JWT Strategy - User not found for ID:', payload.sub);
+      if (!payload.sub) {
+        console.error('JWT Strategy - Invalid payload: missing sub (user ID)');
         return null;
       }
+      
+      const user = await this.usersService.findOne(payload.sub);
+      console.log('JWT Strategy - User lookup result:', { found: !!user, userId: payload.sub });
+      
+      if (!user) {
+        console.warn('JWT Strategy - User not found for ID:', payload.sub, '| Email from token:', payload.email);
+        return null;
+      }
+      
+      console.log('JWT Strategy - User validated successfully:', user.id.toString());
       return user;
     } catch (error) {
-      console.error('JWT Strategy - Error finding user:', error);
+      console.error('JWT Strategy - Error validating user:', error.message);
       return null;
     }
   }

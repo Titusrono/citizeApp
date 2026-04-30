@@ -1,9 +1,12 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreateVoteCreateDto, VoteLevel } from '../../services/vote-create.service';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { LocationService } from '../../../../../shared/services/location.service';
+import { PermissionService } from '../../../../../core/services/permission.service';
+import { AuthService } from '../../../../../core/auth/auth.service';
+import { HasPermissionDirective } from '../../../../../shared/directives/has-permission.directive';
 
 interface FormErrors {
   title?: string;
@@ -16,7 +19,7 @@ interface FormErrors {
 @Component({
   selector: 'app-vote-create-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgSelectComponent],
+  imports: [CommonModule, FormsModule, NgSelectComponent, HasPermissionDirective],
   providers: [LocationService],
   templateUrl: './vote-create-form.component.html',
   styleUrls: ['./vote-create-form.component.scss']
@@ -53,7 +56,9 @@ export class VoteCreateFormComponent implements OnInit, OnChanges {
   currentSubCounties: string[] = [];
   filteredWards: any[] = []; // Cache filtered wards to prevent infinite loops
 
-  constructor(private locationService: LocationService) {}
+  private authService = inject(AuthService);
+
+  constructor(private locationService: LocationService, public permissionService: PermissionService) {}
 
   getFilteredWards(): any[] {
     return this.filteredWards;
@@ -266,6 +271,20 @@ export class VoteCreateFormComponent implements OnInit, OnChanges {
 
       this.isSubmittingLocal = true;
       this.submit.emit(submissionData);
+    }
+  }
+
+  canSubmit(): boolean {
+    // Admins bypass permission checks
+    const userRole = this.authService.getUserRole();
+    if (userRole === 'admin' || userRole === 'super_admin') {
+      return true;
+    }
+
+    if (this.isEditing) {
+      return this.permissionService.hasPermission('update', 'votes');
+    } else {
+      return this.permissionService.hasPermission('create', 'votes');
     }
   }
 

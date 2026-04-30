@@ -2,7 +2,12 @@
   <!-- Header -->
   <div class="header-section">
     <h1>Virtual Meetings Management</h1>
-    <button class="btn-add" (click)="openModal()">
+    <button 
+      *appHasPermission="{ action: 'create', resource: 'townhalls' }"
+      class="btn-add" 
+      (click)="openModal()"
+      title="Create New Meeting"
+    >
       ➕ Add New Meeting
     </button>
   </div>
@@ -70,8 +75,23 @@
             <span *ngIf="item.isDone" class="badge badge-done">✓ Done</span>
           </td>
           <td>
-            <button class="btn-sm btn-edit" (click)="onEdit(item)">Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(item.id!)" [disabled]="!item.id">Delete</button>
+            <button 
+              *appHasPermission="{ action: 'update', resource: 'townhalls' }"
+              class="btn-sm btn-edit" 
+              (click)="onEdit(item)"
+              title="Edit Meeting"
+            >
+              Edit
+            </button>
+            <button 
+              *appHasPermission="{ action: 'delete', resource: 'townhalls' }"
+              class="btn-sm btn-delete" 
+              (click)="onDelete(item.id!)" 
+              [disabled]="!item.id"
+              title="Delete Meeting"
+            >
+              Delete
+            </button>
           </td>
         </tr>
       </tbody>

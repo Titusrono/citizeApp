@@ -27,6 +27,31 @@ export class UsersController {
     return this.usersService.findByEmail(email);
   }
 
+  @Patch('email/:email/permissions')
+  async updateUserPermissions(
+    @Param('email') email: string,
+    @Body() { permissionIds }: { permissionIds: string[] }
+  ) {
+    console.log(`📝 [USERS] Updating permissions for user: ${email}`);
+    console.log(`📝 [USERS] Permission IDs to save:`, permissionIds);
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    console.log(`📝 [USERS] User found:`, { id: user.id, email: user.email });
+    const updated = await this.usersService.update(user.id.toString(), { permissionIds } as any);
+    console.log(`✅ [USERS] Permissions updated for user: ${email}`);
+    if (updated) {
+      console.log(`✅ [USERS] Updated user:`, { 
+        id: updated.id, 
+        email: updated.email, 
+        permissionIds: updated.permissionIds,
+        permissionCount: updated.permissionIds?.length || 0
+      });
+    }
+    return updated;
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);

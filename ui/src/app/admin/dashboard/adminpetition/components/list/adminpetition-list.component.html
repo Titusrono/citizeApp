@@ -2,7 +2,12 @@
   <!-- Header -->
   <div class="header-section">
     <h1>Petitions Management</h1>
-    <button class="btn-add" (click)="openModal()">
+    <button 
+      *appHasPermission="{ action: 'create', resource: 'petitions' }"
+      class="btn-add" 
+      (click)="openModal()"
+      title="Create New Petition"
+    >
       + Create Petition
     </button>
   </div>
@@ -61,32 +66,50 @@
           </td>
           <td class="actions-cell">
             <div class="flex flex-wrap gap-1">
-              <button class="btn-sm btn-view" (click)="onView(item)">View</button>
               <button 
-                *ngIf="!item.isApproved"
-                class="btn-sm btn-success" 
-                (click)="approvePetition(item)"
+                *appHasPermission="{ action: 'read', resource: 'petitions' }"
+                class="btn-sm btn-view" 
+                (click)="onView(item)"
+                title="View Petition Details"
               >
-                Approve
+                View
               </button>
+              <ng-container *appHasPermission="{ action: 'approve', resource: 'petitions' }">
+                <button 
+                  *ngIf="!item.isApproved"
+                  class="btn-sm btn-success" 
+                  (click)="approvePetition(item)"
+                  title="Approve Petition"
+                >
+                  Approve
+                </button>
+              </ng-container>
+              <ng-container *appHasPermission="{ action: 'reject', resource: 'petitions' }">
+                <button 
+                  *ngIf="!item.isApproved"
+                  class="btn-sm btn-reject" 
+                  (click)="rejectPetition(item)"
+                  title="Reject Petition"
+                >
+                  Reject
+                </button>
+              </ng-container>
+              <ng-container *appHasPermission="{ action: 'update', resource: 'petitions' }">
+                <button 
+                  *ngIf="item.isApproved"
+                  class="btn-sm btn-edit" 
+                  (click)="onEdit(item)"
+                  title="Edit Petition"
+                >
+                  Edit
+                </button>
+              </ng-container>
               <button 
-                *ngIf="!item.isApproved"
-                class="btn-sm btn-reject" 
-                (click)="rejectPetition(item)"
-              >
-                Reject
-              </button>
-              <button 
-                *ngIf="item.isApproved"
-                class="btn-sm btn-edit" 
-                (click)="onEdit(item)"
-              >
-                Edit
-              </button>
-              <button 
+                *appHasPermission="{ action: 'delete', resource: 'petitions' }"
                 class="btn-sm btn-delete" 
                 [disabled]="!(item.id || item._id)" 
                 (click)="onDelete(item.id || item._id)"
+                title="Delete Petition"
               >
                 Delete
               </button>

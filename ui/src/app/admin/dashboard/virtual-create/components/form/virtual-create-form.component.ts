@@ -1,6 +1,9 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { PermissionService } from '../../../../../core/services/permission.service';
+import { AuthService } from '../../../../../core/auth/auth.service';
+import { HasPermissionDirective } from '../../../../../shared/directives/has-permission.directive';
 
 interface FormErrors {
   title?: string;
@@ -13,11 +16,14 @@ interface FormErrors {
 @Component({
   selector: 'app-virtual-create-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './virtual-create-form.component.html',
   styleUrls: ['./virtual-create-form.component.scss']
 })
 export class VirtualCreateFormComponent {
+  private permissionService = inject(PermissionService);
+  private authService = inject(AuthService);
+
   @Input() data: any = {
     title: '',
     agenda: '',
@@ -128,6 +134,20 @@ export class VirtualCreateFormComponent {
 
   getDescriptionCharCount(): string {
     return (this.data.agenda?.length || 0).toString();
+  }
+
+  canSubmit(): boolean {
+    // Admins bypass permission checks
+    const userRole = this.authService.getUserRole();
+    if (userRole === 'admin' || userRole === 'super_admin') {
+      return true;
+    }
+
+    if (this.isEditing) {
+      return this.permissionService.hasPermission('update', 'townhalls');
+    } else {
+      return this.permissionService.hasPermission('create', 'townhalls');
+    }
   }
 
   onSubmit() {

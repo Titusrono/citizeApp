@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
+import { PermissionsModule } from '../permissions/permissions.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
@@ -11,6 +12,7 @@ import { RolesGuard } from './roles.guard';
 @Module({
   imports: [
     UsersModule,
+    PermissionsModule,
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],

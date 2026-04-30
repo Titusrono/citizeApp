@@ -4,11 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { UsersregService } from '../../services/usersreg.service';
 import { UsersregFormComponent } from '../form/usersreg-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components';
+import { PermissionService } from '../../../../../core/services/permission.service';
+import { HasPermissionDirective } from '../../../../../shared/directives/has-permission.directive';
+import { AuthService } from '../../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-usersreg-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, UsersregFormComponent, ConfirmDialogComponent],
+  imports: [CommonModule, FormsModule, UsersregFormComponent, ConfirmDialogComponent, HasPermissionDirective],
   templateUrl: './usersreg-list.component.html',
   styleUrls: ['./usersreg-list.component.scss']
 })
@@ -18,7 +21,8 @@ export class UsersregListComponent implements OnInit {
     username: '',
     phone_no: '',
     subCounty: '',
-    ward: ''
+    ward: '',
+    role: 'citizen'
   };
 
   itemsList: any[] = [];
@@ -27,6 +31,15 @@ export class UsersregListComponent implements OnInit {
   editingUser: any = null;
   isEditing = false;
   showModal = false;
+
+  // Permissions modal state
+  showPermissionsModal = false;
+  selectedUserForPermissions: any = null;
+  allPermissions: any[] = [];
+  userPermissions: string[] = [];
+  permissionsLoading = false;
+  permissionsLoadingError = '';
+  permissionsModalLoading = false;
 
   // Delete confirmation dialog state
   showDeleteConfirm = false;
@@ -43,10 +56,20 @@ export class UsersregListComponent implements OnInit {
   selectedSubCounty: string = '';
   subCountyStats: { subCounty: string; count: number; percentage: number }[] = [];
 
-  constructor(private usersregService: UsersregService) {}
+  constructor(
+    private usersregService: UsersregService,
+    public permissionService: PermissionService,
+    private authService: AuthService
+  ) {}
+
+  isSuperAdmin(): boolean {
+    const userRole = this.authService.getUserRole();
+    return userRole === 'Super Admin' || userRole === 'super_admin';
+  }
 
   ngOnInit(): void {
     this.fetchUsers();
+    this.loadAllPermissions();
   }
 
   fetchUsers(): void {
@@ -101,15 +124,28 @@ export class UsersregListComponent implements OnInit {
   }
 
   createUser(): void {
-    this.usersregService.createUser(this.currentData).subscribe({
+    // Create clean payload with ONLY valid DTO fields (whitelist approach)
+    const createPayload = {
+      email: this.currentData.email,
+      username: this.currentData.username,
+      phone_no: this.currentData.phone_no,
+      subCounty: this.currentData.subCounty,
+      ward: this.currentData.ward,
+      role: this.currentData.role || 'citizen'
+    };
+
+    console.log('➕ Creating user with clean payload:', createPayload);
+
+    this.usersregService.createUser(createPayload).subscribe({
       next: () => {
         this.successMessage = 'User created successfully!';
         this.errorMessage = '';
         this.closeModal();
         this.fetchUsers();
       },
-      error: () => {
-        this.errorMessage = 'Failed to create user.';
+      error: (err: any) => {
+        console.error('❌ Create error:', err);
+        this.errorMessage = 'Failed to create user: ' + (err.error?.message || err.message || 'Unknown error');
         this.successMessage = '';
       }
     });
@@ -118,7 +154,19 @@ export class UsersregListComponent implements OnInit {
   updateUser(): void {
     if (!this.editingUser) return;
 
-    this.usersregService.updateUser(this.editingUser.email, this.currentData).subscribe({
+    // Create clean payload with ONLY valid DTO fields (whitelist approach)
+    const updatePayload = {
+      email: this.currentData.email,
+      username: this.currentData.username,
+      phone_no: this.currentData.phone_no,
+      subCounty: this.currentData.subCounty,
+      ward: this.currentData.ward,
+      role: this.currentData.role
+    };
+
+    console.log('📝 Updating user with clean payload:', updatePayload);
+
+    this.usersregService.updateUser(this.editingUser.email, updatePayload).subscribe({
       next: () => {
         this.successMessage = 'User updated successfully!';
         this.errorMessage = '';
@@ -127,8 +175,9 @@ export class UsersregListComponent implements OnInit {
         this.closeModal();
         this.fetchUsers();
       },
-      error: () => {
-        this.errorMessage = 'Failed to update user.';
+      error: (err: any) => {
+        console.error('❌ Update error:', err);
+        this.errorMessage = 'Failed to update user: ' + (err.error?.message || err.message || 'Unknown error');
         this.successMessage = '';
       }
     });
@@ -141,6 +190,321 @@ export class UsersregListComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
     this.showModal = true;
+  }
+
+  openPermissionsModal(user: any): void {
+    this.selectedUserForPermissions = user;
+    // Load user's current permission IDs
+    this.userPermissions = user.permissionIds ? [...user.permissionIds] : [];
+    console.log('🔐 Opening permissions modal for user:', user.username);
+    console.log('📋 Current permissions:', this.userPermissions);
+    this.showPermissionsModal = true;
+    this.permissionsLoadingError = '';
+    
+    // Load permissions if not already loaded
+    if (this.allPermissions.length === 0) {
+      this.permissionsModalLoading = true;
+      this.loadAllPermissions();
+    }
+  }
+
+  closePermissionsModal(): void {
+    this.showPermissionsModal = false;
+    this.selectedUserForPermissions = null;
+    this.userPermissions = [];
+  }
+
+  loadAllPermissions(): void {
+    this.permissionService.getAllPermissions().subscribe({
+      next: (permissions: any[]) => {
+        // Ensure we have valid permission objects with id, action, resource fields
+        this.allPermissions = permissions.map(p => ({
+          id: p.id || p._id,
+          action: p.action,
+          resource: p.resource,
+          description: p.description,
+          name: p.name
+        }));
+        console.log('✅ [MODAL] All permissions loaded:', this.allPermissions.length);
+        console.log('📋 [MODAL] All Permissions:', this.allPermissions.map(p => `${p.action}:${p.resource}`));
+        
+        // Detailed classification logging
+        const adminPerms: any[] = [];
+        const citizenPerms: any[] = [];
+        
+        this.allPermissions.forEach(p => {
+          const section = this.getPermissionSection(p);
+          console.log(`🔍 [MODAL] ${p.action}:${p.resource} → ${section}`);
+          if (section === 'admin') {
+            adminPerms.push(p);
+          } else {
+            citizenPerms.push(p);
+          }
+        });
+        
+        console.log('👨‍💼 [MODAL] Admin permissions:', adminPerms.length);
+        console.log('📝 [MODAL] Admin:', adminPerms.map(p => `${p.action}:${p.resource}`));
+        
+        console.log('👥 [MODAL] Citizen permissions:', citizenPerms.length);
+        console.log('📝 [MODAL] Citizen:', citizenPerms.map(p => `${p.action}:${p.resource}`));
+        
+        // Log unique resources by section
+        const adminResources = this.getUniqueResourcesForSection('admin');
+        const citizenResources = this.getUniqueResourcesForSection('citizen');
+        console.log('📊 [MODAL] Admin resources:', adminResources);
+        console.log('📊 [MODAL] Citizen resources:', citizenResources);
+        
+        this.permissionsModalLoading = false;
+        this.permissionsLoadingError = '';
+      },
+      error: (err: any) => {
+        console.error('❌ [MODAL] Failed to load permissions:', err);
+        this.permissionsLoadingError = 'Failed to load permissions. Please try again.';
+        this.permissionsModalLoading = false;
+      }
+    });
+  }
+
+  togglePermission(permissionId: string): void {
+    const index = this.userPermissions.indexOf(permissionId);
+    if (index > -1) {
+      this.userPermissions.splice(index, 1);
+    } else {
+      this.userPermissions.push(permissionId);
+    }
+  }
+
+  selectAllPermissions(): void {
+    this.userPermissions = this.allPermissions.map(p => p.id);
+    console.log('✅ All permissions selected:', this.userPermissions);
+  }
+
+  deselectAllPermissions(): void {
+    this.userPermissions = [];
+    console.log('✅ All permissions deselected');
+  }
+
+  toggleAllPermissions(): void {
+    if (this.userPermissions.length === this.allPermissions.length) {
+      this.deselectAllPermissions();
+    } else {
+      this.selectAllPermissions();
+    }
+  }
+
+  /**
+   * Get ALL permissions for a specific resource (works for BOTH admin and citizen)
+   * Example: getPermissionsByResource('issues') returns:
+   *   - create:issues (admin action)
+   *   - read:issues (citizen action)
+   *   - update:issues (admin action)
+   *   - delete:issues (admin action)
+   *   - approve:issues (admin action)
+   * 
+   * This method is resource-agnostic and works for any permission action.
+   */
+  getPermissionsByResource(resource: string): any[] {
+    return this.allPermissions.filter(p => p.resource === resource);
+  }
+
+  /**
+   * Select ALL permissions for a resource (both admin and citizen actions)
+   * Used by the resource checkbox to select all actions for that resource
+   */
+  selectResourcePermissions(resource: string): void {
+    const resourcePermissions = this.getPermissionsByResource(resource);
+    const permissionIds = resourcePermissions.map(p => p.id);
+    
+    permissionIds.forEach(id => {
+      if (!this.userPermissions.includes(id)) {
+        this.userPermissions.push(id);
+      }
+    });
+    
+    console.log(`✅ All ${resource} permissions selected (admin + citizen):`, permissionIds);
+  }
+
+  /**
+   * Deselect ALL permissions for a resource (both admin and citizen actions)
+   */
+  deselectResourcePermissions(resource: string): void {
+    const resourcePermissions = this.getPermissionsByResource(resource);
+    const permissionIds = resourcePermissions.map(p => p.id);
+    
+    this.userPermissions = this.userPermissions.filter(
+      id => !permissionIds.includes(id)
+    );
+    
+    console.log(`✅ All ${resource} permissions deselected (admin + citizen):`, permissionIds);
+  }
+
+  /**
+   * Toggle ALL permissions for a resource (both admin and citizen actions)
+   * If ALL are selected → deselect all
+   * If SOME or NONE are selected → select all
+   */
+  toggleResourcePermissions(resource: string): void {
+    const resourcePermissions = this.getPermissionsByResource(resource);
+    const resourcePermissionIds = resourcePermissions.map(p => p.id);
+    
+    // Check if all permissions for this resource are selected
+    const allSelected = resourcePermissionIds.every(id => 
+      this.userPermissions.includes(id)
+    );
+    
+    if (allSelected) {
+      this.deselectResourcePermissions(resource);
+    } else {
+      this.selectResourcePermissions(resource);
+    }
+  }
+
+  /**
+   * Check if ALL permissions for a resource are selected (admin + citizen)
+   */
+  isResourceFullySelected(resource: string): boolean {
+    const resourcePermissions = this.getPermissionsByResource(resource);
+    const resourcePermissionIds = resourcePermissions.map(p => p.id);
+    
+    return resourcePermissionIds.length > 0 && 
+           resourcePermissionIds.every(id => this.userPermissions.includes(id));
+  }
+
+  /**
+   * Check if SOME (but not all) permissions for a resource are selected
+   * This is used to show the "indeterminate" checkbox state
+   */
+  isResourcePartiallySelected(resource: string): boolean {
+    const resourcePermissions = this.getPermissionsByResource(resource);
+    const resourcePermissionIds = resourcePermissions.map(p => p.id);
+    
+    const selectedCount = resourcePermissionIds.filter(id => 
+      this.userPermissions.includes(id)
+    ).length;
+    
+    return selectedCount > 0 && selectedCount < resourcePermissionIds.length;
+  }
+
+  saveUserPermissions(): void {
+    if (!this.selectedUserForPermissions) return;
+
+    this.permissionsLoading = true;
+    console.log(`💾 Saving ${this.userPermissions.length} permissions for user: ${this.selectedUserForPermissions.email}`);
+    
+    this.usersregService.updateUserPermissions(this.selectedUserForPermissions.email, this.userPermissions).subscribe({
+      next: (updatedUser: any) => {
+        console.log('✅ Permissions saved successfully:', updatedUser);
+        this.successMessage = `Permissions assigned to ${this.selectedUserForPermissions.username} successfully!`;
+        this.permissionsLoading = false;
+        this.closePermissionsModal();
+        this.fetchUsers();
+        setTimeout(() => this.successMessage = '', 3000);
+      },
+      error: (err: any) => {
+        console.error('❌ Failed to save permissions:', err);
+        this.errorMessage = 'Failed to assign permissions: ' + (err.error?.message || err.message || 'Unknown error');
+        this.permissionsLoading = false;
+        setTimeout(() => this.errorMessage = '', 3000);
+      }
+    });
+  }
+
+  isPermissionSelected(permissionId: string): boolean {
+    return this.userPermissions.includes(permissionId);
+  }
+
+  getUniqueResources(): string[] {
+    return [...new Set(this.allPermissions.map(p => p.resource))];
+  }
+
+  /**
+   * Get section label for display
+   */
+  getSectionLabel(section: string): string {
+    return section === 'admin' ? '👨‍💼 Admin Permissions' : '👥 Citizen Permissions';
+  }
+
+  /**
+   * ===== PERMISSION CLASSIFICATION (Display Organization) =====
+   * These methods organize permissions into sections for display:
+   * - ADMIN SECTION: create, update, delete, manage, approve, publish actions
+   * - CITIZEN SECTION: read, view, vote, comment actions
+   * 
+   * This is purely for UI organization. The underlying permission data contains BOTH types.
+   */
+
+  /**
+   * Get the actual section for a specific permission based on its ACTION
+   * read:issues → citizen
+   * create:issues → admin
+   * read:blogs → citizen
+   * publish:blogs → admin
+   */
+  getPermissionSection(permission: any): string {
+    const citizenActions = ['view', 'vote', 'comment'];
+    const adminActions = ['create', 'read', 'update', 'delete', 'manage', 'approve', 'publish', 'reject'];
+    
+    if (citizenActions.includes(permission.action)) {
+      return 'citizen';
+    } else if (adminActions.includes(permission.action)) {
+      return 'admin';
+    }
+    
+    // Default to admin for unknown actions
+    return 'admin';
+  }
+
+  /**
+   * Get permissions for a specific section
+   * 
+   * SECTION MAPPING (Based on Sidebar):
+   * 
+   * CITIZEN SECTION (view-only access):
+   *   - view:issues → Report Issue
+   *   - view:petitions → Petitions
+   *   - view:votes → Vote on Projects
+   *   - view:townhalls → Virtual Hall
+   *   - view:blogs → Blogs & News
+   * 
+   * ADMIN SECTION (manage/create access):
+   *   - read:issues, update:issues → Reports Admin
+   *   - read:petitions, update:petitions → Petitions Admin
+   *   - create:votes, read:votes → Vote Create
+   *   - create:townhalls, read:townhalls → Virtual Meet
+   *   - read:users, update:users, delete:users, manage:users → Users
+   *   - create:blogs, read:blogs, update:blogs, delete:blogs → Blogs
+   *   - read:permissions, create:permissions, update:permissions → Permissions
+   * 
+   * NO OVERLAP: 'view' is distinct from 'read' to avoid conflicts
+   */
+  getPermissionsBySection(section: string): any[] {
+    return this.allPermissions.filter(p => this.getPermissionSection(p) === section);
+  }
+
+  /**
+   * Get unique sections in order (admin first, then citizen)
+   * Used to render section headers and containers in the modal
+   */
+  getUniqueSections(): string[] {
+    const sections = new Set<string>();
+    this.allPermissions.forEach(p => {
+      sections.add(this.getPermissionSection(p));
+    });
+    // Return in order: admin first, citizen second
+    return Array.from(sections).sort((a, b) => a === 'admin' ? -1 : 1);
+  }
+
+  /**
+   * Get unique resources for a section
+   * Example: For 'admin' section → [users, issues, petitions, blogs, votes, policies, townhalls]
+   * Example: For 'citizen' section → [issues, petitions, blogs, votes, townhalls, policies, reports]
+   * 
+   * Used to render resource checkboxes within each section
+   */
+  getUniqueResourcesForSection(section: string): string[] {
+    return [...new Set(
+      this.getPermissionsBySection(section).map(p => p.resource)
+    )];
   }
 
   onDelete(email: string): void {
@@ -180,7 +544,8 @@ export class UsersregListComponent implements OnInit {
       username: '',
       phone_no: '',
       subCounty: '',
-      ward: ''
+      ward: '',
+      role: 'citizen'
     };
     this.isEditing = false;
     this.editingUser = null;

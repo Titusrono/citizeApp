@@ -2,7 +2,12 @@
   <!-- Header -->
   <div class="header-section">
     <h1>Blog Management</h1>
-    <button class="btn-add" (click)="openModal()">
+    <button 
+      *appHasPermission="{ action: 'create', resource: 'blogs' }"
+      class="btn-add" 
+      (click)="openModal()"
+      title="Create New Blog"
+    >
       ➕ Add New Blog
     </button>
   </div>
@@ -34,8 +39,22 @@
           <td>{{ item.summary | slice:0:50 }}...</td>
           <td>{{ item.date | date:'short' }}</td>
           <td>
-            <button class="btn-sm btn-edit" (click)="onEdit(item)">✏️ Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(item._id || item.id!)">🗑️ Delete</button>
+            <button 
+              *appHasPermission="{ action: 'update', resource: 'blogs' }"
+              class="btn-sm btn-edit" 
+              (click)="onEdit(item)"
+              title="Edit Blog"
+            >
+              ✏️ Edit
+            </button>
+            <button 
+              *appHasPermission="{ action: 'delete', resource: 'blogs' }"
+              class="btn-sm btn-delete" 
+              (click)="onDelete(item._id || item.id!)"
+              title="Delete Blog"
+            >
+              🗑️ Delete
+            </button>
           </td>
         </tr>
       </tbody>

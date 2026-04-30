@@ -61,6 +61,7 @@ export const COUNTIES: County[] = [
           { name: 'Daraja Mbili' },
           { name: 'Oloosirkon' },
           { name: 'Shompole' },
+          { name: 'Ewaso' },
         ]
       },
     ]

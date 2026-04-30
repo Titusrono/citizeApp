@@ -1,7 +1,10 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Blog } from '../../services/blogs.service';
+import { PermissionService } from '../../../../../core/services/permission.service';
+import { AuthService } from '../../../../../core/auth/auth.service';
+import { HasPermissionDirective } from '../../../../../shared/directives/has-permission.directive';
 
 interface FormErrors {
   title?: string;
@@ -14,11 +17,12 @@ interface FormErrors {
 @Component({
   selector: 'app-blog-admin-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HasPermissionDirective],
   templateUrl: './blog-admin-form.component.html',
   styleUrls: ['./blog-admin-form.component.scss']
 })
 export class BlogAdminFormComponent {
+  private authService = inject(AuthService);
   @Input() data: Blog = {
     title: '',
     date: '',
@@ -48,6 +52,8 @@ export class BlogAdminFormComponent {
     'Environment',
     'Public Safety',
   ];
+
+  constructor(public permissionService: PermissionService) {}
 
   validateField(fieldName: string): boolean {
     const value = this.data[fieldName as keyof Blog]?.toString().trim();
@@ -133,6 +139,20 @@ export class BlogAdminFormComponent {
   onSubmit() {
     if (this.validateForm()) {
       this.submit.emit(this.data);
+    }
+  }
+
+  canSubmit(): boolean {
+    // Admins bypass permission checks
+    const userRole = this.authService.getUserRole();
+    if (userRole === 'admin' || userRole === 'super_admin') {
+      return true;
+    }
+
+    if (this.isEditing) {
+      return this.permissionService.hasPermission('update', 'blogs');
+    } else {
+      return this.permissionService.hasPermission('create', 'blogs');
     }
   }
 

@@ -38,4 +38,13 @@ export class UsersregService {
     const encodedEmail = encodeURIComponent(email);
     return this.http.delete<any>(`${this.apiUrl}/email/${encodedEmail}`);
   }
+
+  // 👉 PATCH: Update user permissions by email
+  updateUserPermissions(email: string, permissionIds: string[]): Observable<any> {
+    const encodedEmail = encodeURIComponent(email);
+    return this.http.patch<any>(
+      `${this.apiUrl}/email/${encodedEmail}/permissions`,
+      { permissionIds }
+    );
+  }
 }

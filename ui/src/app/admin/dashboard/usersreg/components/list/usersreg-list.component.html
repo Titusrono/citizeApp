@@ -2,7 +2,12 @@
   <!-- Header -->
   <div class="header-section">
     <h1>User Registration Management</h1>
-    <button class="btn-add" (click)="openModal()">
+    <button 
+      *appHasPermission="{ action: 'create', resource: 'users' }"
+      class="btn-add" 
+      (click)="openModal()"
+      title="Create New User"
+    >
       + Add New User
     </button>
   </div>
@@ -46,6 +51,7 @@
           <th>Phone</th>
           <th>Sub-County</th>
           <th>Ward</th>
+          <th>Role</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -57,8 +63,35 @@
           <td>{{ user.subCounty }}</td>
           <td>{{ user.ward }}</td>
           <td>
-            <button class="btn-sm btn-edit" (click)="onEdit(user)">Edit</button>
-            <button class="btn-sm btn-delete" (click)="onDelete(user.email)">Delete</button>
+            <span class="role-badge" [ngClass]="'role-' + (user.role || 'citizen')">
+              {{ (user.role || 'citizen') | titlecase }}
+            </span>
+          </td>
+          <td>
+            <button 
+              *ngIf="isSuperAdmin() || permissionService.hasPermission('update', 'users')"
+              class="btn-sm btn-edit" 
+              (click)="onEdit(user)"
+              title="Edit User"
+            >
+              Edit
+            </button>
+            <button 
+              *ngIf="isSuperAdmin() || permissionService.hasPermission('manage', 'users')"
+              class="btn-sm btn-permissions" 
+              (click)="openPermissionsModal(user)"
+              title="Give Permissions"
+            >
+              Permissions
+            </button>
+            <button 
+              *ngIf="isSuperAdmin() || permissionService.hasPermission('delete', 'users')"
+              class="btn-sm btn-delete" 
+              (click)="onDelete(user.email)"
+              title="Delete User"
+            >
+              Delete
+            </button>
           </td>
         </tr>
       </tbody>
@@ -97,4 +130,123 @@
     (confirm)="onDeleteConfirmed()"
     (cancel)="onDeleteCancelled()"
   ></app-confirm-dialog>
+
+  <!-- Permissions Modal -->
+  <div *ngIf="showPermissionsModal" class="modal-overlay" (click)="closePermissionsModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Assign Permissions to <strong>{{ selectedUserForPermissions?.username }}</strong></h2>
+        <div class="permission-summary" *ngIf="allPermissions.length > 0">
+          <span class="current-count">{{ userPermissions.length }} of {{ allPermissions.length }} permissions assigned</span>
+        </div>
+        <button class="btn-close" (click)="closePermissionsModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Loading State -->
+        <div *ngIf="permissionsModalLoading" class="loading-container">
+          <div class="spinner"></div>
+          <p>Loading permissions...</p>
+        </div>
+
+        <!-- Error State -->
+        <div *ngIf="permissionsLoadingError && !permissionsModalLoading" class="error-message">
+          <p>{{ permissionsLoadingError }}</p>
+          <button class="btn-retry" (click)="loadAllPermissions()">Retry</button>
+        </div>
+
+        <!-- Permissions Content -->
+        <div *ngIf="!permissionsModalLoading && !permissionsLoadingError" class="permissions-container">
+          <div *ngIf="allPermissions.length === 0" class="no-permissions-message">
+            <p>No permissions available in the system.</p>
+          </div>
+
+          <!-- Select/Deselect All Buttons -->
+          <div *ngIf="allPermissions.length > 0" class="controls-section">
+            <div class="control-buttons">
+              <button 
+                class="btn-control btn-select-all"
+                (click)="selectAllPermissions()"
+                title="Select all permissions"
+              >
+                ✓ Select All
+              </button>
+              <button 
+                class="btn-control btn-deselect-all"
+                (click)="deselectAllPermissions()"
+                title="Deselect all permissions"
+              >
+                ✗ Deselect All
+              </button>
+            </div>
+            <div class="permission-stats">
+              <span class="stat-badge">{{ userPermissions.length }} of {{ allPermissions.length }} selected</span>
+            </div>
+          </div>
+
+          <!-- Display permissions organized by Section (Admin first, then Citizen) -->
+          <div *ngFor="let section of getUniqueSections()" class="section-container">
+            <!-- Section Header -->
+            <div class="section-header">
+              <h2 class="section-title">{{ getSectionLabel(section) }}</h2>
+              <span class="section-permission-count">{{ getUniqueResourcesForSection(section).length }} components</span>
+            </div>
+
+            <!-- Resources within Section -->
+            <div *ngFor="let resource of getUniqueResourcesForSection(section)" class="resource-section">
+              <div class="resource-header">
+                <div class="resource-title-group">
+                  <label class="resource-checkbox-label">
+                    <input
+                      type="checkbox"
+                      [checked]="isResourceFullySelected(resource)"
+                      [indeterminate]="isResourcePartiallySelected(resource)"
+                      (change)="toggleResourcePermissions(resource)"
+                      class="resource-checkbox"
+                    />
+                    <h3 class="resource-name">{{ resource | uppercase }}</h3>
+                  </label>
+                </div>
+                <span class="permission-count">{{ getPermissionsByResource(resource).length }} permissions</span>
+              </div>
+              <div class="permissions-horizontal">
+                <div *ngFor="let permission of getPermissionsByResource(resource)" class="permission-item-horizontal">
+                  <label class="checkbox-label-horizontal">
+                    <input
+                      type="checkbox"
+                      [checked]="isPermissionSelected(permission.id)"
+                      (change)="togglePermission(permission.id)"
+                      class="checkbox-input"
+                    />
+                    <span class="permission-badge">
+                      <span class="permission-action">{{ permission.action | titlecase }}</span>
+                      <span class="permission-desc" *ngIf="permission.description">{{ permission.description }}</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn-cancel"
+          (click)="closePermissionsModal()"
+          [disabled]="permissionsLoading || permissionsModalLoading"
+        >
+          Cancel
+        </button>
+        <button
+          class="btn-save"
+          (click)="saveUserPermissions()"
+          [disabled]="permissionsLoading || permissionsModalLoading || allPermissions.length === 0"
+        >
+          <span *ngIf="!permissionsLoading">Save Permissions</span>
+          <span *ngIf="permissionsLoading">Saving...</span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

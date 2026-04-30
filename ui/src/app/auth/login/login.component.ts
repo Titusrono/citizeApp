@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { AuthService } from '../../core/auth/auth.service';
+import { PermissionService } from '../../core/services/permission.service';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -22,6 +23,7 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private permissionService: PermissionService,
     private router: Router,
     private activatedRoute: ActivatedRoute
   ) {}
@@ -52,11 +54,26 @@ export class LoginComponent implements OnInit {
           this.successMessage = null;
         }, 3000); // auto dismiss success after 3s
 
+        // Load user permissions
+        const role = this.authService.getRole();
+        if (role) {
+          this.authService.getRolePermissions(role).subscribe({
+            next: (roleData: any) => {
+              if (roleData?.permissions) {
+                this.permissionService.setUserPermissions(roleData.permissions);
+              }
+            },
+            error: (err) => {
+              console.warn('Failed to load permissions:', err);
+              // Continue navigation even if permission loading fails
+            }
+          });
+        }
+
         // Redirect to returnUrl if provided, otherwise use role-based default navigation
         if (this.returnUrl) {
           this.router.navigateByUrl(this.returnUrl);
         } else {
-          const role = this.authService.getRole();
           if (role === 'admin' || role === 'super_admin') {
             this.router.navigate(['/dashboard/report-admin']);
           } else {

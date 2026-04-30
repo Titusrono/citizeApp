@@ -1,0 +1,100 @@
+<div class="permissions-management-container">
+  <!-- Header -->
+  <div class="header-section">
+    <h1>Permissions Management</h1>
+    <p class="subtitle">Assign permissions to roles in the system</p>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="alert alert-error">{{ errorMessage }}</div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <!-- Roles List -->
+  <div *ngIf="!loading" class="roles-grid">
+    <div *ngFor="let role of roles" class="role-card">
+      <div class="role-header">
+        <h2>{{ role.name }}</h2>
+        <span class="badge" [ngClass]="role.isActive ? 'badge-active' : 'badge-inactive'">
+          {{ role.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </div>
+
+      <p class="role-description">{{ role.description || 'No description' }}</p>
+
+      <div class="permissions-list">
+        <h3>Assigned Permissions ({{ role.permissions?.length || 0 }})</h3>
+        <div *ngIf="role.permissions && role.permissions.length > 0" class="permission-tags">
+          <span *ngFor="let permission of role.permissions" class="permission-tag">
+            {{ permission.action }}:{{ permission.resource }}
+          </span>
+        </div>
+        <div *ngIf="!role.permissions || role.permissions.length === 0" class="no-permissions">
+          No permissions assigned
+        </div>
+      </div>
+
+      <button
+        class="btn-assign"
+        (click)="openAssignModal(role)"
+        title="Assign Permissions to This Role"
+      >
+        Assign Permissions
+      </button>
+    </div>
+  </div>
+
+  <!-- Assign Modal -->
+  <div *ngIf="showAssignModal" class="modal-overlay" (click)="closeAssignModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Assign Permissions to <strong>{{ selectedRole?.name }}</strong></h2>
+        <button class="btn-close" (click)="closeAssignModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngFor="let resource of getUniqueResources()" class="resource-section">
+          <h3 class="resource-name">{{ resource | uppercase }}</h3>
+          <div class="permissions-grid">
+            <div *ngFor="let permission of getPermissionsByResource(resource)" class="permission-item">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="isPermissionSelected(permission.id)"
+                  (change)="togglePermission(permission.id)"
+                  class="checkbox-input"
+                />
+                <span class="checkbox-text">
+                  {{ permission.action }} - {{ permission.description || permission.name }}
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn-cancel"
+          (click)="closeAssignModal()"
+          [disabled]="loading"
+        >
+          Cancel
+        </button>
+        <button
+          class="btn-save"
+          (click)="assignPermissions()"
+          [disabled]="loading"
+        >
+          <span *ngIf="!loading">Save Permissions</span>
+          <span *ngIf="loading">Saving...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

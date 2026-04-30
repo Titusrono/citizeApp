@@ -15,7 +15,7 @@ export class LocationService {
     { name: 'Kajiado Central', wards: ['Kitengela', 'Magadi', 'Ngong', 'Isinya', 'Oibor'] },
     { name: 'Kajiado East', wards: ['Imaroro', 'Oloolua', 'Oltepesi', 'Ongata Rongai'] },
     { name: 'Kajiado South', wards: ['Loitokitok', 'Kimana', 'Amboseli', 'Entonet'] },
-    { name: 'Kajiado West', wards: ['Kajiado', 'Daraja Mbili', 'Oloosirkon', 'Shompole'] },
+    { name: 'Kajiado West', wards: ['Kajiado', 'Daraja Mbili', 'Oloosirkon', 'Shompole', 'Ewaso'] },
   ];
 
   constructor() {}

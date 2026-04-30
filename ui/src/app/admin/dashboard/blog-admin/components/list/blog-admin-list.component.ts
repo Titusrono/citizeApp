@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { Blog, BlogsService } from '../../services/blogs.service';
 import { BlogAdminFormComponent } from '../form/blog-admin-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components';
+import { PermissionService } from '../../../../../core/services/permission.service';
+import { HasPermissionDirective } from '../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-blog-admin-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, BlogAdminFormComponent, ConfirmDialogComponent],
+  imports: [CommonModule, FormsModule, BlogAdminFormComponent, ConfirmDialogComponent, HasPermissionDirective],
   templateUrl: './blog-admin-list.component.html',
   styleUrls: ['./blog-admin-list.component.scss']
 })
@@ -42,7 +44,10 @@ export class BlogAdminListComponent implements OnInit {
     'Public Safety',
   ];
 
-  constructor(private blogsService: BlogsService) {}
+  constructor(
+    private blogsService: BlogsService,
+    public permissionService: PermissionService
+  ) {}
 
   ngOnInit() {
     this.fetchBlogs();

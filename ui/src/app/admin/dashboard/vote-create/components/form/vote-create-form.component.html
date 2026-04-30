@@ -228,7 +228,9 @@
         </button>
         <button
           type="submit"
-          [disabled]="isSubmitting"
+          *appHasPermission="{ action: isEditing ? 'update' : 'create', resource: 'votes' }"
+          [disabled]="isSubmitting || !canSubmit()"
+          [title]="!canSubmit() ? 'You do not have permission to ' + (isEditing ? 'update' : 'create') + ' votes' : ''"
           class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md text-sm disabled:opacity-60 disabled:cursor-not-allowed transition-all dark:bg-blue-700 dark:hover:bg-blue-800"
         >
           {{ isSubmitting ? 'Creating...' : 'Create Proposal' }}

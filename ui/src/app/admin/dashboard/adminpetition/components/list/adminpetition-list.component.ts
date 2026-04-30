@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { PetitionService } from '../../services/petition.service';
 import { AdminPetitionFormComponent } from '../form/adminpetition-form.component';
 import { ConfirmDialogComponent, ViewModalComponent } from '../../../../../shared/components';
+import { PermissionService } from '../../../../../core/services/permission.service';
+import { HasPermissionDirective } from '../../../../../shared/directives/has-permission.directive';
 
 // Type for error responses
 declare type ErrorResponse = { error?: { message?: string } };
@@ -16,7 +18,8 @@ declare type ErrorResponse = { error?: { message?: string } };
     FormsModule,
     AdminPetitionFormComponent,
     ConfirmDialogComponent,
-    ViewModalComponent
+    ViewModalComponent,
+    HasPermissionDirective
   ],
   templateUrl: './adminpetition-list.component.html',
   styleUrls: ['./adminpetition-list.component.scss']
@@ -61,7 +64,7 @@ export class AdminPetitionListComponent implements OnInit {
 
   authorityStats: { authority: string; count: number; percentage: number }[] = [];
 
-  constructor(private petitionService: PetitionService) {}
+  constructor(private petitionService: PetitionService, public permissionService: PermissionService) {}
 
   ngOnInit(): void {
     this.fetchPetitions();

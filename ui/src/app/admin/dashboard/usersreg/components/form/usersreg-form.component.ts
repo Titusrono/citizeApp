@@ -2,6 +2,8 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LocationService } from '../../../../../shared/services/location.service';
+import { PermissionService } from '../../../../../core/services/permission.service';
+import { AuthService } from '../../../../../core/auth/auth.service';
 
 interface FormErrors {
   email?: string;
@@ -9,6 +11,7 @@ interface FormErrors {
   phone_no?: string;
   subCounty?: string;
   ward?: string;
+  role?: string;
 }
 
 @Component({
@@ -25,7 +28,8 @@ export class UsersregFormComponent implements OnInit {
     username: '',
     phone_no: '',
     subCounty: '',
-    ward: ''
+    ward: '',
+    role: 'citizen'
   };
   @Input() isEditing = false;
   @Input() successMessage = '';
@@ -41,8 +45,19 @@ export class UsersregFormComponent implements OnInit {
 
   subCounties: string[] = [];
   wardsBySubCounty: { [key: string]: string[] } = {};
+  userRoles: { value: string; label: string }[] = [
+    { value: 'citizen', label: 'Citizen' },
+    { value: 'ward_manager', label: 'Ward Manager' },
+    { value: 'constituency_manager', label: 'Constituency Manager' },
+    { value: 'admin', label: 'Admin' },
+    { value: 'super_admin', label: 'Super Admin' }
+  ];
 
-  constructor(private locationService: LocationService) {}
+  constructor(
+    private locationService: LocationService,
+    public permissionService: PermissionService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.initializeLocations();
@@ -105,13 +120,19 @@ export class UsersregFormComponent implements OnInit {
           this.errors.ward = 'Ward is required';
         }
         break;
+
+      case 'role':
+        if (!this.data.role) {
+          this.errors.role = 'Role is required';
+        }
+        break;
     }
 
     return !this.errors[fieldName as keyof FormErrors];
   }
 
   validateForm(): boolean {
-    const fields = ['email', 'username', 'phone_no', 'subCounty', 'ward'];
+    const fields = ['email', 'username', 'phone_no', 'subCounty', 'ward', 'role'];
     let isValid = true;
     fields.forEach(field => {
       if (!this.validateField(field)) {
@@ -137,6 +158,21 @@ export class UsersregFormComponent implements OnInit {
   onSubmit(): void {
     if (this.validateForm()) {
       this.submit.emit(this.data);
+    }
+  }
+
+  canSubmit(): boolean {
+    // Super Admin can always submit
+    const userRole = this.authService.getUserRole();
+    if (userRole === 'super_admin' || userRole === 'Super Admin') {
+      return true;
+    }
+
+    // Check specific permissions for other roles
+    if (this.isEditing) {
+      return this.permissionService.hasPermission('update', 'users');
+    } else {
+      return this.permissionService.hasPermission('create', 'users');
     }
   }
 

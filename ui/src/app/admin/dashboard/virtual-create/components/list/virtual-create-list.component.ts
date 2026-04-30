@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { VirtualMeet, VirtualService } from '../../services/virtual.service';
 import { VirtualCreateFormComponent } from '../form/virtual-create-form.component';
 import { ConfirmDialogComponent } from '../../../../../shared/components';
+import { HasPermissionDirective } from '../../../../../shared/directives/has-permission.directive';
 
 @Component({
   selector: 'app-virtual-create-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, VirtualCreateFormComponent, ConfirmDialogComponent],
+  imports: [CommonModule, FormsModule, VirtualCreateFormComponent, ConfirmDialogComponent, HasPermissionDirective],
   templateUrl: './virtual-create-list.component.html',
   styleUrls: ['./virtual-create-list.component.scss']
 })

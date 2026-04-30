@@ -46,6 +46,12 @@ export class User {
   @Column({ nullable: true })
   auth_token: string;
 
+  @Column({ type: 'array', nullable: true })
+  permissionIds: string[] = [];
+
+  @Column({ type: 'array', nullable: true })
+  permissionNames: string[] = [];
+
   @OneToMany(() => Issue, (issue: Issue) => issue.user, { cascade: true })
   issues: Issue[];
 
