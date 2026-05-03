@@ -75,7 +75,19 @@ export class UsersregListComponent implements OnInit {
   fetchUsers(): void {
     this.usersregService.getAllUsers().subscribe({
       next: (data: any[]) => {
-        this.itemsList = data;
+        // Sort by createdAt descending (newest first - most recent at top)
+        const sorted = [...data].sort((a, b) => {
+          const getTime = (date: any) => {
+            if (!date) return 0;
+            const parsed = new Date(date);
+            return isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+          };
+          
+          const dateA = getTime(a.createdAt);
+          const dateB = getTime(b.createdAt);
+          return dateB - dateA; // Descending: newest first
+        });
+        this.itemsList = sorted;
         this.calculateSubCountyStats();
       },
       error: (err: any) => {

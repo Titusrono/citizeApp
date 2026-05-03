@@ -35,6 +35,7 @@
           <th>Description</th>
           <th>Location</th>
           <th>Category</th>
+          <th>Date</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -44,6 +45,9 @@
           <td>{{ item.description | slice:0:50 }}...</td>
           <td>{{ item.location }}</td>
           <td><span class="category-badge">{{ item.category }}</span></td>
+          <td>
+            <span class="date-badge">{{ getFormattedDate(item) }}</span>
+          </td>
           <td>
             <span class="status-badge" [class.status-approved]="item.approved" [class.status-pending]="!item.approved">
               {{ item.approved ? 'Approved' : 'Pending' }}

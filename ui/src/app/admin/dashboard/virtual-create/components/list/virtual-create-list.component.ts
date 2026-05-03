@@ -104,9 +104,20 @@ export class VirtualCreateListComponent implements OnInit, AfterViewInit {
             default:
               return true;
           }
+        }).sort((a, b) => {
+          // Sort by createdAt descending (newest first - most recent at top)
+          const getTime = (date: any) => {
+            if (!date) return 0;
+            const parsed = new Date(date);
+            return isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+          };
+          
+          const dateA = getTime((a as any).createdAt || a.date);
+          const dateB = getTime((b as any).createdAt || b.date);
+          return dateB - dateA; // Descending: newest first
         });
         
-        console.log('[VirtualCreateList] Items after filter:', this.items.length);
+        console.log('[VirtualCreateList] Items after filter and sort:', this.items.length);
       },
       error: () => {
         this.errorMessage = 'Failed to load meetings.';

@@ -91,7 +91,19 @@ export class VoteCreateListComponent implements OnInit {
     this.voteService.getAllVotes().subscribe({
       next: (data: any[]) => {
         console.log('[VoteCreateList] Proposals loaded:', data.length);
-        this.proposals = data || [];
+        // Sort by createdAt descending (newest first - most recent at top)
+        const sorted = (data || []).sort((a, b) => {
+          const getTime = (date: any) => {
+            if (!date) return 0;
+            const parsed = new Date(date);
+            return isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+          };
+          
+          const dateA = getTime(a.createdAt);
+          const dateB = getTime(b.createdAt);
+          return dateB - dateA; // Descending: newest first
+        });
+        this.proposals = sorted;
       },
       error: (err: any) => {
         console.error('[VoteCreateList] Error fetching proposals:', err);

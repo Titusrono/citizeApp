@@ -83,7 +83,20 @@ export class AdminPetitionListComponent implements OnInit {
   fetchPetitions(): void {
     this.petitionService.getAllPetitions().subscribe({
       next: (data: any[]) => {
-        this.items = data.map((petition: any) => ({
+        // Sort by createdAt descending (newest first)
+        const sorted = [...data].sort((a, b) => {
+          const getTime = (date: any) => {
+            if (!date) return 0;
+            const parsed = new Date(date);
+            return isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+          };
+          
+          const dateA = getTime(a.createdAt || a.date);
+          const dateB = getTime(b.createdAt || b.date);
+          return dateB - dateA; // Descending: newest first
+        });
+        
+        this.items = sorted.map((petition: any) => ({
           ...petition,
           createdBy: petition.createdBy || {
             username: 'Unknown',
@@ -302,5 +315,53 @@ export class AdminPetitionListComponent implements OnInit {
 
   filterByAuthority(authority: string): void {
     this.selectedAuthority = authority;
+  }
+
+  getFormattedDate(item: any): string {
+    try {
+      // Log for debugging
+      console.log('[AdminPetitionList] Formatting date for item:', {
+        title: item.title?.substring(0, 30),
+        createdAt: item.createdAt,
+        created_at: item.created_at,
+        date: item.date,
+        timestamp: item.timestamp,
+        updatedAt: item.updatedAt,
+        allKeys: Object.keys(item)
+      });
+
+      // Try multiple possible date field names
+      let dateValue = item.createdAt || item.created_at || item.date || item.timestamp || item.updatedAt;
+      
+      if (!dateValue) {
+        console.warn('[AdminPetitionList] No date field found in item:', item);
+        return 'N/A';
+      }
+      
+      // Parse the date
+      const date = new Date(dateValue);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.warn('[AdminPetitionList] Invalid date value:', dateValue);
+        return 'N/A';
+      }
+      
+      // Format as MM/DD/YY, HH:MM
+      const formatted = date.toLocaleDateString('en-US', { 
+        month: '2-digit', 
+        day: '2-digit', 
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      
+      console.log('[AdminPetitionList] Formatted date:', formatted);
+      return formatted;
+    } catch (error) {
+      console.error('[AdminPetitionList] Error formatting date:', error, item);
+      return 'N/A';
+    }
   }
 }

@@ -30,13 +30,22 @@ export class IssuesService {
     const issue = this.issuesRepository.create({
       ...createIssueDto,
       user,
-      userId: userIdString // Store userId as string for easier querying
+      userId: userIdString, // Store userId as string for easier querying
+      createdAt: new Date(), // Explicitly set the current date when issue is reported
+      updatedAt: new Date()  // Set updatedAt as well
     });
     return this.issuesRepository.save(issue);
   }
 
   async findAll() {
-    return this.issuesRepository.find({ relations: ['user'] });
+    const results = await this.issuesRepository.find({ relations: ['user'] });
+    
+    // Ensure all results have timestamps - for existing records without them
+    return results.map(issue => ({
+      ...issue,
+      createdAt: issue.createdAt || new Date(),
+      updatedAt: issue.updatedAt || new Date()
+    }));
   }
 
   // Find issues by filters (userId and/or approved status)
@@ -62,11 +71,22 @@ export class IssuesService {
     });
     
     console.log('findByFilters - results count:', results.length);
-    if (results.length > 0) {
-      console.log('findByFilters - first result userId:', results[0].userId);
+    
+    // Ensure all results have timestamps - for existing records without them
+    const resultsWithTimestamps = results.map(issue => ({
+      ...issue,
+      createdAt: issue.createdAt || new Date(),
+      updatedAt: issue.updatedAt || new Date()
+    }));
+    
+    if (resultsWithTimestamps.length > 0) {
+      console.log('findByFilters - first result:', JSON.stringify(resultsWithTimestamps[0], null, 2));
+      console.log('findByFilters - first result createdAt:', resultsWithTimestamps[0].createdAt);
+      console.log('findByFilters - first result userId:', resultsWithTimestamps[0].userId);
+      console.log('findByFilters - all keys in first result:', Object.keys(resultsWithTimestamps[0]));
     }
     
-    return results;
+    return resultsWithTimestamps;
   }
 
   async findOne(id: string) {
@@ -81,10 +101,13 @@ export class IssuesService {
   async approve(id: string) {
     const objectId = this.convertToObjectId(id);
     
-    // Update the issue to mark it as approved
+    // Update the issue to mark it as approved and update the timestamp
     const result = await this.issuesRepository.update(
       { id: objectId },
-      { approved: true }
+      { 
+        approved: true,
+        updatedAt: new Date() // Update the timestamp when approved
+      }
     );
     
     if (result.affected === 0) {

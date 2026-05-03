@@ -26,6 +26,11 @@ export class IssuesController {
     const isApproved = approved === 'true' ? true : approved === 'false' ? false : undefined;
     const results = await this.issuesService.findByFilters(userId, isApproved);
     console.log('Issues Controller - GET - results returned:', results.length);
+    if (results.length > 0) {
+      console.log('Issues Controller - First result:', JSON.stringify(results[0], null, 2));
+      console.log('Issues Controller - createdAt in first result:', results[0].createdAt);
+      console.log('Issues Controller - Keys in first result:', Object.keys(results[0]));
+    }
     return results;
   }
 

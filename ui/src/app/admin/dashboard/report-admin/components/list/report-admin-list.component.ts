@@ -57,12 +57,39 @@ export class ReportAdminListComponent implements OnInit {
       next: (data: any[]) => {
         console.log('Fetched reports:', data);
         console.log('First report structure:', data[0]);
-        // Sort by createdAt descending (newest first)
-        this.items = data.sort((a, b) => {
-          const dateA = new Date(a.createdAt || 0).getTime();
-          const dateB = new Date(b.createdAt || 0).getTime();
-          return dateB - dateA;
+        console.log('First report keys:', data[0] ? Object.keys(data[0]) : 'no data');
+        
+        // Sort by createdAt descending (newest first - most recent at top)
+        const sorted = [...data].sort((a, b) => {
+          const getTime = (obj: any) => {
+            // Try multiple possible date field names
+            const dateValue = obj.createdAt || obj.created_at || obj.date || obj.timestamp || obj.reportDate || obj.updatedAt || obj.updated_at;
+            
+            if (!dateValue) {
+              console.warn('No date field found in object:', obj);
+              return 0;
+            }
+            
+            const parsed = new Date(dateValue);
+            const time = parsed.getTime();
+            
+            if (isNaN(time)) {
+              console.warn('Invalid date:', dateValue, 'Parsed:', parsed);
+              return 0;
+            }
+            
+            return time;
+          };
+          
+          const dateA = getTime(a);
+          const dateB = getTime(b);
+          console.log('Comparing:', { a: a.description?.substring(0, 30), dateA, b: b.description?.substring(0, 30), dateB });
+          return dateB - dateA; // Descending: newest first
         });
+        
+        console.log('Sorted order:', sorted.map(r => ({ desc: r.description?.substring(0, 30), date: r.createdAt || r.created_at || r.date })));
+        
+        this.items = sorted;
         this.availableCategories = [...new Set(data.map(report => report.category).filter(Boolean))];
         this.computeCategoryStats();
       },
@@ -207,5 +234,54 @@ export class ReportAdminListComponent implements OnInit {
     this.isEditing = false;
     this.editingReport = null;
     this.errorMessage = '';
+  }
+
+  getFormattedDate(item: any): string {
+    try {
+      // Log for debugging
+      console.log('[ReportAdmin] Formatting date for item:', {
+        description: item.description?.substring(0, 30),
+        createdAt: item.createdAt,
+        created_at: item.created_at,
+        date: item.date,
+        timestamp: item.timestamp,
+        reportDate: item.reportDate,
+        updatedAt: item.updatedAt,
+        allKeys: Object.keys(item)
+      });
+
+      // Try multiple possible date field names
+      let dateValue = item.createdAt || item.created_at || item.date || item.timestamp || item.reportDate || item.updatedAt;
+      
+      if (!dateValue) {
+        console.warn('[ReportAdmin] No date field found in item:', item);
+        return 'N/A';
+      }
+      
+      // Parse the date
+      const date = new Date(dateValue);
+      
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.warn('[ReportAdmin] Invalid date value:', dateValue);
+        return 'N/A';
+      }
+      
+      // Format as MM/DD/YY, HH:MM
+      const formatted = date.toLocaleDateString('en-US', { 
+        month: '2-digit', 
+        day: '2-digit', 
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+      
+      console.log('[ReportAdmin] Formatted date:', formatted);
+      return formatted;
+    } catch (error) {
+      console.error('[ReportAdmin] Error formatting date:', error, item);
+      return 'N/A';
+    }
   }
 }

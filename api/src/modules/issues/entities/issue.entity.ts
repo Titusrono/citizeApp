@@ -1,4 +1,4 @@
-import { Entity, ObjectIdColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, ObjectIdColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { ObjectId } from 'mongodb';
 
@@ -31,6 +31,9 @@ export class Issue {
   @Column({ type: 'boolean', default: false })
   approved?: boolean;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt?: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt?: Date;
 }

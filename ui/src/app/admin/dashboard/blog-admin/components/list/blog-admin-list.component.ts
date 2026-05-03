@@ -66,7 +66,19 @@ export class BlogAdminListComponent implements OnInit {
   fetchBlogs() {
     this.blogsService.getBlogs().subscribe({
       next: (data: Blog[]) => {
-        this.items = data;
+        // Sort by createdAt or date descending (newest first - most recent at top)
+        const sorted = [...data].sort((a, b) => {
+          const getTime = (date: any) => {
+            if (!date) return 0;
+            const parsed = new Date(date);
+            return isNaN(parsed.getTime()) ? 0 : parsed.getTime();
+          };
+          
+          const dateA = getTime((a as any).createdAt || a.date);
+          const dateB = getTime((b as any).createdAt || b.date);
+          return dateB - dateA; // Descending: newest first
+        });
+        this.items = sorted;
       },
       error: () => {
         this.errorMessage = 'Failed to load blogs.';

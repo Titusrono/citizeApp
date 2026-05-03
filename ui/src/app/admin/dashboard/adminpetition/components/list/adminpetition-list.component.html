@@ -39,6 +39,7 @@
         <tr>
           <th>Title</th>
           <th>Target Authority</th>
+          <th>Date</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -47,6 +48,9 @@
         <tr *ngFor="let item of items">
           <td>{{ item.title }}</td>
           <td>{{ item.targetAuthority }}</td>
+          <td>
+            <span class="date-badge">{{ getFormattedDate(item) }}</span>
+          </td>
           <td>
             <div class="flex flex-col gap-1">
               <span class="status-badge" [ngClass]="'status-' + item.status">{{ item.status }}</span>
