@@ -104,8 +104,15 @@ export class UsersregFormComponent implements OnInit {
       case 'phone_no':
         if (!value) {
           this.errors.phone_no = 'Phone number is required';
-        } else if (!/^\+?[\d\s\-()]+$/.test(value) || value.replace(/\D/g, '').length < 10) {
-          this.errors.phone_no = 'Please enter a valid phone number';
+        } else {
+          // Accept both local (07XXXXXXXXX) and international (+254XXXXXXXXX) formats
+          const cleanedNumber = value.replace(/[\s\-]/g, '');
+          const isValidLocal = /^0[0-9]{9}$/.test(cleanedNumber); // 07XXXXXXXXX
+          const isValidIntl = /^\+254[0-9]{9}$/.test(cleanedNumber); // +254XXXXXXXXX
+          
+          if (!isValidLocal && !isValidIntl) {
+            this.errors.phone_no = 'Please enter a valid phone number (07XXXXXXXXX or +254XXXXXXXXX)';
+          }
         }
         break;
 

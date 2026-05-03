@@ -50,25 +50,8 @@ export class AuthController {
         permissionCount: fullUser.permissionIds?.length || 0
       });
 
-      // Auto-assign permissions if user is admin/super_admin and has none
-      if ((!fullUser.permissionIds || fullUser.permissionIds.length === 0) && 
-          ['admin', 'super_admin'].includes(fullUser.role)) {
-        console.log(`🔐 [Auth] User ${fullUser.email} (${fullUser.role}) has no permissions. Auto-assigning...`);
-        
-        try {
-          const defaultPermissionIds = await this.permissionsService.getDefaultPermissionsForRole(fullUser.role);
-          const defaultPermissionNames = await this.permissionsService.getDefaultPermissionNamesForRole(fullUser.role);
-          console.log(`✅ [Auth] Auto-assigned ${defaultPermissionIds.length} permissions to ${fullUser.email}`);
-          
-          // Update user with permissions
-          await this.usersService.updateUserPermissions(userId, defaultPermissionIds);
-          fullUser.permissionIds = defaultPermissionIds;
-          fullUser.permissionNames = defaultPermissionNames;
-        } catch (err) {
-          console.error('❌ [Auth] Failed to auto-assign permissions:', err instanceof Error ? err.message : String(err));
-          // Continue anyway - user can proceed without permissions
-        }
-      }
+      console.log('✅ [Auth] Permissions are based on individual assignments (modal), not role. User has', 
+        fullUser.permissionIds?.length || 0, 'permissions assigned.');
 
       return fullUser;
     } catch (err) {

@@ -31,20 +31,15 @@ export class AuthService {
       const userRole = (data.role as UserRole) || UserRole.CITIZEN;
       console.log(`🔑 [AUTH] User role: ${userRole}`);
 
-      // Get default permissions for role
-      console.log(`🔒 [AUTH] Fetching default permissions for role: ${userRole}`);
-      let defaultPermissionIds: string[] = [];
-      let defaultPermissionNames: string[] = [];
-      try {
-        defaultPermissionIds = await this.permissionsService.getDefaultPermissionsForRole(userRole);
-        defaultPermissionNames = await this.permissionsService.getDefaultPermissionNamesForRole(userRole);
-        console.log(`🔒 [AUTH] Received ${defaultPermissionIds.length} permission IDs and ${defaultPermissionNames.length} names`);
-      } catch (permErr) {
-        console.error(`❌ [AUTH] ERROR getting default permissions:`, permErr.message);
-        console.warn(`⚠️ [AUTH] Continuing without permissions`);
-      }
+      // NOTE: Permissions are NO LONGER assigned based on role
+      // Permissions are assigned individually through the admin permissions modal
+      // New users start with NO permissions until admin assigns them
+      console.log(`🔒 [AUTH] Permissions will be assigned individually via permissions modal (not role-based)`);
+      
+      const defaultPermissionIds: string[] = [];
+      const defaultPermissionNames: string[] = [];
 
-      // Create user with default permissions
+      // Create user with NO default permissions
       const userData = {
         ...data,
         password: hashedPassword,

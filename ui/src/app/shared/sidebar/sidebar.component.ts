@@ -216,40 +216,84 @@ export class SidebarComponent implements OnInit {
   }
 
   hasCitizenAccess(): boolean {
-    const hasCitizen = ['citizen', 'admin', 'super_admin'].includes(this.userRole);
-    console.log('🔐 [SIDEBAR] hasCitizenAccess:', { userRole: this.userRole, result: hasCitizen });
-    return hasCitizen;
+    // Check if user has ANY citizen permissions OR is an admin role
+    const userPermissions = this.permissionService.getUserPermissions();
+    const citizenPermissions = ['view:issues', 'view:petitions', 'view:votes', 'view:townhalls', 'view:blogs'];
+    const hasCitizenPermissions = userPermissions.some(p => 
+      citizenPermissions.includes(`${p.action}:${p.resource}`)
+    );
+    
+    // Also grant if role explicitly allows it
+    const hasCitizenRole = ['citizen', 'admin', 'super_admin', 'ward_manager', 'constituency_manager'].includes(this.userRole);
+    
+    const result = hasCitizenPermissions || hasCitizenRole;
+    console.log('🔐 [SIDEBAR] hasCitizenAccess:', { 
+      userRole: this.userRole, 
+      hasCitizenPermissions, 
+      hasCitizenRole,
+      result 
+    });
+    return result;
   }
 
   hasAdminAccess(): boolean {
-    const hasAdmin = ['admin', 'super_admin'].includes(this.userRole);
-    console.log('🔐 [SIDEBAR] hasAdminAccess:', { userRole: this.userRole, result: hasAdmin });
-    return hasAdmin;
+    // Check if user has ANY admin permissions (permission-based, not role-based)
+    const userPermissions = this.permissionService.getUserPermissions();
+    const adminActions = ['create', 'read', 'update', 'delete', 'manage', 'approve', 'publish'];
+    const hasAdminPermissions = userPermissions.some(p => 
+      adminActions.includes(p.action)
+    );
+    
+    // Also grant if role is admin/super_admin
+    const hasAdminRole = ['admin', 'super_admin', 'ward_manager', 'constituency_manager'].includes(this.userRole);
+    
+    const result = hasAdminPermissions || hasAdminRole;
+    console.log('🔐 [SIDEBAR] hasAdminAccess:', { 
+      userRole: this.userRole, 
+      hasAdminPermissions, 
+      hasAdminRole,
+      result 
+    });
+    return result;
   }
 
+  /**
+   * Get citizen items based on permissions ONLY (not role)
+   * Any user with the right permissions will see these items
+   */
   getCitizenItems() {
     const items = this.navigationItems.filter(item => 
       item.section === 'citizen' && 
-      item.allowedRoles.includes(this.userRole) &&
       this.hasRequiredPermissions(item.requiredPermissions)
     );
-    console.log('📋 [SIDEBAR] getCitizenItems returned:', items.length, 'items');
+    console.log('📋 [SIDEBAR] getCitizenItems returned:', items.length, 'items (permission-based, not role-based)');
     return items;
   }
 
+  /**
+   * Get admin items based on permissions ONLY (not role)
+   * Any user with the right permissions will see these items
+   * Ward Manager, Constituency Manager, or any role can access if they have permissions
+   */
   getAdminItems() {
     const items = this.navigationItems.filter(item => 
       item.section === 'admin' && 
-      item.allowedRoles.includes(this.userRole) &&
       this.hasRequiredPermissions(item.requiredPermissions)
     );
-    console.log('📋 [SIDEBAR] getAdminItems returned:', items.length, 'items');
+    console.log('📋 [SIDEBAR] getAdminItems returned:', items.length, 'items (permission-based, not role-based)');
     return items;
   }
 
   /**
    * Check if user has ALL required permissions
-   * Returns true if user is Super Admin (bypass) or has all required permissions
+   * 
+   * PERMISSION-BASED SYSTEM (NOT ROLE-BASED):
+   * - Ward Manager can see admin items if they have the required permissions
+   * - Constituency Manager can see admin items if they have the required permissions
+   * - Citizen can see admin items if they have the required permissions
+   * - Super Admin has access to everything (bypass)
+   * 
+   * Sidebar items are shown based purely on assigned permissions, not role
    */
   hasRequiredPermissions(requiredPermissions: string[]): boolean {
     // Super Admin has access to everything
@@ -264,23 +308,23 @@ export class SidebarComponent implements OnInit {
       return true;
     }
 
-    // Check if user has all required permissions
+    // Check if user has ALL required permissions (PRIMARY CHECK - PERMISSION-BASED)
     const userPermissions = this.permissionService.getUserPermissions();
     const userPermissionStrings = userPermissions.map(p => `${p.action}:${p.resource}`);
     
-    console.log('📋 [SIDEBAR] Checking permissions:', {
-      role: this.userRole,
-      required: requiredPermissions,
-      userHas: userPermissionStrings,
-      count: { required: requiredPermissions.length, user: userPermissionStrings.length }
-    });
-
-    const hasAllPermissions = requiredPermissions.every(requiredPerm =>
-      userPermissionStrings.includes(requiredPerm)
-    );
+    const missingPermissions = requiredPermissions.filter(req => !userPermissionStrings.includes(req));
     
-    console.log(hasAllPermissions ? '✅ [SIDEBAR] Has all required permissions' : '❌ [SIDEBAR] Missing some permissions');
-    
-    return hasAllPermissions;
+    if (missingPermissions.length === 0) {
+      console.log('✅ [SIDEBAR] User has all required permissions:', requiredPermissions);
+      return true;
+    } else {
+      console.log('❌ [SIDEBAR] Missing permissions:', {
+        role: this.userRole,
+        required: requiredPermissions,
+        userHas: userPermissionStrings,
+        missing: missingPermissions
+      });
+      return false;
+    }
   }
 }

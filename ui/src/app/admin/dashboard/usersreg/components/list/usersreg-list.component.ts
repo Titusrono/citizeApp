@@ -165,11 +165,51 @@ export class UsersregListComponent implements OnInit {
     };
 
     console.log('📝 Updating user with clean payload:', updatePayload);
+    
+    // Check if role is being changed
+    const roleChanged = this.editingUser.role !== this.currentData.role;
+    const currentUserEmail = this.authService.getUserEmail();
+    const isCurrentUser = currentUserEmail === this.editingUser.email;
 
     this.usersregService.updateUser(this.editingUser.email, updatePayload).subscribe({
-      next: () => {
+      next: (updatedUser: any) => {
         this.successMessage = 'User updated successfully!';
         this.errorMessage = '';
+        
+        // If this is the current user and role changed, refresh permissions from backend
+        if (isCurrentUser && roleChanged) {
+          console.log('🔄 [UPDATE-USER] Current user role changed from', this.editingUser.role, 'to', this.currentData.role);
+          console.log('🔄 [UPDATE-USER] Fetching updated permissions for current user...');
+          
+          // Fetch the updated user to get their new permissions
+          this.usersregService.getUserByEmail(currentUserEmail!).subscribe({
+            next: (user: any) => {
+              console.log('✅ [UPDATE-USER] Got updated user:', {
+                email: user.email,
+                role: user.role,
+                permissionIds: user.permissionIds?.length || 0
+              });
+              
+              if (user.permissionIds && user.permissionIds.length > 0) {
+                console.log('📡 [UPDATE-USER] Fetching full permission objects for current user...');
+                this.permissionService.getPermissionsByIds(user.permissionIds).subscribe({
+                  next: (permissions: any[]) => {
+                    console.log('✅ [UPDATE-USER] Updated permissions loaded:', permissions.map(p => `${p.action}:${p.resource}`));
+                    this.permissionService.setUserPermissions(permissions);
+                    console.log('✅ [UPDATE-USER] Sidebar will now update with new permissions');
+                  },
+                  error: (err) => {
+                    console.error('❌ [UPDATE-USER] Failed to load permissions:', err);
+                  }
+                });
+              }
+            },
+            error: (err) => {
+              console.error('❌ [UPDATE-USER] Failed to fetch updated user:', err);
+            }
+          });
+        }
+        
         this.editingUser = null;
         this.isEditing = false;
         this.closeModal();
@@ -396,6 +436,35 @@ export class UsersregListComponent implements OnInit {
         console.log('✅ Permissions saved successfully:', updatedUser);
         this.successMessage = `Permissions assigned to ${this.selectedUserForPermissions.username} successfully!`;
         this.permissionsLoading = false;
+        
+        // Check if the current user's permissions were updated
+        const currentUserEmail = this.authService.getUserEmail();
+        if (currentUserEmail === this.selectedUserForPermissions.email) {
+          console.log('🔄 [PERMISSIONS-MODAL] Current user permissions updated - refreshing sidebar immediately...');
+          
+          // Get full permission objects for the updated permissions
+          const permissionIds = this.userPermissions;
+          
+          if (permissionIds && permissionIds.length > 0) {
+            console.log('📡 [PERMISSIONS-MODAL] Fetching full permission objects for IDs:', permissionIds);
+            this.permissionService.getPermissionsByIds(permissionIds).subscribe({
+              next: (permissions: any[]) => {
+                console.log('✅ [PERMISSIONS-MODAL] Updated permissions loaded for current user:', permissions.map(p => `${p.action}:${p.resource}`));
+                this.permissionService.setUserPermissions(permissions);
+                console.log('✅ [PERMISSIONS-MODAL] Permissions updated in service - sidebar should now show new items');
+              },
+              error: (err) => {
+                console.error('❌ [PERMISSIONS-MODAL] Failed to refresh permissions for current user:', err);
+                // Fallback: show message and ask user to refresh
+                this.errorMessage = 'Permissions saved but please refresh the page to see changes';
+              }
+            });
+          } else {
+            console.log('⚠️ [PERMISSIONS-MODAL] No permissions to set - clearing sidebar');
+            this.permissionService.setUserPermissions([]);
+          }
+        }
+        
         this.closePermissionsModal();
         this.fetchUsers();
         setTimeout(() => this.successMessage = '', 3000);

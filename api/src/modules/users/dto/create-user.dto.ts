@@ -9,7 +9,7 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  @Matches(/^\+?[1-9]\d{1,14}$/, { message: 'Phone number must be a valid E.164 format' })
+  @Matches(/^(0[0-9]{9}|\+254[0-9]{9})$/, { message: 'Phone number must be in format 07XXXXXXXXX or +254XXXXXXXXX' })
   phone_no: string;
 
   @IsEmail()

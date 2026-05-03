@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PermissionsService } from '../permissions/permissions.service';
 import { ObjectId } from 'mongodb';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private permissionsService: PermissionsService,
   ) {}
 
   private isValidObjectId(id: string): boolean {
@@ -78,6 +80,30 @@ export class UsersService {
     console.log(`🔄 [USERS-SERVICE] Updating user with ID:`, id);
     console.log(`🔄 [USERS-SERVICE] Update data:`, updateUserDto);
     
+    // Check if role is being changed and user didn't explicitly set permissionIds
+    if (updateUserDto.role && !updateUserDto.permissionIds) {
+      console.log(`🔄 [USERS-SERVICE] Role change detected: new role = ${updateUserDto.role}`);
+      
+      // Get current user to check if role is actually changing
+      const currentUser = await this.findOne(id);
+      if (currentUser && currentUser.role !== updateUserDto.role) {
+        console.log(`🔄 [USERS-SERVICE] Role changed from "${currentUser.role}" to "${updateUserDto.role}"`);
+        console.log(`🔄 [USERS-SERVICE] Fetching default permissions for new role: ${updateUserDto.role}`);
+        
+        try {
+          const defaultPermissionIds = await this.permissionsService.getDefaultPermissionsForRole(updateUserDto.role);
+          console.log(`✅ [USERS-SERVICE] Assigned ${defaultPermissionIds.length} default permissions for role: ${updateUserDto.role}`);
+          console.log(`✅ [USERS-SERVICE] Default permission IDs:`, defaultPermissionIds);
+          
+          // Add the default permissions to the update
+          updateUserDto.permissionIds = defaultPermissionIds;
+        } catch (error) {
+          console.error('❌ [USERS-SERVICE] Error fetching default permissions:', error);
+          // Continue with update even if permission fetch fails
+        }
+      }
+    }
+    
     const updateResult = await this.usersRepository.update(this.convertToObjectId(id), updateUserDto);
     console.log(`🔄 [USERS-SERVICE] Update result:`, updateResult);
     
@@ -85,6 +111,7 @@ export class UsersService {
     console.log(`🔄 [USERS-SERVICE] User after update:`, {
       id: updated?.id,
       email: updated?.email,
+      role: updated?.role,
       permissionIds: updated?.permissionIds,
       permissionCount: updated?.permissionIds?.length || 0
     });
